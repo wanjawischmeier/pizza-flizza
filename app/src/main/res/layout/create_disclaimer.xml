@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:contentDescription="@string/content_realtime_icon"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toTopOf="@+id/disclaimer_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/firebase_realtime_database_icon_knockout" />
+
+    <TextView
+        android:id="@+id/disclaimer_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/disclaimer_points_margin_horizontal"
+        android:text="@string/disclaimer_header"
+        android:textAppearance="@style/Large"
+        app:layout_constraintBottom_toTopOf="@+id/guideline_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline_header">
+
+        <LinearLayout
+            android:id="@+id/disclaimer_firebase"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/arrow_firebase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="@dimen/disclaimer_points_margin_horizontal"
+                android:layout_marginVertical="@dimen/disclaimer_points_margin_vertical"
+                android:autoSizeTextType="none"
+                android:text="@string/disclaimer_arrow"
+                android:textAppearance="@style/MediumBulletPoints"
+                android:textSize="34sp" />
+
+            <TextView
+                android:id="@+id/text_firebase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:text="@string/disclaimer_firebase"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Medium" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/disclaimer_realtime"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/arrow_realtime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="@dimen/disclaimer_points_margin_horizontal"
+                android:layout_marginVertical="@dimen/disclaimer_points_margin_vertical"
+                android:text="@string/disclaimer_arrow"
+                android:textAppearance="@style/MediumBulletPoints"
+                android:textSize="34sp" />
+
+            <TextView
+                android:id="@+id/text_realtime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:text="@string/disclaimer_realtime"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Medium" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/disclaimer_location"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/arrow_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="@dimen/disclaimer_points_margin_horizontal"
+                android:layout_marginVertical="@dimen/disclaimer_points_margin_vertical"
+                android:text="@string/disclaimer_arrow"
+                android:textAppearance="@style/MediumBulletPoints"
+                android:textSize="34sp" />
+
+            <TextView
+                android:id="@+id/text_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:text="@string/disclaimer_location"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Medium" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/disclaimer_emmisions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/arrow_emmisions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="@dimen/disclaimer_points_margin_horizontal"
+                android:layout_marginVertical="@dimen/disclaimer_points_margin_vertical"
+                android:text="@string/disclaimer_arrow"
+                android:textAppearance="@style/MediumBulletPoints"
+                android:textSize="34sp" />
+
+            <TextView
+                android:id="@+id/text_emmisions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:text="@string/disclaimer_emmisions"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Medium" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/disclaimer_analythics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/arrow_analythics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="@dimen/disclaimer_points_margin_horizontal"
+                android:layout_marginVertical="@dimen/disclaimer_points_margin_vertical"
+                android:text="@string/disclaimer_arrow"
+                android:textAppearance="@style/MediumBulletPoints"
+                android:textSize="34sp" />
+
+            <TextView
+                android:id="@+id/text_analythics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:text="@string/disclaimer_analythics"
+                android:textAlignment="gravity"
+                android:textAppearance="@style/Medium" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:onClick="onToggleCheck"
+        android:text="@string/disclaimer_agree"
+        android:textAppearance="@style/Small"
+        android:textColor="@color/gray_light"
+        app:layout_constraintBottom_toTopOf="@+id/continue_disclaimer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline_button"
+        tools:ignore="TextContrastCheck" />
+
+    <Button
+        android:id="@+id/continue_disclaimer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp"
+        android:enabled="false"
+        android:onClick="onContinueDisclaimer"
+        android:text="@string/disclaimer_button"
+        android:textAppearance="@style/Medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/checkBox" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.35" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.8" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

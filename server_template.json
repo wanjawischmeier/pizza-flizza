@@ -1,0 +1,26 @@
+{
+    "users": {},
+
+    "shops": {
+        "penny_burgtor": {
+            "name": "Penny am Burgtor",
+            "address": "Große Burgstraße 55, 23552 Lübeck",
+            "picture": "https://www.gelbeseiten.de/media/teilnehmer-logo/8000129828554310",
+            "items": {
+                "lye_rod": {
+                    "name": "Laugenstange",
+                    "price": 99.5
+                },
+                "party_bread": {
+                    "name": "Partybrot",
+                    "price": 12.29
+                },
+                "pizza": {
+                    "name": "Pizza Margeritha",
+                    "price": 0.02
+                }
+            },
+            "orders": {}
+        }
+    }
+}

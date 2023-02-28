@@ -1,0 +1,26 @@
+<resources>
+
+    <style name="Theme.Pizza" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/cream</item>
+        <item name="colorPrimaryVariant">@color/gray_mid</item>
+        <item name="colorOnPrimary">@color/gray_mid</item>
+        <item name="colorAccent">@color/cream</item>
+
+        <item name="android:statusBarColor">@color/gray_dark</item>
+        <item name="actionBarStyle">@style/Theme.AppCompat.Light.NoActionBar</item>
+        <item name="android:windowBackground">@color/gray_dark</item>
+
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/gray_light</item>
+        <item name="android:textColorTertiary">@color/gray_mid</item>
+    </style>
+
+    <style name="Theme.Pizza.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Pizza.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark" />
+
+    <style name="Theme.Pizza.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>
