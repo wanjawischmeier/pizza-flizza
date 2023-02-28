@@ -13,11 +13,6 @@
             android:name=".OrderActivity"
             android:exported="false" />
         <activity
-            android:name=".DrawerActivity"
-            android:exported="false"
-            android:label="@string/title_activity_drawer"
-            android:theme="@style/Theme.Pizza.NoActionBar" />
-        <activity
             android:name=".FulfillActivity"
             android:exported="false"
             android:screenOrientation="portrait"

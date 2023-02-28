@@ -19,8 +19,4 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-
-    <style name="Theme.Pizza.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark" />
-
-    <style name="Theme.Pizza.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
