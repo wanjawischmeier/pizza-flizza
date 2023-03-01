@@ -4,10 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
+import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isInvisible
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -18,12 +22,15 @@ import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class LoginActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var user: FirebaseUser
     private lateinit var database: FirebaseDatabase
     private lateinit var emailField: EditText
     private lateinit var passwordField: EditText
+    private lateinit var infoField: TextView
+    private lateinit var loginButton: Button
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,52 +47,63 @@ class LoginActivity : AppCompatActivity() {
 
         emailField = findViewById(R.id.email_field)
         passwordField = findViewById(R.id.password_field)
-        val loginButton = findViewById<Button>(R.id.button_login)
-        val createButton = findViewById<Button>(R.id.button_create)
+        infoField = findViewById(R.id.info_text_login)
+        loginButton = findViewById(R.id.button_login)
 
-        emailField.addTextChangedListener { text ->
-            if (text.toString() != "" && Patterns.EMAIL_ADDRESS.matcher(text.toString()).matches()) {
-                auth.fetchSignInMethodsForEmail(text.toString())
-                    .addOnCompleteListener { task ->
-                        val methods = task.result.signInMethods
+        infoField.isInvisible = true
+        emailField.requestFocus()
 
-                        if (methods == null || methods.size == 0) {
-                            // no account found
-                            loginButton.isEnabled = false
-                            createButton.isEnabled = true
-                        } else {
-                            // account exists
-                            loginButton.isEnabled = true
-                            createButton.isEnabled = false
-                        }
-                    }
+        emailField.addTextChangedListener { checkEmail() }
+        passwordField.addTextChangedListener { checkEmail() }
+
+        passwordField.setOnEditorActionListener(OnEditorActionListener { view, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                onSignIn(view)
+                return@OnEditorActionListener true
             }
-        }
+
+            return@OnEditorActionListener false
+        })
     }
 
-    fun onCreateAccount(@Suppress("UNUSED_PARAMETER") view: View) {
+    private fun checkEmail() {
+        infoField.isInvisible = true
         val email = emailField.text.toString()
         val password = passwordField.text.toString()
 
-        if (email == "" || password == "") return
+        if (email != "" && password != "" && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            loginButton.isEnabled = true
 
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    signIn(email, password)
-                } else {
-                    Toast.makeText(applicationContext, "Creation Failed", Toast.LENGTH_SHORT).show()
+            auth.fetchSignInMethodsForEmail(email)
+                .addOnCompleteListener { task ->
+                    val methods = task.result.signInMethods
+
+                    if (methods == null || methods.size == 0) {
+                        // no account found
+                        loginButton.text = getString(R.string.create_account)
+                    } else {
+                        // account exists
+                        loginButton.text = getString(R.string.login_button)
+                    }
                 }
-            }
+        } else {
+            loginButton.text = getString(R.string.login_button)
+            loginButton.isEnabled = false
+        }
     }
 
     fun onSignIn(@Suppress("UNUSED_PARAMETER") view: View) {
         val email = findViewById<EditText>(R.id.email_field).text.toString()
         val password = findViewById<EditText>(R.id.password_field).text.toString()
+        val loginButton = findViewById<Button>(R.id.button_login)
 
         if (email == "" || password == "") return
 
-        signIn(email, password)
+        if (loginButton.text == getString(R.string.login_button)) {
+            signIn(email, password)
+        } else {
+            createAccount(email, password)
+        }
     }
 
     fun onToggleCheck(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -115,14 +133,26 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     user = auth.currentUser!!
                     if (user.isEmailVerified) {
-                        Toast.makeText(applicationContext, "Success", Toast.LENGTH_SHORT).show()
                         checkUser()
                     } else {
-                        Toast.makeText(applicationContext, "Please verify your email", Toast.LENGTH_SHORT).show()
+                        infoField.text = getString(R.string.email_verify_text)
+                        infoField.isInvisible = false
                         user.sendEmailVerification()
                     }
                 } else {
-                    Toast.makeText(applicationContext, "Failed", Toast.LENGTH_SHORT).show()
+                    infoField.text = getString(R.string.wrong_password)
+                    infoField.isInvisible = false
+                }
+            }
+    }
+
+    private fun createAccount(email: String, password: String) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    signIn(email, password)
+                } else {
+                    Toast.makeText(applicationContext, "Creation Failed", Toast.LENGTH_SHORT).show()
                 }
             }
     }

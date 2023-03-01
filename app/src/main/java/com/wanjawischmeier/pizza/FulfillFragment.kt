@@ -15,18 +15,18 @@ import java.lang.Integer.max
 import java.lang.Integer.min
 import kotlin.math.*
 
-class FulfillFragment : CallableFragment() {
-    lateinit var card: CardView
-    private var cardScaleExpanded = 1.04f
-    private var cardMode = 0
+const val CARD_SCALE_EXPANDED = 1.04f
 
+class FulfillFragment : CallableFragment() {
+    private lateinit var card: CardView
+    private var cardMode = 0
     private var maxItems = 5
     private var items = 5
     private var screenCenter = 0f
     private var grabX = 0f
     private var grabY = 0f
-    var cardX = 0f
-    var cardY = 0f
+    private var cardX = 0f
+    private var cardY = 0f
 
 
     override fun onCreateView(
@@ -99,8 +99,8 @@ class FulfillFragment : CallableFragment() {
         grabY = event.rawY
 
         card.animate()
-            .scaleX(cardScaleExpanded)
-            .scaleY(cardScaleExpanded)
+            .scaleX(CARD_SCALE_EXPANDED)
+            .scaleY(CARD_SCALE_EXPANDED)
             .duration = 10
     }
 
@@ -117,8 +117,8 @@ class FulfillFragment : CallableFragment() {
 
             if (items != newItems) {
                 card.animate()
-                    .scaleX(cardScaleExpanded)
-                    .scaleY(cardScaleExpanded)
+                    .scaleX(CARD_SCALE_EXPANDED)
+                    .scaleY(CARD_SCALE_EXPANDED)
                     .setDuration(10)
                     .withEndAction {
                         card.animate()
@@ -140,10 +140,7 @@ class FulfillFragment : CallableFragment() {
         } else {
 
             if (cardMode == 0 && diff > screenCenter / 4) {
-                cardMode = if (rawDiffY > 0) -1
-                else {
-                    max(-1, min(1, (diffX * 4  - diffY).roundToInt()))
-                }
+                cardMode = max(-1, min(1, (diffX * 4  - diffY).roundToInt()))
 
                 card.animate()
                     .scaleX(1f)

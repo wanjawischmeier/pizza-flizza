@@ -57,6 +57,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_transaction -> targetFragment = transactionFragment
             }
 
+            if (targetFragment == transactionFragment) {
+                val intent = Intent(this, LoginActivity::class.java)
+                finish()
+                startActivity(intent)
+            }
+
             val transaction = supportFragmentManager.beginTransaction().apply {
                 hide(currentFragment)
                 show(targetFragment)

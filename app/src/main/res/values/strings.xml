@@ -53,5 +53,7 @@
 
     <!-- Transactions -->
     <string name="coming_soon" translatable="false">Coming soon :)</string>
+    <string name="email_verify_text" translatable="false">Please verify your E-Mail to create the account</string>
+    <string name="wrong_password">Wrong password</string>
 
 </resources>
