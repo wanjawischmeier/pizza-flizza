@@ -17,4 +17,10 @@
     <string name="to_penny">Zu Penny</string>
     <string name="create_account">Account erstellen</string>
     <string name="password_login_field">Passwort</string>
+
+    <string name="order_button">Bestellen</string>
+
+    <string name="menu_order">Bestellung</string>
+    <string name="menu_shop">Einkaufen</string>
+    <string name="menu_transactions">Transaktionen</string>
 </resources>

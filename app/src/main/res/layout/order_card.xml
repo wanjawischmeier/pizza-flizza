@@ -43,14 +43,16 @@
         app:layout_constraintStart_toEndOf="@+id/order_price"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
+        <TextView
             android:id="@+id/order_sub"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/layout_bg"
+            android:backgroundTint="@color/gray_light"
             android:gravity="center"
             android:onClick="onSub"
             android:text="@string/order_sub"
+            android:textAppearance="@style/Medium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1.2"
             app:layout_constraintEnd_toStartOf="@+id/guideline_count"
@@ -70,14 +72,16 @@
             app:layout_constraintStart_toStartOf="@+id/guideline_count"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
+        <TextView
             android:id="@+id/order_add"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:background="@drawable/layout_bg"
+            android:backgroundTint="@color/gray_light"
             android:gravity="center"
             android:onClick="onAdd"
             android:text="@string/order_add"
+            android:textAppearance="@style/Medium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/guideline_add"

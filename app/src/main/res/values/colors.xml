@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- pallete: https://coolors.co/palette/e63946-f1faee-a8dadc-457b9d-1d3557 -->
-    <color name="red_pantone">#E63946</color>
-    <color name="honeydew">#F1FAEE</color>
-    <color name="non_photo_blue">#A8DADC</color>
-    <color name="cerulean">#457B9D</color>
-    <color name="berkeley_blue">#1D3557</color>
-    <color name="black">#001219</color>
-    <color name="background">#24293D</color>
-    <color name="text">#F4F4FC</color>
-    <color name="accent">#8EBBFF</color>
-    <color name="secondary">#2F3855</color>
-    <color name="tertiary">#D97E7E</color>
     <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- pallete: https://coolors.co/palette/e63946-f1faee-a8dadc-457b9d-1d3557 -->
+    <!--
     <color name="gray_light">#676F9D</color>
     <color name="gray_mid">#424769</color>
     <color name="gray_dark">#2D3250</color>
+    <color name="cream">#F9B17A</color>
+    -->
+    <color name="gray_light">#4D5375</color>
+    <color name="gray_mid">#383D59</color>
+    <color name="gray_dark">#1F2338</color>
     <color name="cream">#F9B17A</color>
 </resources>

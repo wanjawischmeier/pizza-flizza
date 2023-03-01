@@ -10,10 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pizza">
         <activity
-            android:name=".OrderActivity"
-            android:exported="false" />
-        <activity
-            android:name=".FulfillActivity"
+            android:name=".MainActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />

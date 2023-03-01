@@ -147,7 +147,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun onSignedIn() {
-        val intent = Intent(this, OrderActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         finish()
         startActivity(intent)
     }

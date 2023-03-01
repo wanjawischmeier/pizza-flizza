@@ -1,42 +1,51 @@
 package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.Fragment
 import com.google.firebase.database.FirebaseDatabase
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
 import kotlin.math.*
 
-class FulfillActivity : AppCompatActivity() {
+class FulfillFragment : CallableFragment() {
+    lateinit var card: CardView
     private var cardScaleExpanded = 1.04f
     private var cardMode = 0
 
     private var maxItems = 5
     private var items = 5
     private var screenCenter = 0f
-    var cardX = 0f
-    var cardY = 0f
     private var grabX = 0f
     private var grabY = 0f
+    var cardX = 0f
+    var cardY = 0f
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fulfill)
+    @Nullable
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        @Nullable container: ViewGroup?,
+        @Nullable savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_fulfill, container, false)
+    }
 
-        val database = FirebaseDatabase.getInstance()
-        database.getReference("test").get().addOnCompleteListener { snapshot ->
-            Toast.makeText(applicationContext, snapshot.result.value.toString(), Toast.LENGTH_SHORT).show()
-        }
+    @Nullable
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val displayMetrics = resources.displayMetrics
         screenCenter = displayMetrics.widthPixels.toFloat() / 2
@@ -44,13 +53,26 @@ class FulfillActivity : AppCompatActivity() {
         createCard()
     }
 
+    override fun onShow(topBubble: ConstraintLayout) {
+        topBubble.animate()
+            .alpha(0f)
+            .duration = 100
+
+        card.scaleX = 0f
+        card.scaleY = 0f
+
+        card.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .duration = 100
+    }
+
 
     @SuppressLint("ClickableViewAccessibility")
     private fun createCard() {
-        val root = findViewById<ViewGroup>(android.R.id.content)
-        val cardView = layoutInflater.inflate(R.layout.fulfill_card, root)
+        val cardView = layoutInflater.inflate(R.layout.fulfill_card, view as ViewGroup)
 
-        val card = cardView.findViewById<CardView>(R.id.card)
+        card = cardView.findViewById(R.id.card)
         card.scaleX = 0f
         card.scaleY = 0f
 
@@ -86,6 +108,8 @@ class FulfillActivity : AppCompatActivity() {
 
 
     private fun onCardCreated(card: View) {
+        items = maxItems
+
         card.findViewById<TextView>(R.id.item_count).text = items.toString()
         card.findViewById<TextView>(R.id.item_name).text = getString(R.string.sample_item_name)
     }

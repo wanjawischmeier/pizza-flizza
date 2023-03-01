@@ -31,22 +31,27 @@
     <string name="order_sub" translatable="false">-</string>
     <string name="order_add" translatable="false">+</string>
     <string name="order_def" translatable="false">0</string>
-    <string name="order_button" translatable="false">Order</string>
+    <string name="order_button">Order</string>
 
     <string name="sample_item_count" translatable="false">5</string>
     <string name="sample_item_name" translatable="false">Pizza</string>
     <string name="sample_order_name" translatable="false">Pizza Margeritha</string>
     <string name="sample_order_price" translatable="false">1,69€</string>
+    <string name="sample_total_price" translatable="false">99,99€</string>
 
-    <string name="title_activity_drawer" translatable="false">DrawerActivity</string>
-    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
-    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
-    <string name="nav_header_title" translatable="false">Android Studio</string>
-    <string name="nav_header_subtitle" translatable="false">android.studio@android.com</string>
-    <string name="nav_header_desc" translatable="false">Navigation header</string>
-    <string name="action_settings" translatable="false">Settings</string>
+    <string name="menu_order">Order</string>
+    <string name="menu_shop">Shop</string>
+    <string name="menu_transactions">Transactions</string>
 
-    <string name="menu_home" translatable="false">Home</string>
-    <string name="menu_gallery" translatable="false">Gallery</string>
-    <string name="menu_slideshow" translatable="false">Slideshow</string>
+    <string-array name="planets_array">
+        <item>Mercury</item>
+        <item>Venus</item>
+        <item>Earth</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
+
 </resources>
