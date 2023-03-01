@@ -1,6 +1,5 @@
 package com.wanjawischmeier.pizza
 
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
@@ -11,43 +10,36 @@ open class CallableFragment : Fragment() {
         lateinit var bottomLayout: ConstraintLayout
     }
 
-    var isTopBubbleVisible: Boolean
-        get() {
-            return topBubble.alpha == 1f
+    open var showTopBubble = false
+    open var showBottomLayout = false
+
+    fun updateTopBubble() {
+        topBubble.animate()
+            .alpha(if (showTopBubble) 1f else 0f)
+            .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+    }
+
+    fun updateBottomLayout() {
+        var start = 0f
+        var end = bottomLayout.height.toFloat()
+
+        if (showBottomLayout) {
+            start = end
+            end = 0f
+            bottomLayout.isGone = false
         }
-        set(value) {
-            topBubble.animate()
-                .alpha(if (value) 1f else 0f)
-                .duration = 100
-        }
 
-    var isBottomLayoutVisible: Boolean
-        get() {
-            return bottomLayout.alpha == 1f
-        }
-        set(value) {
-            var start = 0f
-            var end = bottomLayout.height.toFloat()
-
-            if (value) {
-                start = end
-                end = 0f
-
-                bottomLayout.isGone = false
-            }
-
-            bottomLayout.translationY = start
-            bottomLayout.animate()
-                .translationY(end)
-                .withEndAction {
-                    if (!value) {
-                        bottomLayout.isGone = true
-                    }
-
-                    onBottomLayoutGone()
+        bottomLayout.translationY = start
+        bottomLayout.animate()
+            .translationY(end)
+            .withEndAction {
+                if (!showBottomLayout) {
+                    bottomLayout.isGone = true
                 }
-                .duration = 100
-        }
+                onBottomLayoutGone()
+            }
+            .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+    }
 
     open fun onShow() {}
 

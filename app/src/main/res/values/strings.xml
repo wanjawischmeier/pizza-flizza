@@ -1,5 +1,9 @@
 <resources>
+    <!-- General -->
     <string name="app_name">Pizza</string>
+    <string name="web_client_id" translatable="false">207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com</string>
+
+    <!-- Login -->
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -9,7 +13,6 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
-    <string name="your_web_client_id" translatable="false">207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com</string>
     <string name="email_login_field">E-Mail</string>
     <string name="login_button">Log in</string>
     <string name="what_do_you_want">Wohin möchtest du?</string>
@@ -17,6 +20,8 @@
     <string name="to_penny">Zu Penny</string>
     <string name="create_account">Create Account</string>
     <string name="password_login_field">Password</string>
+
+    <!-- Disclaimer -->
     <string name="disclaimer_header" translatable="false">Hey,</string>
     <string name="disclaimer_arrow" translatable="false">-</string>
     <string name="disclaimer_firebase" translatable="false">Dieses Projekt benutzt leider Google Firebase zum speichern speichern der Daten :/</string>
@@ -28,30 +33,25 @@
     <string name="disclaimer_button" translatable="false">Alles klar</string>
     <string name="content_realtime_icon" translatable="false">Firebase Realtime Icon</string>
 
+    <!-- Order -->
     <string name="order_sub" translatable="false">-</string>
     <string name="order_add" translatable="false">+</string>
     <string name="order_def" translatable="false">0</string>
     <string name="order_button">Order</string>
-
-    <string name="sample_item_count" translatable="false">5</string>
-    <string name="sample_item_name" translatable="false">Pizza</string>
     <string name="sample_order_name" translatable="false">Pizza Margeritha</string>
     <string name="sample_order_price" translatable="false">1,69€</string>
     <string name="sample_total_price" translatable="false">99,99€</string>
 
+    <!-- Shop -->
+    <string name="sample_item_count" translatable="false">5</string>
+    <string name="sample_item_name" translatable="false">Pizza</string>
+
+    <!-- Menu -->
     <string name="menu_order">Order</string>
     <string name="menu_shop">Shop</string>
     <string name="menu_transactions">Transactions</string>
 
-    <string-array name="planets_array">
-        <item>Mercury</item>
-        <item>Venus</item>
-        <item>Earth</item>
-        <item>Mars</item>
-        <item>Jupiter</item>
-        <item>Saturn</item>
-        <item>Uranus</item>
-        <item>Neptune</item>
-    </string-array>
+    <!-- Transactions -->
+    <string name="coming_soon" translatable="false">Coming soon :)</string>
 
 </resources>

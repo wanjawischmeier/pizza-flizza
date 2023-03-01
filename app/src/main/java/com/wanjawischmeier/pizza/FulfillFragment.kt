@@ -6,13 +6,10 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.isVisible
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -48,29 +45,11 @@ class FulfillFragment : CallableFragment() {
         screenCenter = displayMetrics.widthPixels.toFloat() / 2
     }
 
-    override fun onShow() {
-        isTopBubbleVisible = false
-        isBottomLayoutVisible = false
-
-        if (this::card.isInitialized) {
-            card.isVisible = false
-        }
-    }
-
     override fun onBottomLayoutGone() {
         if (!this::card.isInitialized) {
             createCard()
             return
         }
-
-        card.scaleX = 0f
-        card.scaleY = 0f
-        card.isVisible = true
-
-        card.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .duration = 100
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -90,7 +69,7 @@ class FulfillFragment : CallableFragment() {
                     cardX = card.x
                     cardY = card.y
                 }
-                .duration = 100
+                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
         }
 
         card.setOnTouchListener(

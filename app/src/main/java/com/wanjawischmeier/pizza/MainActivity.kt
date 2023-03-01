@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.FragmentContainerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -23,12 +23,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val header = findViewById<TextView>(R.id.header)
+        val navigationHeader = findViewById<TextView>(R.id.header)
+        val navigationHost = findViewById<FragmentContainerView>(R.id.nav_host_fragment)
         CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
         CallableFragment.bottomLayout = findViewById(R.id.bottom_layout)
 
         val orderFragment = OrderFragment()
         val fulfillFragment = FulfillFragment()
+        val transactionFragment = TransactionFragment()
         var currentFragment = orderFragment as CallableFragment
         var targetFragment = currentFragment
 
@@ -36,32 +38,47 @@ class MainActivity : AppCompatActivity() {
             remove(supportFragmentManager.fragments[0])
             add(R.id.nav_host_fragment, orderFragment)
             add(R.id.nav_host_fragment, fulfillFragment)
+            add(R.id.nav_host_fragment, transactionFragment)
             hide(fulfillFragment)
+            hide(transactionFragment)
+            runOnCommit(orderFragment::onShow)
         }.commit()
-        orderFragment.onShow()
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
             val menuItemId = menuItem.itemId
-            val selectedItemId = bottomNavigationView.selectedItemId
-            if (menuItemId == selectedItemId) {
+            if (menuItemId == bottomNavigationView.selectedItemId) {
                 return@setOnItemSelectedListener false
             }
 
             when (menuItemId) {
                 R.id.navigation_order -> targetFragment = orderFragment
                 R.id.navigation_shop -> targetFragment = fulfillFragment
+                R.id.navigation_transaction -> targetFragment = transactionFragment
             }
 
-            supportFragmentManager.beginTransaction()
-                .hide(currentFragment)
-                .show(targetFragment)
-                .runOnCommit {
-                    header.text = menuItem.title
+            val transaction = supportFragmentManager.beginTransaction().apply {
+                hide(currentFragment)
+                show(targetFragment)
+                runOnCommit {
                     currentFragment = targetFragment
-                    currentFragment.onShow()
+
+                    navigationHost.animate()
+                        .alpha(1f)
+                        .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
                 }
-                .commit()
+            }
+
+            navigationHeader.text = menuItem.title
+            targetFragment.updateTopBubble()
+            targetFragment.updateBottomLayout()
+            targetFragment.onShow()
+            navigationHost.animate()
+                .alpha(0f)
+                .withEndAction {
+                    transaction.commit()
+                }
+                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
 
             return@setOnItemSelectedListener true
         }
