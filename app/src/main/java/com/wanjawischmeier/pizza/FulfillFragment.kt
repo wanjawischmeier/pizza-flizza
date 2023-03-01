@@ -1,7 +1,6 @@
 package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -13,8 +12,7 @@ import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.Fragment
-import com.google.firebase.database.FirebaseDatabase
+import androidx.core.view.isVisible
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -34,11 +32,10 @@ class FulfillFragment : CallableFragment() {
     var cardY = 0f
 
 
-    @Nullable
     override fun onCreateView(
         inflater: LayoutInflater,
-        @Nullable container: ViewGroup?,
-        @Nullable savedInstanceState: Bundle?
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_fulfill, container, false)
     }
@@ -49,24 +46,32 @@ class FulfillFragment : CallableFragment() {
 
         val displayMetrics = resources.displayMetrics
         screenCenter = displayMetrics.widthPixels.toFloat() / 2
-
-        createCard()
     }
 
-    override fun onShow(topBubble: ConstraintLayout) {
-        topBubble.animate()
-            .alpha(0f)
-            .duration = 100
+    override fun onShow() {
+        isTopBubbleVisible = false
+        isBottomLayoutVisible = false
+
+        if (this::card.isInitialized) {
+            card.isVisible = false
+        }
+    }
+
+    override fun onBottomLayoutGone() {
+        if (!this::card.isInitialized) {
+            createCard()
+            return
+        }
 
         card.scaleX = 0f
         card.scaleY = 0f
+        card.isVisible = true
 
         card.animate()
             .scaleX(1f)
             .scaleY(1f)
             .duration = 100
     }
-
 
     @SuppressLint("ClickableViewAccessibility")
     private fun createCard() {
@@ -75,23 +80,18 @@ class FulfillFragment : CallableFragment() {
         card = cardView.findViewById(R.id.card)
         card.scaleX = 0f
         card.scaleY = 0f
+        onCardCreated(card)
 
-        card.viewTreeObserver.addOnGlobalLayoutListener(
-            object : OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
+        (view as ViewGroup).post {
+            card.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .withEndAction {
                     cardX = card.x
                     cardY = card.y
-
-                    card.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .duration = 100
-
-                    onCardCreated(card)
-
-                    card.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
-            })
+                .duration = 100
+        }
 
         card.setOnTouchListener(
             View.OnTouchListener { view, event ->
@@ -204,11 +204,11 @@ class FulfillFragment : CallableFragment() {
 
             card.animate()
                 .x(target)
-                .y(event.rawY - card.height)
+                .y(event.rawY - card.height / 1.5f)
                 .setDuration(200)
                 .withEndAction {
-                    (card.parent as ViewGroup)
-                        .removeView(card)
+                    (card.parent.parent as ViewGroup)
+                        .removeView(card.parent as ConstraintLayout)
                     createCard()
                 }
         } else {

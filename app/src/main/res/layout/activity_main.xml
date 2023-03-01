@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <View
-        android:id="@+id/price_backdrop3"
+        android:id="@+id/header_backdrop"
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:background="@drawable/layout_bg"
         android:backgroundTint="@color/gray_mid"
-        app:layout_constraintBottom_toBottomOf="@+id/price_constraint_layout"
+        app:layout_constraintBottom_toBottomOf="@+id/header_constraint_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="VisualLintBounds" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/price_constraint_layout"
+        android:id="@+id/header_constraint_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -69,14 +71,57 @@
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/price_backdrop3"
-        app:defaultNavHost="true"
+        app:layout_constraintTop_toBottomOf="@+id/header_backdrop"
         app:navGraph="@navigation/navigation" />
 
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <View
+            android:id="@+id/bottom_backdrop"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:background="@drawable/layout_bg"
+            android:backgroundTint="@color/gray_mid"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/bottom_constraint_layout"
+            tools:ignore="VisualLintBounds" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bottom_constraint_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Button
+                android:id="@+id/bottom_button"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:paddingHorizontal="100dp"
+                android:text="@string/order_button"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/gray_dark"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"

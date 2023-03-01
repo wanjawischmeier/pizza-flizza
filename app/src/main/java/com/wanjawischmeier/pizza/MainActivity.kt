@@ -5,16 +5,8 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -32,7 +24,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val header = findViewById<TextView>(R.id.header)
-        val topBubble = findViewById<ConstraintLayout>(R.id.top_bubble_constraint)
+        CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
+        CallableFragment.bottomLayout = findViewById(R.id.bottom_layout)
 
         val orderFragment = OrderFragment()
         val fulfillFragment = FulfillFragment()
@@ -45,6 +38,7 @@ class MainActivity : AppCompatActivity() {
             add(R.id.nav_host_fragment, fulfillFragment)
             hide(fulfillFragment)
         }.commit()
+        orderFragment.onShow()
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
@@ -62,11 +56,12 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.beginTransaction()
                 .hide(currentFragment)
                 .show(targetFragment)
+                .runOnCommit {
+                    header.text = menuItem.title
+                    currentFragment = targetFragment
+                    currentFragment.onShow()
+                }
                 .commit()
-
-            currentFragment = targetFragment
-            currentFragment.onShow(topBubble)
-            header.text = menuItem.title
 
             return@setOnItemSelectedListener true
         }
