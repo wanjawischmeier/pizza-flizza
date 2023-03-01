@@ -3,13 +3,6 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
-    <!-- pallete: https://coolors.co/palette/e63946-f1faee-a8dadc-457b9d-1d3557 -->
-    <!--
-    <color name="gray_light">#676F9D</color>
-    <color name="gray_mid">#424769</color>
-    <color name="gray_dark">#2D3250</color>
-    <color name="cream">#F9B17A</color>
-    -->
     <color name="gray_light">#4D5375</color>
     <color name="gray_mid">#383D59</color>
     <color name="gray_dark">#1F2338</color>

@@ -14,7 +14,7 @@
         android:id="@+id/fulfillFragment"
         android:name="com.wanjawischmeier.pizza.FulfillFragment"
         android:label="fragment_fulfill"
-        tools:layout="@layout/fragment_fulfill" />
+        tools:layout="@layout/fragment_shop" />
     <fragment
         android:id="@+id/transactionFragment"
         android:name="com.wanjawischmeier.pizza.TransactionFragment"

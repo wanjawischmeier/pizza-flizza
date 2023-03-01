@@ -34,7 +34,7 @@ class FulfillFragment : CallableFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_fulfill, container, false)
+        return inflater.inflate(R.layout.fragment_shop, container, false)
     }
 
     @Nullable
