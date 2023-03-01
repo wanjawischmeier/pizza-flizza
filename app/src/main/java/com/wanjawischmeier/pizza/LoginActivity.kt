@@ -37,11 +37,6 @@ class LoginActivity : AppCompatActivity() {
         catch (_: Exception) { }
 
         auth = Firebase.auth
-        if (auth.currentUser != null) {
-            Toast.makeText(applicationContext, "Already signed in", Toast.LENGTH_SHORT).show()
-            user = auth.currentUser!!
-            checkUser()
-        }
 
         emailField = findViewById(R.id.email_field)
         passwordField = findViewById(R.id.password_field)

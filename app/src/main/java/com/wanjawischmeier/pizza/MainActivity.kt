@@ -1,5 +1,6 @@
 package com.wanjawischmeier.pizza
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -15,10 +16,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (Firebase.auth.currentUser == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
