@@ -17,7 +17,7 @@ import kotlin.math.*
 
 const val CARD_SCALE_EXPANDED = 1.04f
 
-class FulfillFragment : CallableFragment() {
+class ShopFragment : CallableFragment() {
     private lateinit var card: CardView
     private var cardMode = 0
     private var maxItems = 5
@@ -54,7 +54,7 @@ class FulfillFragment : CallableFragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun createCard() {
-        val cardView = layoutInflater.inflate(R.layout.fulfill_card, view as ViewGroup)
+        val cardView = layoutInflater.inflate(R.layout.card_shop, view as ViewGroup)
 
         card = cardView.findViewById(R.id.card)
         card.scaleX = 0f

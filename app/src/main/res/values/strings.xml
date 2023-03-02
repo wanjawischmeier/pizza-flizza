@@ -3,6 +3,7 @@
     <string name="app_name">Pizza</string>
     <string name="app_icon" translatable="false">App Icon</string>
     <string name="web_client_id" translatable="false">207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com</string>
+    <string name="price_format" translatable="false">"%.2f€"</string>
 
     <!-- Login -->
     <string name="title_activity_login">LoginActivity</string>

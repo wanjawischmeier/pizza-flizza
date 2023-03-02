@@ -11,9 +11,9 @@
         android:label="fragment_order"
         tools:layout="@layout/fragment_order" />
     <fragment
-        android:id="@+id/fulfillFragment"
-        android:name="com.wanjawischmeier.pizza.FulfillFragment"
-        android:label="fragment_fulfill"
+        android:id="@+id/shopFragment"
+        android:name="com.wanjawischmeier.pizza.ShopFragment"
+        android:label="fragment_shop"
         tools:layout="@layout/fragment_shop" />
     <fragment
         android:id="@+id/transactionFragment"

@@ -111,6 +111,7 @@
                 android:id="@+id/bottom_button"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
+                android:onClick="onOrder"
                 android:paddingHorizontal="100dp"
                 android:text="@string/order_button"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
