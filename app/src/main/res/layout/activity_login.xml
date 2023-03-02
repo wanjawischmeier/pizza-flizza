@@ -40,10 +40,10 @@
             android:layout_marginTop="20dp"
             android:ems="10"
             android:hint="@string/email_login_field"
-            android:importantForAutofill="no"
             android:inputType="textEmailAddress"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/white"
+            android:autofillHints="emailAddress"
+            android:importantForAutofill="yes"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -58,9 +58,10 @@
             android:ems="10"
             android:hint="@string/password_login_field"
             android:imeOptions="actionDone"
-            android:importantForAutofill="no"
             android:inputType="textPassword"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:autofillHints="password"
+            android:importantForAutofill="yes"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/email_field"
@@ -73,7 +74,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/firebase_realtime_database_icon_knockout" />
+            app:srcCompat="@drawable/firebase_realtime_database_icon_knockout"
+            android:contentDescription="@string/app_icon" />
 
         <TextView
             android:id="@+id/textView4"
@@ -90,7 +92,7 @@
             android:id="@+id/info_text_login"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/email_verify_text"
+            android:text="@string/info_verify_email"
             android:textAppearance="@style/Small"
             android:textColor="@color/cream"
             app:layout_constraintEnd_toEndOf="parent"

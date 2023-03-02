@@ -53,8 +53,8 @@ class LoginActivity : AppCompatActivity() {
         infoField.isInvisible = true
         emailField.requestFocus()
 
-        emailField.addTextChangedListener { checkEmail() }
-        passwordField.addTextChangedListener { checkEmail() }
+        emailField.addTextChangedListener(onTextChanged = checkEmail)
+        passwordField.addTextChangedListener(onTextChanged = checkEmail)
 
         passwordField.setOnEditorActionListener(OnEditorActionListener { view, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    private fun checkEmail() {
+    private val checkEmail: (text: CharSequence?, Int, Int, Int) -> Unit = { _, _, _, _ ->
         infoField.isInvisible = true
         val email = emailField.text.toString()
         val password = passwordField.text.toString()
@@ -98,6 +98,11 @@ class LoginActivity : AppCompatActivity() {
         val loginButton = findViewById<Button>(R.id.button_login)
 
         if (email == "" || password == "") return
+        if (password.length < 6) {
+            infoField.text = getString(R.string.info_invalid_password)
+            infoField.isInvisible = false
+            return
+        }
 
         if (loginButton.text == getString(R.string.login_button)) {
             signIn(email, password)
@@ -122,7 +127,7 @@ class LoginActivity : AppCompatActivity() {
             if (task.isSuccessful) {
                 onSignedIn()
             } else {
-                Toast.makeText(applicationContext, "Failed to create user entry", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "Failed to create user entry", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -135,12 +140,12 @@ class LoginActivity : AppCompatActivity() {
                     if (user.isEmailVerified) {
                         checkUser()
                     } else {
-                        infoField.text = getString(R.string.email_verify_text)
+                        infoField.text = getString(R.string.info_verify_email)
                         infoField.isInvisible = false
                         user.sendEmailVerification()
                     }
                 } else {
-                    infoField.text = getString(R.string.wrong_password)
+                    infoField.text = getString(R.string.info_wrong_password)
                     infoField.isInvisible = false
                 }
             }
@@ -163,9 +168,6 @@ class LoginActivity : AppCompatActivity() {
             if (task.result.value == null) {
                 setContentView(R.layout.create_disclaimer)
             } else {
-                Shop.loadAll(database).addOnCompleteListener { task ->
-                    task.result["yo"]?.items?.get("lye_rod")?.name
-                }
                 onSignedIn()
             }
         }

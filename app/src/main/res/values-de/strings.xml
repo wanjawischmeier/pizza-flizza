@@ -23,5 +23,5 @@
     <string name="menu_order">Bestellung</string>
     <string name="menu_shop">Einkaufen</string>
     <string name="menu_transactions">Transaktionen</string>
-    <string name="wrong_password">Falsches Passwort</string>
+    <string name="info_wrong_password">Falsches Passwort</string>
 </resources>
