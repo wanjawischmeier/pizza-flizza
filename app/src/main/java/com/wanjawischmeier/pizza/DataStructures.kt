@@ -34,6 +34,8 @@ class Shop
 
     companion object {
         lateinit var database: FirebaseDatabase
+        lateinit var orders: HashMap<String, Map<String, Int>>
+        lateinit var items: HashMap<String, Item>
 
         private fun <K, V> loadStructure(path: String): Task<HashMap<K, V>> {
             return database.getReference(path).get().continueWith { task ->

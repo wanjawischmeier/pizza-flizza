@@ -43,5 +43,7 @@ open class CallableFragment : Fragment() {
 
     open fun onShow() {}
 
+    open fun onHide() {}
+
     open fun onBottomLayoutGone() {}
 }

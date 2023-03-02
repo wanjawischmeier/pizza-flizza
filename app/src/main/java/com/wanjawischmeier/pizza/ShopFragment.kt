@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -21,7 +22,7 @@ class ShopFragment : CallableFragment() {
     private lateinit var card: CardView
     private var cardMode = 0
     private var maxItems = 5
-    private var items = 5
+    private var itemCount = 5
     private var screenCenter = 0f
     private var grabX = 0f
     private var grabY = 0f
@@ -45,24 +46,62 @@ class ShopFragment : CallableFragment() {
         screenCenter = displayMetrics.widthPixels.toFloat() / 2
     }
 
-    override fun onBottomLayoutGone() {
-        if (!this::card.isInitialized) {
-            createCard()
-            return
+    override fun onShow() {
+        if (this::card.isInitialized) {
+            card.isVisible = false
         }
     }
 
+    override fun onBottomLayoutGone() {
+        Shop.getOrders().addOnCompleteListener { ordersTask ->
+            Shop.orders = ordersTask.result ?: return@addOnCompleteListener
+            Shop.getItems().addOnCompleteListener { itemsTask ->
+                Shop.items = itemsTask.result ?: return@addOnCompleteListener
+                loadOrder()
+            }
+        }
+    }
+
+    private fun loadOrder() {
+        if (Shop.orders.isEmpty()) {
+            return
+        }
+
+        val order = Shop.orders.iterator().next()
+        val item = order.value.iterator().next()
+        val newItems = order.value.toMutableMap()
+        newItems.remove(item.key)
+
+        if (newItems.isEmpty()) {
+            Shop.orders.remove(order.key)
+        } else {
+            Shop.orders[order.key] = newItems
+        }
+
+        createCard(Shop.items[item.key]?.name ?: return, item.value)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    private fun createCard() {
+    private fun createCard(item: String, count: Int) {
+        if (this::card.isInitialized) {
+            removeCard()
+        }
+
         val cardView = layoutInflater.inflate(R.layout.card_shop, view as ViewGroup)
 
         card = cardView.findViewById(R.id.card)
+        card.alpha = 0f
         card.scaleX = 0f
         card.scaleY = 0f
-        onCardCreated(card)
+        maxItems = count
+        itemCount = maxItems
+
+        card.findViewById<TextView>(R.id.item_count).text = itemCount.toString()
+        card.findViewById<TextView>(R.id.item_name).text = item
 
         (view as ViewGroup).post {
             card.animate()
+                .alpha(1f)
                 .scaleX(1f)
                 .scaleY(1f)
                 .withEndAction {
@@ -85,12 +124,9 @@ class ShopFragment : CallableFragment() {
         )
     }
 
-
-    private fun onCardCreated(card: View) {
-        items = maxItems
-
-        card.findViewById<TextView>(R.id.item_count).text = items.toString()
-        card.findViewById<TextView>(R.id.item_name).text = getString(R.string.sample_item_name)
+    private fun removeCard() {
+        (card.parent.parent as ViewGroup)
+            .removeView(card.parent as ConstraintLayout)
     }
 
 
@@ -115,7 +151,7 @@ class ShopFragment : CallableFragment() {
             val relative = (event.rawY - cardY) / (card.height)
             val newItems = min(maxItems, max(1, ((1 - relative) * maxItems + 1).roundToInt()))
 
-            if (items != newItems) {
+            if (itemCount != newItems) {
                 card.animate()
                     .scaleX(CARD_SCALE_EXPANDED)
                     .scaleY(CARD_SCALE_EXPANDED)
@@ -128,14 +164,14 @@ class ShopFragment : CallableFragment() {
                     }
                     .start()
 
-                items = newItems
+                itemCount = newItems
             }
 
             val itemCount = card.findViewById<TextView>(R.id.item_count)
-            itemCount.text = items.toString()
+            itemCount.text = this.itemCount.toString()
 
             val slider = card.findViewById<View>(R.id.progress)
-            slider.y = ((maxItems - items).toFloat() / maxItems) * card.height
+            slider.y = ((maxItems - this.itemCount).toFloat() / maxItems) * card.height
 
         } else {
 
@@ -182,11 +218,7 @@ class ShopFragment : CallableFragment() {
                 .x(target)
                 .y(event.rawY - card.height / 1.5f)
                 .setDuration(200)
-                .withEndAction {
-                    (card.parent.parent as ViewGroup)
-                        .removeView(card.parent as ConstraintLayout)
-                    createCard()
-                }
+                .withEndAction { loadOrder() }
         } else {
             card.animate()
                 .x(cardX)

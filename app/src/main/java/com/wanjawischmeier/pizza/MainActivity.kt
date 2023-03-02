@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_transaction -> targetFragment = transactionFragment
             }
 
+            // Login screen bridge
             if (targetFragment == transactionFragment) {
                 val intent = Intent(this, LoginActivity::class.java)
                 finish()
@@ -100,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         orderFragment.modifyCount(view, 1)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onOrder(view: View) {
         orderFragment.placeOrder()
     }
