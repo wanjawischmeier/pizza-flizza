@@ -3,7 +3,6 @@ package com.wanjawischmeier.pizza
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlin.reflect.typeOf
 
 class User {
     var name = ""
@@ -77,34 +76,6 @@ class Shop {
             }
         }
 
-        /**
-         * Retrieves all open orders
-         * @param groupId Only returns orders placed by members of this group
-         * @param shopId Only returns orders placed for this shop
-         */
-        @Suppress("UNCHECKED_CAST")
-        fun getOpenOrders(groupId: String, shopId: String): Task<Map<String, Long>> {
-            return Firebase.database.getReference("users/$groupId").get().continueWith { task ->
-                var orders = hashMapOf<String, Long>()
-
-                val users = task.result.value ?: return@continueWith orders
-
-                for (user in (users as Map<String, Map<*, *>>).values) {
-                    val userOrders = (user["orders"] ?: continue) as HashMap<String, HashMap<String, Long>>
-                    val userFulfilled = (user["fulfilled"] ?: hashMapOf<String, HashMap<String, Long>>()) as HashMap<String, HashMap<String, Long>>
-
-                    val order = userOrders[shopId] ?: continue
-                    val fulfilled = userFulfilled[shopId] ?: hashMapOf()
-
-                    for ((key, value) in order) {
-                        orders[key] = value.toInt() + (orders[key] ?: 0) - (fulfilled[key]?.toInt() ?: 0)
-                    }
-                }
-
-                return@continueWith orders
-            }
-        }
-
         fun processOrder(groupId: String, userId: String, shopId: String, order: HashMap<String, Long>) {
             Firebase.database.getReference("users/$groupId/$userId/orders/$shopId").setValue(order)
         }
@@ -114,60 +85,3 @@ class Shop {
         }
     }
 }
-
-/*
-class Shoping {
-    companion object {
-        lateinit var database: FirebaseDatabase
-        lateinit var orders: HashMap<String, Map<String, Int>>
-
-        private fun <K, V> loadStructure(path: String): Task<HashMap<K, V>> {
-            return database.getReference(path).get().continueWith { task ->
-                if (task.isSuccessful && task.result.value != null) {
-                    @Suppress("UNCHECKED_CAST")
-                    return@continueWith task.result.value as HashMap<K, V>
-                } else {
-                    return@continueWith hashMapOf<K, V>()
-                }
-            }
-        }
-
-        fun getAll(): Task<HashMap<String, Shoping>> {
-            return loadStructure("shops")
-        }
-
-        fun getOrders(): Task<HashMap<String, Map<String, Int>>> {
-            return loadStructure("shops/$SHOP_ID/orders")
-        }
-
-        fun getOrder(uid: String): Task<HashMap<String, Int>> {
-            return loadStructure("users/$uid/$SHOP_ID/order")
-        }
-
-        fun processOrder(userId: String, order: HashMap<String, Int>) {
-            database.getReference("users/$GROUP_ID/$userId/orders/$SHOP_ID").setValue(order)
-        }
-
-        fun getItems(): Task<HashMap<String, Item2>> {
-            return database.getReference("shops/$SHOP_ID/items").get().continueWith { task ->
-                if (task.isSuccessful) {
-                    val idllddl = task.result.getValue(User::class.java) ?: return@continueWith null
-                    val result = task.result.value as HashMap<*, *>
-                    val jsonString = JSONObject(result).toString()
-                    return@continueWith Json.decodeFromString<HashMap<String, Item2>>(jsonString)
-                } else return@continueWith null
-            }
-        }
-
-        fun getItem(itemId: String): Task<Item2> {
-            return database.getReference("shops/$SHOP_ID/items/$itemId").get().continueWith { task ->
-                if (task.isSuccessful) {
-                    val result = task.result.value as HashMap<*, *>
-                    val jsonString = JSONObject(result).toString()
-                    return@continueWith Json.decodeFromString<Item2>(jsonString)
-                } else return@continueWith null
-            }
-        }
-    }
-}
-*/

@@ -36,7 +36,6 @@ open class CallableFragment : Fragment() {
                 if (!showBottomLayout) {
                     bottomLayout.isGone = true
                 }
-                onBottomLayoutGone()
             }
             .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
     }
@@ -44,6 +43,4 @@ open class CallableFragment : Fragment() {
     open fun onShow() {}
 
     open fun onHide() {}
-
-    open fun onBottomLayoutGone() {}
 }

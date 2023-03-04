@@ -10,11 +10,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pizza">
         <activity
-            android:name=".StartActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
-        <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:screenOrientation="portrait"
