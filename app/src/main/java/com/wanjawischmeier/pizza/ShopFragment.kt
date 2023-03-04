@@ -11,6 +11,8 @@ import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -20,9 +22,15 @@ const val CARD_SCALE_EXPANDED = 1.04f
 
 class ShopFragment : CallableFragment() {
     private lateinit var card: CardView
+    private lateinit var shop: Shop
+    private lateinit var orders: Map<String, Long>
+    private lateinit var fulfilled: HashMap<String, Long>
+    private lateinit var openOrders: HashMap<String, Long>
+    private var userId = ""
     private var cardMode = 0
     private var maxItems = 5
     private var itemCount = 5
+    private var itemId = ""
     private var screenCenter = 0f
     private var grabX = 0f
     private var grabY = 0f
@@ -41,48 +49,75 @@ class ShopFragment : CallableFragment() {
     @Nullable
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        userId = Firebase.auth.currentUser?.uid ?: ""
 
         val displayMetrics = resources.displayMetrics
         screenCenter = displayMetrics.widthPixels.toFloat() / 2
+
+        Shop.getShop(SHOP_ID).continueWith { task ->
+            shop = task.result ?: return@continueWith
+        }
     }
 
     override fun onShow() {
         if (this::card.isInitialized) {
             card.isVisible = false
         }
+
+        openOrders = hashMapOf()
+
+        Shop.getOrders(GROUP_ID, SHOP_ID).continueWith { task ->
+            orders = task.result?.first ?: orders
+            fulfilled = task.result?.second ?: fulfilled
+
+            for ((key, value) in orders) {
+                val open = value - (fulfilled[key] ?: 0L)
+                if (open > 0) {
+                    openOrders[key] = open
+                }
+            }
+
+            loadOrder()
+        }
     }
 
-    override fun onBottomLayoutGone() {
-        Shop.getOrders().addOnCompleteListener { ordersTask ->
-            Shop.orders = ordersTask.result ?: return@addOnCompleteListener
-            Shop.getItems().addOnCompleteListener { itemsTask ->
-                Shop.items = itemsTask.result ?: return@addOnCompleteListener
-                loadOrder()
-            }
+    override fun onHide() {
+        if (this::card.isInitialized) {
+            card.isVisible = false
         }
     }
 
     private fun loadOrder() {
-        if (Shop.orders.isEmpty()) {
+        if (!this::shop.isInitialized || openOrders.isEmpty()) return
+        val item = openOrders.iterator().next()
+        itemId = item.key
+        itemCount = item.value.toInt()
+        val name = shop.items[itemId]?.name ?: return
+
+        createCard(name, itemCount)
+
+        /*
+        if (Shoping.orders.isEmpty()) {
             return
         }
 
-        val order = Shop.orders.iterator().next()
+        val order = Shoping.orders.iterator().next()
         val item = order.value.iterator().next()
         val newItems = order.value.toMutableMap()
         newItems.remove(item.key)
 
         if (newItems.isEmpty()) {
-            Shop.orders.remove(order.key)
+            Shoping.orders.remove(order.key)
         } else {
-            Shop.orders[order.key] = newItems
+            Shoping.orders[order.key] = newItems
         }
 
-        createCard(Shop.items[item.key]?.name ?: return, item.value)
+        createCard(Shoping.items_f[item.key]?.name ?: return, item.value)
+         */
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun createCard(item: String, count: Int) {
+    private fun createCard(name: String, count: Int) {
         if (this::card.isInitialized) {
             removeCard()
         }
@@ -97,7 +132,7 @@ class ShopFragment : CallableFragment() {
         itemCount = maxItems
 
         card.findViewById<TextView>(R.id.item_count).text = itemCount.toString()
-        card.findViewById<TextView>(R.id.item_name).text = item
+        card.findViewById<TextView>(R.id.item_name).text = name
 
         (view as ViewGroup).post {
             card.animate()
@@ -205,12 +240,14 @@ class ShopFragment : CallableFragment() {
         val diff = event.rawX - grabX
 
         if (cardMode == 1 && abs(diff) > screenCenter / 4) {
+            openOrders.remove(itemId)
 
             val target = if (diff < 0) {
-                // Toast.makeText(applicationContext, "left", Toast.LENGTH_SHORT).show()
                 cardX - screenCenter * 3
             } else {
-                // Toast.makeText(applicationContext, "right", Toast.LENGTH_SHORT).show()
+                // fulfill previous order
+                fulfilled[itemId] = fulfilled[itemId]?.plus(itemCount.toLong()) ?: itemCount.toLong()
+                Shop.setFulfilled(GROUP_ID, userId, SHOP_ID, fulfilled)
                 cardX + screenCenter * 3
             }
 
@@ -218,7 +255,7 @@ class ShopFragment : CallableFragment() {
                 .x(target)
                 .y(event.rawY - card.height / 1.5f)
                 .setDuration(200)
-                .withEndAction { loadOrder() }
+                .withEndAction(this::loadOrder)
         } else {
             card.animate()
                 .x(cardX)

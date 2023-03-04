@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentContainerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +27,6 @@ class MainActivity : AppCompatActivity() {
         val navigationHost = findViewById<FragmentContainerView>(R.id.nav_host_fragment)
         CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
         CallableFragment.bottomLayout = findViewById(R.id.bottom_layout)
-        Shop.database = FirebaseDatabase.getInstance()
 
         orderFragment = OrderFragment()
         val shopFragment = ShopFragment()
@@ -43,7 +41,9 @@ class MainActivity : AppCompatActivity() {
             add(R.id.nav_host_fragment, transactionFragment)
             hide(shopFragment)
             hide(transactionFragment)
-            runOnCommit(orderFragment::onShow)
+            runOnCommit {
+                orderFragment.onShow()
+            }
         }.commit()
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             navigationHeader.text = menuItem.title
+            currentFragment.onHide()
             targetFragment.updateTopBubble()
             targetFragment.updateBottomLayout()
             targetFragment.onShow()

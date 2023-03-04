@@ -122,8 +122,9 @@ class LoginActivity : AppCompatActivity() {
         val date = dateFormat.format(calendar.time)
         val userStruct = User()
         userStruct.creationDate = date
+        userStruct.name = "FalkonxX"
 
-        database.getReference("users/${user.uid}").setValue(userStruct).addOnCompleteListener { task ->
+        database.getReference("users/$GROUP_ID/${user.uid}").setValue(userStruct).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 onSignedIn()
             } else {
@@ -164,7 +165,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun checkUser() {
         database = FirebaseDatabase.getInstance()
-        database.getReference("users/${user.uid}").get().addOnCompleteListener { task ->
+        database.getReference("users/$GROUP_ID/${user.uid}").get().addOnCompleteListener { task ->
             if (task.result.value == null) {
                 setContentView(R.layout.create_disclaimer)
             } else {
