@@ -1,7 +1,6 @@
 package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -12,8 +11,6 @@ import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -22,16 +19,14 @@ import kotlin.math.*
 const val CARD_SCALE_EXPANDED = 1.04f
 
 class ShopFragment : CallableFragment() {
+    private lateinit var main: MainActivity
     private lateinit var card: CardView
-    private lateinit var shop: Shop
-    private lateinit var users: Users
     private lateinit var openOrders: HashMap<String, Order>
     private lateinit var currentOrder: Order
     private var cardMode = 0
     private var maxItems = 5
     private var itemCount = 5
     private var itemId = ""
-    private var userId = ""
     private var screenCenter = 0f
     private var grabX = 0f
     private var grabY = 0f
@@ -44,6 +39,10 @@ class ShopFragment : CallableFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val displayMetrics = resources.displayMetrics
+        screenCenter = displayMetrics.widthPixels.toFloat() / 2
+        main = activity as MainActivity
+
         return inflater.inflate(R.layout.fragment_shop, container, false)
     }
 
@@ -51,34 +50,18 @@ class ShopFragment : CallableFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val displayMetrics = resources.displayMetrics
-        screenCenter = displayMetrics.widthPixels.toFloat() / 2
-
         Shop.getShop(SHOP_ID).continueWith { task ->
-            shop = task.result ?: return@continueWith
+            main.shop = task.result ?: return@continueWith
         }
     }
 
     override fun onShow() {
-        userId = Firebase.auth.currentUser?.uid ?: ""
-        if (userId == "") {
-            val intent = Intent(activity, LoginActivity::class.java)
-            activity?.finish()
-            startActivity(intent)
-        }
-
         if (this::card.isInitialized) {
             card.isVisible = false
         }
 
-        openOrders = hashMapOf()
-
-        User.getUsers(GROUP_ID).continueWith {
-            users = it.result
-            openOrders = Shop.getOpenOrders(users, SHOP_ID)
-
-            loadOrder()
-        }
+        openOrders = Shop.getOpenOrders(main.users, SHOP_ID)
+        loadOrder()
     }
 
     override fun onHide() {
@@ -88,12 +71,12 @@ class ShopFragment : CallableFragment() {
     }
 
     private fun loadOrder() {
-        if (!this::shop.isInitialized || openOrders.isEmpty()) return
+        if (openOrders.isEmpty()) return
 
         currentOrder = hashMapOf()
         val userEntry = openOrders.iterator().next()
         itemId = userEntry.value.iterator().next().key
-        val name = shop.items[itemId]?.name ?: return
+        val name = main.shop.items[itemId]?.name ?: return
         itemCount = 0
 
         for ((user, order) in openOrders) {
@@ -247,7 +230,7 @@ class ShopFragment : CallableFragment() {
                 }
 
                 if (fulfill) {
-                    Shop.fulfillItem(users, GROUP_ID, orderUserId, SHOP_ID, userId, itemId, change)
+                    Shop.fulfillItem(main.users, GROUP_ID, orderUserId, SHOP_ID, main.userId, itemId, change)
                 }
             }
 

@@ -8,29 +8,59 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentContainerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
     private lateinit var orderFragment: OrderFragment
+    private lateinit var shopFragment: ShopFragment
+    private lateinit var transactionFragment: TransactionFragment
+
+    lateinit var shop: Shop
+    lateinit var users: Users
+    var userId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Firebase.auth.currentUser == null) {
+        super.onCreate(savedInstanceState)
+
+        val user = Firebase.auth.currentUser
+        if (user == null) {
             val intent = Intent(this, LoginActivity::class.java)
             finish()
             startActivity(intent)
+        } else {
+            userId = user.uid
         }
 
-        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val navigationHeader = findViewById<TextView>(R.id.header)
-        val navigationHost = findViewById<FragmentContainerView>(R.id.nav_host_fragment)
         CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
         CallableFragment.bottomLayout = findViewById(R.id.bottom_layout)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        Shop.getShop(SHOP_ID).continueWith { shopTask ->
+            shop = shopTask.result
+
+            User.getUsers(GROUP_ID).continueWith { usersTask ->
+                users = usersTask.result
+
+                runOnUiThread(this::initializeFragments)
+            }
+        }
+    }
+
+    private fun initializeFragments() {
+        val navigationHeader = findViewById<TextView>(R.id.header)
+        val navigationHost = findViewById<FragmentContainerView>(R.id.nav_host_fragment)
 
         orderFragment = OrderFragment()
-        val shopFragment = ShopFragment()
-        val transactionFragment = TransactionFragment()
+        shopFragment = ShopFragment()
+        transactionFragment = TransactionFragment()
+
         var currentFragment = orderFragment as CallableFragment
         var targetFragment = currentFragment
 
@@ -41,9 +71,6 @@ class MainActivity : AppCompatActivity() {
             add(R.id.nav_host_fragment, transactionFragment)
             hide(shopFragment)
             hide(transactionFragment)
-            runOnCommit {
-                orderFragment.onShow()
-            }
         }.commit()
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
@@ -59,30 +86,48 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_transaction -> targetFragment = transactionFragment
             }
 
+            /*
             // Login screen bridge
             if (targetFragment == transactionFragment) {
                 val intent = Intent(this, LoginActivity::class.java)
                 finish()
                 startActivity(intent)
             }
+             */
 
+            val activity = this
             val transaction = supportFragmentManager.beginTransaction().apply {
                 hide(currentFragment)
                 show(targetFragment)
                 runOnCommit {
-                    currentFragment = targetFragment
+                    val user = Firebase.auth.currentUser
+                    if (user == null) {
+                        val intent = Intent(activity, LoginActivity::class.java)
+                        activity.finish()
+                        startActivity(intent)
+                    } else {
+                        userId = user.uid
+                    }
 
-                    navigationHost.animate()
-                        .alpha(1f)
-                        .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+                    User.getUsers(GROUP_ID).continueWith { usersTask ->
+                        users = usersTask.result
+
+                        runOnUiThread {
+                            currentFragment.onHide()
+                            targetFragment.updateTopBubble()
+                            targetFragment.updateBottomLayout()
+                            targetFragment.onShow()
+                            currentFragment = targetFragment
+
+                            navigationHost.animate()
+                                .alpha(1f)
+                                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+                        }
+                    }
                 }
             }
 
             navigationHeader.text = menuItem.title
-            currentFragment.onHide()
-            targetFragment.updateTopBubble()
-            targetFragment.updateBottomLayout()
-            targetFragment.onShow()
             navigationHost.animate()
                 .alpha(0f)
                 .withEndAction {
@@ -94,12 +139,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onSub(view: View) {
+    fun onOrderSub(view: View) {
         orderFragment.modifyCount(view, -1)
     }
 
-    fun onAdd(view: View) {
+    fun onOrderAdd(view: View) {
         orderFragment.modifyCount(view, 1)
+    }
+
+    fun onTransactionAccept(view: View) {
+        transactionFragment.accept(view)
+    }
+
+    fun onTransactionReject(view: View) {
+        transactionFragment.reject(view)
     }
 
     @Suppress("UNUSED_PARAMETER")

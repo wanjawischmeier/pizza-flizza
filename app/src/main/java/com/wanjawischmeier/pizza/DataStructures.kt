@@ -83,9 +83,35 @@ class Shop {
             return open
         }
 
+        @Suppress("UNCHECKED_CAST")
+        fun getFulfilled(groupId: String, userId: String, shopId: String): Task<HashMap<String, Order>> {
+            return Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId").get().continueWith {
+                return@continueWith (it.result.value ?: hashMapOf<String, Order>()) as HashMap<String, Order>
+            }
+        }
+
+        fun processOrder(groupId: String, userId: String, shopId: String, order: Order) {
+            Firebase.database.getReference("users/$groupId/$userId/orders/$shopId").setValue(order)
+        }
+
         fun fulfillItem(users: Users, groupId: String, userId: String, shopId: String, fulfillerId: String, itemId: String, count: Long): Task<Void> {
             val currentCount = users[userId]?.fulfilled?.get(shopId)?.get(fulfillerId)?.get(itemId) ?: 0L
             return Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId/$itemId").setValue(currentCount + count)
+        }
+
+        fun clearFulfilledOrder(users: Users, order: Order, groupId: String, userId: String, shopId: String, fulfillerId: String) {
+            Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId").removeValue().continueWith {
+                for ((itemId, count) in order) {
+                    val ref = Firebase.database.getReference("users/$groupId/$userId/orders/$shopId/$itemId")
+                    val new = (users[userId]?.orders?.get(shopId)?.get(itemId) ?: 0L) - count
+
+                    if (new > 0) {
+                        ref.setValue(new)
+                    } else {
+                        ref.removeValue()
+                    }
+                }
+            }
         }
     }
 }

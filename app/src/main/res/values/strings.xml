@@ -58,5 +58,7 @@
 
     <!-- Transactions -->
     <string name="coming_soon" translatable="false">Coming soon :)</string>
+    <string name="transaction_accept" translatable="false">Accept</string>
+    <string name="transaction_reject" translatable="false">Reject</string>
 
 </resources>
