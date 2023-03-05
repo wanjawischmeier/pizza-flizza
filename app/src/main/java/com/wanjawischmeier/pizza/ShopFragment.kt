@@ -1,6 +1,7 @@
 package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -23,14 +24,14 @@ const val CARD_SCALE_EXPANDED = 1.04f
 class ShopFragment : CallableFragment() {
     private lateinit var card: CardView
     private lateinit var shop: Shop
-    private lateinit var orders: Map<String, Long>
-    private lateinit var fulfilled: HashMap<String, Long>
-    private lateinit var openOrders: HashMap<String, Long>
-    private var userId = ""
+    private lateinit var users: Users
+    private lateinit var openOrders: HashMap<String, Order>
+    private lateinit var currentOrder: Order
     private var cardMode = 0
     private var maxItems = 5
     private var itemCount = 5
     private var itemId = ""
+    private var userId = ""
     private var screenCenter = 0f
     private var grabX = 0f
     private var grabY = 0f
@@ -49,7 +50,6 @@ class ShopFragment : CallableFragment() {
     @Nullable
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        userId = Firebase.auth.currentUser?.uid ?: ""
 
         val displayMetrics = resources.displayMetrics
         screenCenter = displayMetrics.widthPixels.toFloat() / 2
@@ -60,22 +60,22 @@ class ShopFragment : CallableFragment() {
     }
 
     override fun onShow() {
+        userId = Firebase.auth.currentUser?.uid ?: ""
+        if (userId == "") {
+            val intent = Intent(activity, LoginActivity::class.java)
+            activity?.finish()
+            startActivity(intent)
+        }
+
         if (this::card.isInitialized) {
             card.isVisible = false
         }
 
         openOrders = hashMapOf()
 
-        Shop.getOrders(GROUP_ID, SHOP_ID).continueWith { task ->
-            orders = task.result?.first ?: orders
-            fulfilled = task.result?.second ?: fulfilled
-
-            for ((key, value) in orders) {
-                val open = value - (fulfilled[key] ?: 0L)
-                if (open > 0) {
-                    openOrders[key] = open
-                }
-            }
+        User.getUsers(GROUP_ID).continueWith {
+            users = it.result
+            openOrders = Shop.getOpenOrders(users, SHOP_ID)
 
             loadOrder()
         }
@@ -89,31 +89,23 @@ class ShopFragment : CallableFragment() {
 
     private fun loadOrder() {
         if (!this::shop.isInitialized || openOrders.isEmpty()) return
-        val item = openOrders.iterator().next()
-        itemId = item.key
-        itemCount = item.value.toInt()
+
+        currentOrder = hashMapOf()
+        val userEntry = openOrders.iterator().next()
+        itemId = userEntry.value.iterator().next().key
         val name = shop.items[itemId]?.name ?: return
+        itemCount = 0
+
+        for ((user, order) in openOrders) {
+            for ((id, count) in order) {
+                if (id == itemId) {
+                    currentOrder[user] = count
+                    itemCount += count.toInt()
+                }
+            }
+        }
 
         createCard(name, itemCount)
-
-        /*
-        if (Shoping.orders.isEmpty()) {
-            return
-        }
-
-        val order = Shoping.orders.iterator().next()
-        val item = order.value.iterator().next()
-        val newItems = order.value.toMutableMap()
-        newItems.remove(item.key)
-
-        if (newItems.isEmpty()) {
-            Shoping.orders.remove(order.key)
-        } else {
-            Shoping.orders[order.key] = newItems
-        }
-
-        createCard(Shoping.items_f[item.key]?.name ?: return, item.value)
-         */
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -240,15 +232,29 @@ class ShopFragment : CallableFragment() {
         val diff = event.rawX - grabX
 
         if (cardMode == 1 && abs(diff) > screenCenter / 4) {
-            openOrders.remove(itemId)
+            val fulfill = diff > 0
+            var itemsLeft = itemCount.toLong()
 
-            val target = if (diff < 0) {
-                cardX - screenCenter * 3
-            } else {
-                // fulfill previous order
-                fulfilled[itemId] = fulfilled[itemId]?.plus(itemCount.toLong()) ?: itemCount.toLong()
-                Shop.setFulfilled(GROUP_ID, userId, SHOP_ID, fulfilled)
+            for ((orderUserId, count) in currentOrder) {
+                if (itemsLeft < 0) break
+                val change = min(count, itemsLeft)
+                itemsLeft -= count
+
+                openOrders[orderUserId]?.remove(itemId)
+
+                if (openOrders[orderUserId]?.size == 0) {
+                    openOrders.remove(orderUserId)
+                }
+
+                if (fulfill) {
+                    Shop.fulfillItem(users, GROUP_ID, orderUserId, SHOP_ID, userId, itemId, change)
+                }
+            }
+
+            val target = if (fulfill) {
                 cardX + screenCenter * 3
+            } else {
+                cardX - screenCenter * 3
             }
 
             card.animate()

@@ -4,14 +4,33 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
+// userId, user
+typealias Users = Map<String, User>
+// itemId, count
+typealias Order = HashMap<String, Long>
+// fulfillerId, order
+typealias FulfilledOrder = HashMap<String, Order>
+
 class User {
     var name = ""
     var creationDate = ""
 
-    // shopId, order (itemId, count)
-    var orders = hashMapOf<String, HashMap<String, Long>>()
+    // shopId, order
+    var orders = hashMapOf<String, Order>()
+    // shopId, fulfilledOrder
+    var fulfilled = hashMapOf<String, FulfilledOrder>()
 
     companion object {
+        fun getUsers(groupId: String): Task<Users> {
+            return Firebase.database.getReference("users/$groupId").get().continueWith { userTask ->
+                return@continueWith userTask.result.children.mapNotNull {
+                    val key = it.key ?: return@mapNotNull null
+                    val value = it.getValue(User::class.java) ?: return@mapNotNull null
+                    return@mapNotNull key to value
+                }.toMap()
+            }
+        }
+
         fun getUser(groupId: String, userId: String): Task<User> {
             return Firebase.database.getReference("users/$groupId/$userId").get().continueWith { userTask ->
                 return@continueWith userTask.result.getValue(User::class.java)
@@ -40,48 +59,33 @@ class Shop {
             }
         }
 
-        private fun addMaps(a: Map<String, Long>, b: Map<String, Long>): HashMap<String, Long> {
-            return b.map { (key, value) ->
-                key to (a[key]?.plus(value) ?: value)
-            }.toMap() as HashMap<String, Long>
-        }
+        fun getOpenOrders(users: Users, shopId: String): HashMap<String, Order> {
+            val open = hashMapOf<String, Order>()
 
-        /**
-         * Retrieves all open and fulfilled orders
-         * @param groupId Only returns orders placed by members of this group
-         * @param shopId Only returns orders placed for this shop
-         * @return A [Pair] of open and fulfilled orders
-         */
-        @Suppress("UNCHECKED_CAST")
-        fun getOrders(groupId: String, shopId: String): Task<Pair<HashMap<String, Long>, HashMap<String, Long>>> {
-            return Firebase.database.getReference("users/$groupId").get().continueWith { task ->
-                var orders = hashMapOf<String, Long>()
-                var fulfilled = hashMapOf<String, Long>()
+            for ((userId, user) in users) {
+                val order = user.orders[shopId] ?: continue
+                val fulfilled = user.fulfilled[shopId] ?: hashMapOf()
 
-                val users = task.result.value ?: return@continueWith orders to fulfilled
+                for ((itemId, count) in order) {
+                    var fulfilledCount = 0L
 
-                for (user in (users as Map<String, Map<*, *>>).values) {
-                    if (user.containsKey("orders")) {
-                        val userOrders = user["orders"] as Map<String, Map<String, Long>>
-                        orders = addMaps(orders, userOrders[shopId] ?: mapOf())
+                    for (items in fulfilled.values) {
+                        fulfilledCount += items[itemId] ?: 0L
                     }
 
-                    if (user.containsKey("fulfilled")) {
-                        val userFulfilled = user["fulfilled"] as Map<String, Map<String, Long>>
-                        fulfilled = addMaps(fulfilled, userFulfilled[shopId] ?: mapOf())
+                    if (count - fulfilledCount > 0) {
+                        val newOrder = hashMapOf(itemId to count - fulfilledCount)
+                        open[userId] = (open[userId]?.plus(newOrder) ?: newOrder) as HashMap<String, Long>
                     }
                 }
-
-                return@continueWith orders to fulfilled
             }
+
+            return open
         }
 
-        fun processOrder(groupId: String, userId: String, shopId: String, order: HashMap<String, Long>) {
-            Firebase.database.getReference("users/$groupId/$userId/orders/$shopId").setValue(order)
-        }
-
-        fun setFulfilled(groupId: String, userId: String, shopId: String, fulfilled: HashMap<String, Long>) {
-            Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId").setValue(fulfilled)
+        fun fulfillItem(users: Users, groupId: String, userId: String, shopId: String, fulfillerId: String, itemId: String, count: Long): Task<Void> {
+            val currentCount = users[userId]?.fulfilled?.get(shopId)?.get(fulfillerId)?.get(itemId) ?: 0L
+            return Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId/$itemId").setValue(currentCount + count)
         }
     }
 }
