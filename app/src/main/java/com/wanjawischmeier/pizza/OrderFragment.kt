@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.Nullable
+import com.google.android.gms.tasks.Task
 import kotlin.math.round
 
 const val GROUP_ID = "prenski_12"
@@ -68,8 +69,8 @@ class OrderFragment : CallableFragment() {
         priceView.text = getString(R.string.price_format).format(total)
     }
 
-    override fun onShow() {
-        User.getUser(GROUP_ID, main.userId).continueWith {
+    override fun onShow(): Task<Any> {
+        return User.getUser(GROUP_ID, main.userId).continueWith {
             order = it.result.orders[SHOP_ID] ?: hashMapOf()
             total = 0f
 
@@ -81,6 +82,10 @@ class OrderFragment : CallableFragment() {
                 priceView.text = getString(R.string.price_format).format(total)
             }
         }
+    }
+
+    override fun onHide() {
+        // TODO: Not yet implemented
     }
 
     fun modifyCount(view: View, change: Long) {

@@ -3,8 +3,9 @@ package com.wanjawischmeier.pizza
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
+import com.google.android.gms.tasks.Task
 
-open class CallableFragment : Fragment() {
+abstract class CallableFragment : Fragment() {
     companion object {
         lateinit var topBubble: ConstraintLayout
         lateinit var bottomLayout: ConstraintLayout
@@ -40,7 +41,7 @@ open class CallableFragment : Fragment() {
             .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
     }
 
-    open fun onShow() {}
+    abstract fun onShow(): Task<Any>?
 
-    open fun onHide() {}
+    abstract fun onHide()
 }

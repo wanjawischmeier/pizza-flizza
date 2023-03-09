@@ -46,19 +46,22 @@
     <string name="sample_order_name" translatable="false">Pizza Margeritha</string>
     <string name="sample_order_price" translatable="false">1,69€</string>
     <string name="sample_total_price" translatable="false">99,99€</string>
+    <string name="order_nav_view_description" translatable="false">Navigation view</string>
 
     <!-- Shop -->
     <string name="sample_item_count" translatable="false">5</string>
     <string name="sample_item_name" translatable="false">Pizza</string>
-
-    <!-- Menu -->
-    <string name="menu_order">Order</string>
-    <string name="menu_shop">Shop</string>
-    <string name="menu_transactions">Transactions</string>
+    <string name="info_no_items" translatable="false">No open orders</string>
 
     <!-- Transactions -->
     <string name="coming_soon" translatable="false">Coming soon :)</string>
     <string name="transaction_accept" translatable="false">Accept</string>
     <string name="transaction_reject" translatable="false">Reject</string>
+    <string name="info_no_transactions" translatable="false">No transactions</string>
+
+    <!-- Menu -->
+    <string name="menu_order">Order</string>
+    <string name="menu_shop">Shop</string>
+    <string name="menu_transactions">Transactions</string>
 
 </resources>

@@ -6,19 +6,28 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentContainerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+
+/*
+TODO: hide order button on order
+TODO: fix quick switching bug
+TODO: fix reopen bug (onResume?)
+TODO: fix grab card bug
+ */
 
 class MainActivity : AppCompatActivity() {
     private lateinit var orderFragment: OrderFragment
     private lateinit var shopFragment: ShopFragment
     private lateinit var transactionFragment: TransactionFragment
+    private lateinit var currentFragment: CallableFragment
 
     lateinit var shop: Shop
     lateinit var users: Users
+    lateinit var swipeRefreshLayout: SwipeRefreshLayout
     var userId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,16 +46,22 @@ class MainActivity : AppCompatActivity() {
 
         CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
         CallableFragment.bottomLayout = findViewById(R.id.bottom_layout)
+
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout)
+        swipeRefreshLayout.setOnRefreshListener(this::refreshView)
     }
 
     override fun onStart() {
         super.onStart()
+
+        swipeRefreshLayout.isRefreshing = true
 
         Shop.getShop(SHOP_ID).continueWith { shopTask ->
             shop = shopTask.result
 
             User.getUsers(GROUP_ID).continueWith { usersTask ->
                 users = usersTask.result
+                swipeRefreshLayout.isRefreshing = false
 
                 runOnUiThread(this::initializeFragments)
             }
@@ -61,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         shopFragment = ShopFragment()
         transactionFragment = TransactionFragment()
 
-        var currentFragment = orderFragment as CallableFragment
+        currentFragment = orderFragment
         var targetFragment = currentFragment
 
         supportFragmentManager.beginTransaction().apply {
@@ -95,33 +110,26 @@ class MainActivity : AppCompatActivity() {
             }
              */
 
-            val activity = this
             val transaction = supportFragmentManager.beginTransaction().apply {
                 hide(currentFragment)
                 show(targetFragment)
                 runOnCommit {
-                    val user = Firebase.auth.currentUser
-                    if (user == null) {
-                        val intent = Intent(activity, LoginActivity::class.java)
-                        activity.finish()
-                        startActivity(intent)
-                    } else {
-                        userId = user.uid
-                    }
-
-                    User.getUsers(GROUP_ID).continueWith { usersTask ->
-                        users = usersTask.result
-
+                    refreshView().continueWith {
                         runOnUiThread {
                             currentFragment.onHide()
                             targetFragment.updateTopBubble()
                             targetFragment.updateBottomLayout()
-                            targetFragment.onShow()
                             currentFragment = targetFragment
 
-                            navigationHost.animate()
-                                .alpha(1f)
-                                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+                            val after = {
+                                swipeRefreshLayout.isRefreshing = false
+
+                                navigationHost.animate()
+                                    .alpha(1f)
+                                    .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+                            }
+
+                            currentFragment.onShow()?.continueWith { after.invoke() } ?: after.invoke()
                         }
                     }
                 }
@@ -137,6 +145,28 @@ class MainActivity : AppCompatActivity() {
 
             return@setOnItemSelectedListener true
         }
+    }
+
+    private fun refreshView(): Task<Users> {
+        val user = Firebase.auth.currentUser
+        if (user == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            finish()
+            startActivity(intent)
+        } else {
+            userId = user.uid
+        }
+
+        val taskUsers = User.getUsers(GROUP_ID)
+        taskUsers.continueWith { usersTask ->
+            users = usersTask.result
+
+            val after = { swipeRefreshLayout.isRefreshing = false }
+
+            currentFragment.onShow()?.continueWith { after.invoke() } ?: after.invoke()
+        }
+
+        return taskUsers
     }
 
     fun onOrderSub(view: View) {

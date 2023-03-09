@@ -53,8 +53,13 @@ class LoginActivity : AppCompatActivity() {
         infoField.isInvisible = true
         emailField.requestFocus()
 
-        emailField.addTextChangedListener(onTextChanged = checkEmail)
-        passwordField.addTextChangedListener(onTextChanged = checkEmail)
+        val checkEmailFromListener: (text: CharSequence?, Int, Int, Int) -> Unit =
+            { _: CharSequence?, _: Int, _: Int, _: Int ->
+                checkEmail()
+            }
+
+        emailField.addTextChangedListener(onTextChanged = checkEmailFromListener)
+        passwordField.addTextChangedListener(onTextChanged = checkEmailFromListener)
 
         passwordField.setOnEditorActionListener(OnEditorActionListener { view, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -66,7 +71,12 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    private val checkEmail: (text: CharSequence?, Int, Int, Int) -> Unit = { _, _, _, _ ->
+    override fun onResume() {
+        super.onResume()
+        checkEmail()
+    }
+
+    private fun checkEmail() {
         infoField.isInvisible = true
         val email = emailField.text.toString()
         val password = passwordField.text.toString()
@@ -144,6 +154,7 @@ class LoginActivity : AppCompatActivity() {
                         infoField.text = getString(R.string.info_verify_email)
                         infoField.isInvisible = false
                         user.sendEmailVerification()
+                        Firebase.auth.signOut()
                     }
                 } else {
                     infoField.text = getString(R.string.info_wrong_password)
