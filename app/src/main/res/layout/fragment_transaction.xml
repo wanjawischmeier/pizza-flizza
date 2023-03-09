@@ -1,30 +1,24 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
     tools:context=".OrderFragment">
 
-    <LinearLayout
-        android:id="@+id/transactions_list"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"/>
-
-    <!--
-    <TextView
-        android:id="@+id/coming_soon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/layout_bg"
-        android:backgroundTint="@color/gray_mid"
-        android:padding="10dp"
-        android:text="@string/coming_soon"
-        android:textAppearance="@style/Large"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    -->
+        app:layout_constraintTop_toTopOf="parent">
 
-</ScrollView>
+        <LinearLayout
+            android:id="@+id/transactions_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

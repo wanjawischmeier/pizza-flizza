@@ -11,6 +11,7 @@ import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import com.google.android.gms.tasks.Task
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -55,13 +56,16 @@ class ShopFragment : CallableFragment() {
         }
     }
 
-    override fun onShow() {
+    override fun onShow(): Task<Any>? {
         if (this::card.isInitialized) {
             card.isVisible = false
         }
 
+
         openOrders = Shop.getOpenOrders(main.users, SHOP_ID)
         loadOrder()
+
+        return null
     }
 
     override fun onHide() {
@@ -71,7 +75,14 @@ class ShopFragment : CallableFragment() {
     }
 
     private fun loadOrder() {
-        if (openOrders.isEmpty()) return
+        val noItems = view?.findViewById<TextView>(R.id.no_items_text)?.parent
+        if (noItems != null) (view as ViewGroup).removeView(noItems as View)
+
+        if (openOrders.isEmpty()) {
+            val inflated = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
+            inflated.findViewById<TextView>(R.id.no_items_text).text = getString(R.string.info_no_items)
+            return
+        }
 
         currentOrder = hashMapOf()
         val userEntry = openOrders.iterator().next()
@@ -141,6 +152,8 @@ class ShopFragment : CallableFragment() {
 
 
     private fun onCardClicked(card: View, event: MotionEvent) {
+        main.swipeRefreshLayout.isEnabled = false
+
         grabX = event.rawX
         grabY = event.rawY
 
@@ -212,6 +225,8 @@ class ShopFragment : CallableFragment() {
 
 
     private fun onCardReleased(card: View, event: MotionEvent) {
+        main.swipeRefreshLayout.isEnabled = true
+
         val diff = event.rawX - grabX
 
         if (cardMode == 1 && abs(diff) > screenCenter / 4) {

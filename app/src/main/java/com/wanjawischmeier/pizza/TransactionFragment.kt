@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import java.util.regex.Pattern
 
 
 class TransactionFragment : CallableFragment() {
@@ -33,8 +33,9 @@ class TransactionFragment : CallableFragment() {
         transactionsList = view.findViewById(R.id.transactions_list)
     }
 
-    override fun onShow() {
-        Shop.getFulfilled(GROUP_ID, main.userId, SHOP_ID).continueWith {
+    @SuppressLint("InflateParams")
+    override fun onShow(): Task<Any> {
+        return Shop.getFulfilled(GROUP_ID, main.userId, SHOP_ID).continueWith {
             transactions = it.result
 
             for ((fulfillerId, items) in transactions) {
@@ -79,7 +80,19 @@ class TransactionFragment : CallableFragment() {
                         .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
                 }
             }
+
+            val noItems = view?.findViewById<TextView>(R.id.no_items_text)?.parent
+            if (noItems != null) (view as ViewGroup).removeView(noItems as View)
+
+            if (transactionChildren.isEmpty()) {
+                val inflated = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
+                inflated.findViewById<TextView>(R.id.no_items_text).text = getString(R.string.info_no_transactions)
+            }
         }
+    }
+
+    override fun onHide() {
+        // TODO: Not yet implemented
     }
 
     fun accept(view: View) {
@@ -106,7 +119,7 @@ class TransactionFragment : CallableFragment() {
         onShow()
     }
 
-    fun reject(view: View) {
+    fun reject(@Suppress("UNUSED_PARAMETER") view: View) {
         Toast.makeText(main, "reject", Toast.LENGTH_SHORT).show()
     }
 }
