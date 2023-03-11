@@ -15,8 +15,11 @@ import com.google.firebase.ktx.Firebase
 /*
 TODO: hide order button on order
 TODO: fix quick switching bug
-TODO: fix reopen bug (onResume?)
+TODO: fix reopen bug (onResume?) -> test result
 TODO: fix grab card bug
+TODO: fix transaction showing incorrect users
+TODO: login add username
+TODO: fix small text in api 24
  */
 
 class MainActivity : AppCompatActivity() {
@@ -66,6 +69,18 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread(this::initializeFragments)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (!this::currentFragment.isInitialized) return
+
+        supportFragmentManager.beginTransaction().apply {
+            if (currentFragment != orderFragment) hide(orderFragment)
+            if (currentFragment != shopFragment) hide(shopFragment)
+            if (currentFragment != transactionFragment) hide(transactionFragment)
+        }.commit()
     }
 
     private fun initializeFragments() {

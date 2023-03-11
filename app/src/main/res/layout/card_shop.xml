@@ -9,9 +9,10 @@
         android:id="@+id/card"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_margin="20dp"
         app:cardBackgroundColor="@color/gray_mid"
         app:cardCornerRadius="25dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline_bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="0.7"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,11 +33,11 @@
                 android:id="@+id/item_count"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:autoSizeMaxTextSize="1000sp"
-                android:autoSizeTextType="uniform"
                 android:text="@string/sample_item_count"
                 android:textAlignment="center"
                 android:textAppearance="@style/Dark"
+                app:autoSizeMaxTextSize="1000sp"
+                app:autoSizeTextType="uniform"
                 app:layout_constraintBottom_toTopOf="@+id/guideline_card"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -47,11 +48,11 @@
                 android:id="@+id/item_name"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:autoSizeMaxTextSize="1000sp"
-                android:autoSizeTextType="uniform"
                 android:text="@string/sample_item_name"
                 android:textAlignment="center"
                 android:textAppearance="@style/Dark"
+                app:autoSizeMaxTextSize="1000sp"
+                app:autoSizeTextType="uniform"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -74,13 +75,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.25" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_bottom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.85" />
+        app:layout_constraintGuide_percent=".1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,8 +9,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 
 class TransactionFragment : CallableFragment() {
@@ -39,8 +37,7 @@ class TransactionFragment : CallableFragment() {
             transactions = it.result
 
             for ((fulfillerId, items) in transactions) {
-                val email = Firebase.auth.currentUser?.email ?: continue
-                val text = email.substring(0, email.indexOf('@'))
+                val name = main.users[fulfillerId]?.name ?: continue
                 var total = 0f
 
                 for ((itemId, count) in items) {
@@ -65,7 +62,7 @@ class TransactionFragment : CallableFragment() {
                     }
                 }
 
-                transactionView?.findViewById<TextView>(R.id.transaction_name)?.text = text
+                transactionView?.findViewById<TextView>(R.id.transaction_name)?.text = name
                 transactionView?.findViewById<TextView>(R.id.transaction_price)?.text = getString(R.string.price_format).format(total)
             }
 
@@ -114,6 +111,7 @@ class TransactionFragment : CallableFragment() {
 
         val parent = view.parent.parent as ViewGroup
         val fulfillerId = transactionChildren[parent] ?: return
+        transactions.remove(fulfillerId)
         Shop.clearFulfilledOrder(main.users, transactions[fulfillerId] ?: return, GROUP_ID, main.userId, SHOP_ID, fulfillerId)
 
         onShow()
