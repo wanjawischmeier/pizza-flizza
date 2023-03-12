@@ -100,22 +100,6 @@ class TransactionFragment : CallableFragment() {
     }
 
     fun accept(view: View) {
-        /*
-        val popupView = layoutInflater.inflate(R.layout.transaction_popup, null)
-
-        // create the popup window
-        // create the popup window
-        val width = LinearLayout.LayoutParams.WRAP_CONTENT
-        val height = LinearLayout.LayoutParams.WRAP_CONTENT
-        val focusable = true // lets taps outside the popup also dismiss it
-
-        val popupWindow = PopupWindow(popupView, width, height, focusable)
-
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
-        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
-        */
-
         val parent = view.parent.parent as ViewGroup
         val fulfillerId = transactionChildren[parent] ?: return
         Shop.clearFulfilledOrder(main.users, transactions[fulfillerId] ?: return, GROUP_ID, main.userId, SHOP_ID, fulfillerId)

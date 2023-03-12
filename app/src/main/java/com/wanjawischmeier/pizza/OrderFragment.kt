@@ -104,8 +104,11 @@ class OrderFragment : CallableFragment() {
     }
 
     fun placeOrder() {
+        main.swipeRefreshLayout.isRefreshing = true
+
         order = order.filterValues { it != 0L } as HashMap<String, Long>
         Shop.processOrder(GROUP_ID, main.userId, SHOP_ID, order).continueWith {
+            main.swipeRefreshLayout.isRefreshing = false
             bottomLayoutVisible = false
         }
     }

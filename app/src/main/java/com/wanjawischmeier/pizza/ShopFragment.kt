@@ -221,7 +221,7 @@ class ShopFragment : CallableFragment() {
 
         val diff = event.rawX - grabX
 
-        if (cardMode == 1 && abs(diff) > screenCenter / 4) {
+        if (cardMode == 1 && abs(diff) > screenCenter / 1.5f) {
             val fulfill = diff > 0
             var itemsLeft = itemCount.toLong()
 

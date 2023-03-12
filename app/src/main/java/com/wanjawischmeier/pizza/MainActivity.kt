@@ -12,15 +12,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-/*
-TODO: fix quick switching bug
-TODO: consider nav bar state on resume
-TODO: fix grab card bug
-TODO: login add username
-TODO: add discard order warning
-TODO: fix accepting multiple orders
-TODO: smooth bottom loading bar
- */
 
 class MainActivity : AppCompatActivity() {
     private lateinit var orderFragment: OrderFragment

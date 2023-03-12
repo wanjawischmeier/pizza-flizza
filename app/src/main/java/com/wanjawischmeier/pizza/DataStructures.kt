@@ -106,6 +106,7 @@ class Shop {
                     val new = (users[userId]?.orders?.get(shopId)?.get(itemId) ?: 0L) - count
 
                     if (new > 0) {
+                        users[userId]?.orders?.get(shopId)?.set(itemId, new)
                         ref.setValue(new)
                     } else {
                         ref.removeValue()
