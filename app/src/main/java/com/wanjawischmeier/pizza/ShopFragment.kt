@@ -7,7 +7,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.Nullable
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -47,20 +46,13 @@ class ShopFragment : CallableFragment() {
         return inflater.inflate(R.layout.fragment_shop, container, false)
     }
 
-    @Nullable
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onShow(): Task<Unit>? {
+        topBubbleVisible = false
+        bottomLayoutVisible = false
 
-        Shop.getShop(SHOP_ID).continueWith { task ->
-            main.shop = task.result ?: return@continueWith
-        }
-    }
-
-    override fun onShow(): Task<Any>? {
         if (this::card.isInitialized) {
             card.isVisible = false
         }
-
 
         openOrders = Shop.getOpenOrders(main.users, SHOP_ID)
         loadOrder()

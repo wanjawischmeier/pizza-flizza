@@ -13,20 +13,22 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 /*
-TODO: hide order button on order
 TODO: fix quick switching bug
-TODO: fix reopen bug (onResume?) -> test result
+TODO: consider nav bar state on resume
 TODO: fix grab card bug
-TODO: fix transaction showing incorrect users
 TODO: login add username
-TODO: fix small text in api 24
+TODO: add discard order warning
+TODO: fix accepting multiple orders
+TODO: smooth bottom loading bar
  */
 
 class MainActivity : AppCompatActivity() {
     private lateinit var orderFragment: OrderFragment
     private lateinit var shopFragment: ShopFragment
     private lateinit var transactionFragment: TransactionFragment
+    private lateinit var previousFragment: CallableFragment
     private lateinit var currentFragment: CallableFragment
+    private lateinit var bottomNavigationView: BottomNavigationView
 
     lateinit var shop: Shop
     lateinit var users: Users
@@ -52,11 +54,6 @@ class MainActivity : AppCompatActivity() {
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener(this::refreshView)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
         swipeRefreshLayout.isRefreshing = true
 
         Shop.getShop(SHOP_ID).continueWith { shopTask ->
@@ -71,28 +68,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        if (!this::currentFragment.isInitialized) return
-
-        supportFragmentManager.beginTransaction().apply {
-            if (currentFragment != orderFragment) hide(orderFragment)
-            if (currentFragment != shopFragment) hide(shopFragment)
-            if (currentFragment != transactionFragment) hide(transactionFragment)
-        }.commit()
-    }
-
     private fun initializeFragments() {
         val navigationHeader = findViewById<TextView>(R.id.header)
         val navigationHost = findViewById<FragmentContainerView>(R.id.nav_host_fragment)
+
+        swipeRefreshLayout.isRefreshing = true
 
         orderFragment = OrderFragment()
         shopFragment = ShopFragment()
         transactionFragment = TransactionFragment()
 
         currentFragment = orderFragment
-        var targetFragment = currentFragment
+        previousFragment = currentFragment
 
         supportFragmentManager.beginTransaction().apply {
             remove(supportFragmentManager.fragments[0])
@@ -101,19 +88,27 @@ class MainActivity : AppCompatActivity() {
             add(R.id.nav_host_fragment, transactionFragment)
             hide(shopFragment)
             hide(transactionFragment)
+
+            runOnCommit {
+                val after = { swipeRefreshLayout.isRefreshing = false }
+                currentFragment.onShow()?.continueWith { after.invoke() } ?: after.invoke()
+            }
         }.commit()
 
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        bottomNavigationView = findViewById(R.id.bottomNavigationView)
         bottomNavigationView.setOnItemSelectedListener { menuItem ->
             val menuItemId = menuItem.itemId
             if (menuItemId == bottomNavigationView.selectedItemId) {
                 return@setOnItemSelectedListener false
             }
 
+            swipeRefreshLayout.isRefreshing = true
+            previousFragment = currentFragment
+
             when (menuItemId) {
-                R.id.navigation_order -> targetFragment = orderFragment
-                R.id.navigation_shop -> targetFragment = shopFragment
-                R.id.navigation_transaction -> targetFragment = transactionFragment
+                R.id.navigation_order -> currentFragment = orderFragment
+                R.id.navigation_shop -> currentFragment = shopFragment
+                R.id.navigation_transaction -> currentFragment = transactionFragment
             }
 
             /*
@@ -125,36 +120,32 @@ class MainActivity : AppCompatActivity() {
             }
              */
 
-            val transaction = supportFragmentManager.beginTransaction().apply {
-                hide(currentFragment)
-                show(targetFragment)
-                runOnCommit {
-                    refreshView().continueWith {
-                        runOnUiThread {
-                            currentFragment.onHide()
-                            targetFragment.updateTopBubble()
-                            targetFragment.updateBottomLayout()
-                            currentFragment = targetFragment
-
-                            val after = {
-                                swipeRefreshLayout.isRefreshing = false
-
-                                navigationHost.animate()
-                                    .alpha(1f)
-                                    .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
-                            }
-
-                            currentFragment.onShow()?.continueWith { after.invoke() } ?: after.invoke()
-                        }
-                    }
-                }
-            }
-
+            previousFragment.onHide()
             navigationHeader.text = menuItem.title
             navigationHost.animate()
                 .alpha(0f)
                 .withEndAction {
-                    transaction.commit()
+                    supportFragmentManager.beginTransaction().apply {
+                        hide(previousFragment)
+                        show(currentFragment)
+
+                        runOnCommit {
+                            User.getUsers(GROUP_ID).continueWith { usersTask ->
+                                users = usersTask.result ?: return@continueWith
+
+                                val after = {
+                                    swipeRefreshLayout.isRefreshing = false
+
+                                    navigationHost.animate()
+                                        .alpha(1f)
+                                        .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+                                }
+
+                                val showTask = currentFragment.onShow()
+                                showTask?.continueWith { after.invoke() } ?: after.invoke()
+                            }
+                        }.commit()
+                    }
                 }
                 .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
 
@@ -177,7 +168,6 @@ class MainActivity : AppCompatActivity() {
             users = usersTask.result
 
             val after = { swipeRefreshLayout.isRefreshing = false }
-
             currentFragment.onShow()?.continueWith { after.invoke() } ?: after.invoke()
         }
 

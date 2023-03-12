@@ -9,7 +9,7 @@
         android:id="@+id/card"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="20dp"
+        android:layout_margin="50dp"
         app:cardBackgroundColor="@color/gray_mid"
         app:cardCornerRadius="25dp"
         app:layout_constraintBottom_toBottomOf="parent"

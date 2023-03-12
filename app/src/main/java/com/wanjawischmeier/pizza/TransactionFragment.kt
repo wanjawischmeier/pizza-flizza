@@ -28,11 +28,14 @@ class TransactionFragment : CallableFragment() {
 
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        transactionsList = view.findViewById(R.id.transactions_list)
+        transactionsList = (view as ViewGroup).findViewById(R.id.transactions_list)
     }
 
     @SuppressLint("InflateParams")
-    override fun onShow(): Task<Any> {
+    override fun onShow(): Task<Unit> {
+        topBubbleVisible = false
+        bottomLayoutVisible = false
+
         return Shop.getFulfilled(GROUP_ID, main.userId, SHOP_ID).continueWith {
             transactions = it.result
 
@@ -78,18 +81,22 @@ class TransactionFragment : CallableFragment() {
                 }
             }
 
-            val noItems = view?.findViewById<TextView>(R.id.no_items_text)?.parent
-            if (noItems != null) (view as ViewGroup).removeView(noItems as View)
-
-            if (transactionChildren.isEmpty()) {
-                val inflated = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
-                inflated.findViewById<TextView>(R.id.no_items_text).text = getString(R.string.info_no_transactions)
-            }
+            refreshNoItemsHint(transactionChildren.isEmpty())
         }
     }
 
     override fun onHide() {
         // TODO: Not yet implemented
+    }
+
+    private fun refreshNoItemsHint(visible: Boolean) {
+        val noItems = view?.findViewById<TextView>(R.id.no_items_text)?.parent
+        if (noItems != null) (view as ViewGroup).removeView(noItems as View)
+
+        if (visible) {
+            val inflated = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
+            inflated.findViewById<TextView>(R.id.no_items_text).text = getString(R.string.info_no_transactions)
+        }
     }
 
     fun accept(view: View) {
@@ -111,9 +118,13 @@ class TransactionFragment : CallableFragment() {
 
         val parent = view.parent.parent as ViewGroup
         val fulfillerId = transactionChildren[parent] ?: return
-        transactions.remove(fulfillerId)
         Shop.clearFulfilledOrder(main.users, transactions[fulfillerId] ?: return, GROUP_ID, main.userId, SHOP_ID, fulfillerId)
 
+        transactionsList.removeView(parent)
+        transactionChildren.remove(parent)
+        transactions.remove(fulfillerId)
+
+        refreshNoItemsHint(transactionChildren.isEmpty())
         onShow()
     }
 

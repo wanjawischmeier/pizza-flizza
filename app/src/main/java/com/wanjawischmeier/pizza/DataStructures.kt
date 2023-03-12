@@ -90,8 +90,8 @@ class Shop {
             }
         }
 
-        fun processOrder(groupId: String, userId: String, shopId: String, order: Order) {
-            Firebase.database.getReference("users/$groupId/$userId/orders/$shopId").setValue(order)
+        fun processOrder(groupId: String, userId: String, shopId: String, order: Order): Task<Void> {
+            return Firebase.database.getReference("users/$groupId/$userId/orders/$shopId").setValue(order)
         }
 
         fun fulfillItem(users: Users, groupId: String, userId: String, shopId: String, fulfillerId: String, itemId: String, count: Long): Task<Void> {

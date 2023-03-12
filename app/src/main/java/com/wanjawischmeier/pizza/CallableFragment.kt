@@ -11,37 +11,42 @@ abstract class CallableFragment : Fragment() {
         lateinit var bottomLayout: ConstraintLayout
     }
 
-    open var showTopBubble = false
-    open var showBottomLayout = false
+    var topBubbleVisible: Boolean
+        get() = topBubble.alpha == 1f
+        set(value) {
+            if (value == topBubbleVisible) return
 
-    fun updateTopBubble() {
-        topBubble.animate()
-            .alpha(if (showTopBubble) 1f else 0f)
-            .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
-    }
-
-    fun updateBottomLayout() {
-        var start = 0f
-        var end = bottomLayout.height.toFloat()
-
-        if (showBottomLayout) {
-            start = end
-            end = 0f
-            bottomLayout.isGone = false
+            topBubble.animate()
+                .alpha(if (value) 1f else 0f)
+                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
         }
 
-        bottomLayout.translationY = start
-        bottomLayout.animate()
-            .translationY(end)
-            .withEndAction {
-                if (!showBottomLayout) {
-                    bottomLayout.isGone = true
-                }
-            }
-            .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
-    }
+    var bottomLayoutVisible: Boolean
+        get() = bottomLayout.translationY == 0f
+        set(value) {
+            if (value == bottomLayoutVisible) return
 
-    abstract fun onShow(): Task<Any>?
+            var start = 0f
+            var end = bottomLayout.height.toFloat()
+
+            if (value) {
+                start = end
+                end = 0f
+                bottomLayout.isGone = false
+            }
+
+            bottomLayout.translationY = start
+            bottomLayout.animate()
+                .translationY(end)
+                .withEndAction {
+                    if (!value) {
+                        bottomLayout.isGone = true
+                    }
+                }
+                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+        }
+
+    abstract fun onShow(): Task<Unit>?
 
     abstract fun onHide()
 }
