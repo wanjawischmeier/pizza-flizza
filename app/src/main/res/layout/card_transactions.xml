@@ -1,95 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/transaction_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:paddingVertical="18dp"
-        android:singleLine="true"
-        android:text="@string/sample_order_name"
-        android:textAppearance="@style/Medium"
-        app:layout_constraintEnd_toStartOf="@id/transaction_price"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/transaction_price"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="20dp"
-        android:singleLine="true"
-        android:text="@string/sample_order_price"
-        android:textAppearance="@style/Medium"
-        app:layout_constraintBottom_toBottomOf="@id/transaction_name"
-        app:layout_constraintEnd_toStartOf="@id/transaction_constraint"
-        app:layout_constraintStart_toEndOf="@id/transaction_name"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/transaction_constraint"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginVertical="4dp"
+        android:id="@+id/constraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/layout_bg"
         android:backgroundTint="@color/gray_mid"
-        app:layout_constraintBottom_toBottomOf="@id/transaction_name"
+        android:padding="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/transaction_price"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/transaction_reject"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/layout_bg"
-            android:backgroundTint="@color/gray_dark"
-            android:enabled="false"
-            android:gravity="center"
-            android:onClick="onTransactionReject"
-            android:paddingHorizontal="20dp"
+            android:id="@+id/transaction_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:gravity="top"
+            android:padding="0dp"
+            android:paddingVertical="18dp"
             android:singleLine="true"
-            android:text="@string/transaction_reject"
-            android:textAppearance="@style/Medium"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline_accept"
+            android:text="@string/sample_name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toStartOf="@+id/transaction_date"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="TouchTargetSizeCheck" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/transaction_accept"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/layout_bg"
-            android:backgroundTint="@color/gray_light"
-            android:gravity="center"
-            android:onClick="onTransactionAccept"
-            android:paddingHorizontal="20dp"
-            android:singleLine="true"
-            android:text="@string/transaction_accept"
-            android:textAppearance="@style/Medium"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/guideline_accept"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="TouchTargetSizeCheck" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_accept"
+            android:id="@+id/transaction_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
+            android:layout_marginEnd="10dp"
+            android:gravity="top"
+            android:padding="0dp"
+            android:paddingVertical="18dp"
+            android:singleLine="true"
+            android:text="@string/sample_date"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toStartOf="@+id/transaction_price_constraint"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/transaction_price_constraint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/layout_bg"
+            android:backgroundTint="@color/gray_light"
+            app:layout_constraintDimensionRatio="2.5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/transaction_price_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="@string/sample_total_price"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/transaction_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:padding="0dp"
+            android:paddingVertical="18dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:singleLine="false"
+            android:text="@string/sample_order"
+            android:textAppearance="@style/Medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/transaction_name" />
+
+        <Button
+            android:id="@+id/transaction_payed_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:onClick="onTransactionAccept"
+            android:text="@string/transaction_payed"
+            android:textAllCaps="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/gray_dark"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/transaction_content" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/transaction_status_ring"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
+        app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+        app:layout_constraintTop_toTopOf="@+id/constraintLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

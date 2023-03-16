@@ -3,16 +3,20 @@ package com.wanjawischmeier.pizza
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.util.Calendar
 
 // userId, user
 typealias Users = Map<String, User>
 // itemId, count
-typealias Order = HashMap<String, Long>
+typealias Order = HashMap<String, List<Long>>
 // fulfillerId, order
 typealias FulfilledOrder = HashMap<String, Order>
 
+const val ITEM_COUNT = 0
+const val ITEM_TIME = 1
+
 class User {
-    var name = ""
+    var email = ""
     var creationDate = ""
 
     // shopId, order
@@ -63,20 +67,9 @@ class Shop {
             val open = hashMapOf<String, Order>()
 
             for ((userId, user) in users) {
-                val order = user.orders[shopId] ?: continue
-                val fulfilled = user.fulfilled[shopId] ?: hashMapOf()
-
-                for ((itemId, count) in order) {
-                    var fulfilledCount = 0L
-
-                    for (items in fulfilled.values) {
-                        fulfilledCount += items[itemId] ?: 0L
-                    }
-
-                    if (count - fulfilledCount > 0) {
-                        val newOrder = hashMapOf(itemId to count - fulfilledCount)
-                        open[userId] = (open[userId]?.plus(newOrder) ?: newOrder) as HashMap<String, Long>
-                    }
+                for ((itemId, count) in user.orders[shopId] ?: continue) {
+                    val newOrder = hashMapOf(itemId to count)
+                    open[userId] = (open[userId]?.plus(newOrder) ?: newOrder) as HashMap<String, List<Long>>
                 }
             }
 
@@ -84,35 +77,42 @@ class Shop {
         }
 
         @Suppress("UNCHECKED_CAST")
-        fun getFulfilled(groupId: String, userId: String, shopId: String): Task<HashMap<String, Order>> {
-            return Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId").get().continueWith {
-                return@continueWith (it.result.value ?: hashMapOf<String, Order>()) as HashMap<String, Order>
+        fun getFulfilled(shopId: String, users: Users): HashMap<Pair<String, String>, Order> {
+            val fulfilled = hashMapOf<Pair<String, String>, Order>()
+
+            for ((userId, user) in users) {
+                for ((fulfillerId, order) in user.fulfilled[shopId] ?: continue) {
+                    fulfilled += (userId to fulfillerId) to order
+                }
             }
+
+            return fulfilled
         }
 
         fun processOrder(groupId: String, userId: String, shopId: String, order: Order): Task<Void> {
             return Firebase.database.getReference("users/$groupId/$userId/orders/$shopId").setValue(order)
         }
 
-        fun fulfillItem(users: Users, groupId: String, userId: String, shopId: String, fulfillerId: String, itemId: String, count: Long): Task<Void> {
-            val currentCount = users[userId]?.fulfilled?.get(shopId)?.get(fulfillerId)?.get(itemId) ?: 0L
-            return Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId/$itemId").setValue(currentCount + count)
+        fun fulfillItem(users: Users, groupId: String, userId: String, shopId: String, fulfillerId: String, itemId: String, count: Long): Task<Task<Void>> {
+            val currentOpen = users[userId]?.orders?.get(shopId)?.get(itemId)?.get(ITEM_COUNT) ?: 0L
+            val currentFulfilled = users[userId]?.fulfilled?.get(shopId)?.get(fulfillerId)?.get(itemId)?.get(ITEM_COUNT) ?: 0L
+            val time = Calendar.getInstance().time.time
+
+            return if (currentOpen - count <= 0) {
+                Firebase.database.getReference("users/$groupId/$userId/orders/$shopId/$itemId").removeValue()
+            } else {
+                Firebase.database.getReference("users/$groupId/$userId/orders/$shopId/$itemId").setValue(
+                    listOf(currentOpen - count, time)
+                )
+            }.continueWith {
+                Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId/$itemId").setValue(
+                    listOf(currentFulfilled + count, time)
+                )
+            }
         }
 
-        fun clearFulfilledOrder(users: Users, order: Order, groupId: String, userId: String, shopId: String, fulfillerId: String) {
-            Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId").removeValue().continueWith {
-                for ((itemId, count) in order) {
-                    val ref = Firebase.database.getReference("users/$groupId/$userId/orders/$shopId/$itemId")
-                    val new = (users[userId]?.orders?.get(shopId)?.get(itemId) ?: 0L) - count
-
-                    if (new > 0) {
-                        users[userId]?.orders?.get(shopId)?.set(itemId, new)
-                        ref.setValue(new)
-                    } else {
-                        ref.removeValue()
-                    }
-                }
-            }
+        fun clearFulfilledOrder(groupId: String, userId: String, shopId: String, fulfillerId: String): Task<Void> {
+            return Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId").removeValue()
         }
     }
 }

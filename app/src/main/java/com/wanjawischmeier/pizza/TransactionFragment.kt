@@ -7,15 +7,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isGone
 import com.google.android.gms.tasks.Task
+import java.text.SimpleDateFormat
 
 
 class TransactionFragment : CallableFragment() {
     private lateinit var main: MainActivity
-    private lateinit var transactions: HashMap<String, Order>
+    private lateinit var fulfilled: HashMap<Pair<String, String>, Order>
     private lateinit var transactionsList: LinearLayout
-    private var transactionChildren = hashMapOf<View, String>()
+    private var transactionChildren = hashMapOf<ConstraintLayout, Pair<String, String>>()
+    private var userView: ConstraintLayout? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,62 +29,104 @@ class TransactionFragment : CallableFragment() {
         return inflater.inflate(R.layout.fragment_transaction, container, false)
     }
 
-    @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         transactionsList = (view as ViewGroup).findViewById(R.id.transactions_list)
     }
 
-    @SuppressLint("InflateParams")
-    override fun onShow(): Task<Unit> {
+    override fun onShow(): Task<Unit>? {
         topBubbleVisible = false
         bottomLayoutVisible = false
 
-        return Shop.getFulfilled(GROUP_ID, main.userId, SHOP_ID).continueWith {
-            transactions = it.result
+        val userOrder = main.users[main.userId]?.orders?.get(SHOP_ID)
+        refreshOrder(Pair(main.userId, main.userId), userOrder, true)
 
-            for ((fulfillerId, items) in transactions) {
-                val name = main.users[fulfillerId]?.name ?: continue
-                var total = 0f
+        fulfilled = Shop.getFulfilled(SHOP_ID, main.users)
 
-                for ((itemId, count) in items) {
-                    total += (main.shop.items[itemId]?.price ?: 0f) * count
-                }
+        for ((view, ids) in transactionChildren) {
+            if (!fulfilled.containsKey(ids)) {
+                transactionChildren.remove(view)
+                transactionsList.removeView(view)
+            }
+        }
 
-                var transactionView: View? = null
+        for ((ids, order) in fulfilled) {
+            refreshOrder(ids, order)
+        }
 
-                if (transactionChildren.containsValue(fulfillerId)) {
-                    for ((view, id) in transactionChildren) {
-                        if (id == fulfillerId) {
-                            transactionView = view
-                        }
-                    }
-                } else {
-                    activity?.runOnUiThread {
-                        val inflated = layoutInflater.inflate(R.layout.card_transactions, null)
+        refreshNoItemsHint()
+        return null
+    }
 
-                        transactionChildren += inflated to fulfillerId
-                        transactionsList.addView(inflated)
-                        transactionView = inflated
-                    }
-                }
+    @SuppressLint("InflateParams")
+    private fun refreshOrder(ids: Pair<String, String>, order: Order?, openOrder: Boolean = false) {
+        val fulfillerId = ids.second
 
-                transactionView?.findViewById<TextView>(R.id.transaction_name)?.text = name
-                transactionView?.findViewById<TextView>(R.id.transaction_price)?.text = getString(R.string.price_format).format(total)
+        if (order?.isNotEmpty() == true) {
+            var total = 0f
+            var content = ""
+            var date = 0L
+
+            // get latest change
+            order.values.forEach { item -> if (item[ITEM_TIME] > date) date = item[ITEM_TIME] }
+            val dateFormatter = SimpleDateFormat("dd.MM.yy HH:mm", SimpleDateFormat.getAvailableLocales()[0])
+
+            for ((itemId, itemInfo) in order) {
+                val item = main.shop.items[itemId]
+                val name = item?.name ?: "Unknown Name"
+                val count = itemInfo[ITEM_COUNT]
+
+                total += (item?.price ?: 0f) * itemInfo[ITEM_COUNT]
+                content += "- ${count}x $name\n"
             }
 
-            for ((view, fulfillerId) in transactionChildren) {
-                if (!transactions.containsKey(fulfillerId)) {
-                    view.animate()
-                        .alpha(0f)
-                        .withEndAction {
-                            (view.parent as ViewGroup).removeView(view)
-                            transactionChildren.remove(view)
-                        }
-                        .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+            activity?.runOnUiThread {
+                val transactionView = getViewFromUserIds(ids, openOrder)
+                val outlineId = if (fulfillerId == main.userId) {
+                    if (openOrder) R.drawable.order_open_outline
+                    else null
+                } else R.drawable.order_to_pay_outline
+                transactionView.findViewById<View>(R.id.transaction_payed_button).isGone = fulfillerId != main.userId || openOrder
+                transactionView.findViewById<TextView>(R.id.transaction_name)?.text = getPseudoUsername(fulfillerId)
+                transactionView.findViewById<TextView>(R.id.transaction_date)?.text = dateFormatter.format(date)
+                transactionView.findViewById<TextView>(R.id.transaction_price_text)?.text = getString(R.string.price_format).format(total)
+                transactionView.findViewById<TextView>(R.id.transaction_content)?.text = content.trim()
+                transactionView.findViewById<View>(R.id.transaction_status_ring).setBackgroundResource(outlineId ?: return@runOnUiThread)
+            }
+        } else {
+            if (fulfillerId == main.userId && !transactionChildren.containsValue(ids)) {
+                transactionsList.removeView(userView)
+                userView = null
+            } else {
+                if (transactionChildren.containsValue(ids)) {
+                    // view already inflated, so no need to run on ui thread
+                    val transactionView = getViewFromUserIds(ids)
+                    transactionChildren -= transactionView
+                    transactionsList.removeView(transactionView)
                 }
             }
+        }
+    }
 
-            refreshNoItemsHint(transactionChildren.isEmpty())
+    @SuppressLint("InflateParams")
+    private fun getViewFromUserIds(ids: Pair<String, String>, addToUser: Boolean = false): ConstraintLayout {
+        if (addToUser && userView != null) {
+            return userView!!
+        }
+
+        val matching = transactionChildren.filterValues { _ids -> _ids == ids  }.keys.iterator()
+
+        return if (matching.hasNext() && !addToUser) {
+            matching.next()
+        } else {
+            val inflated = layoutInflater.inflate(R.layout.card_transactions, null) as ConstraintLayout
+            transactionsList.addView(inflated)
+
+            if (addToUser) {
+                userView = inflated
+            } else {
+                transactionChildren += inflated to ids
+            }
+            inflated
         }
     }
 
@@ -89,30 +134,30 @@ class TransactionFragment : CallableFragment() {
         // TODO: Not yet implemented
     }
 
-    private fun refreshNoItemsHint(visible: Boolean) {
+    private fun refreshNoItemsHint() {
         val noItems = view?.findViewById<TextView>(R.id.no_items_text)?.parent
         if (noItems != null) (view as ViewGroup).removeView(noItems as View)
 
-        if (visible) {
+        if (transactionChildren.isEmpty() && userView == null) {
             val inflated = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
             inflated.findViewById<TextView>(R.id.no_items_text).text = getString(R.string.info_no_transactions)
         }
     }
 
+    private fun getPseudoUsername(userId: String): String {
+        val email = main.users[userId]?.email ?: return "Unknown Username"
+        return email.split('@')[0]
+    }
+
     fun accept(view: View) {
-        val parent = view.parent.parent as ViewGroup
-        val fulfillerId = transactionChildren[parent] ?: return
-        Shop.clearFulfilledOrder(main.users, transactions[fulfillerId] ?: return, GROUP_ID, main.userId, SHOP_ID, fulfillerId)
+        val parent = view.parent.parent as ConstraintLayout
+        val ids = transactionChildren[parent] ?: return
+        val (userId, fulfillerId) = ids
+        Shop.clearFulfilledOrder(GROUP_ID, userId, SHOP_ID, fulfillerId)
 
         transactionsList.removeView(parent)
         transactionChildren.remove(parent)
-        transactions.remove(fulfillerId)
 
-        refreshNoItemsHint(transactionChildren.isEmpty())
-        onShow()
-    }
-
-    fun reject(@Suppress("UNUSED_PARAMETER") view: View) {
-        Toast.makeText(main, "reject", Toast.LENGTH_SHORT).show()
+        refreshNoItemsHint()
     }
 }

@@ -177,10 +177,6 @@ class MainActivity : AppCompatActivity() {
         transactionFragment.accept(view)
     }
 
-    fun onTransactionReject(view: View) {
-        transactionFragment.reject(view)
-    }
-
     @Suppress("UNUSED_PARAMETER")
     fun onOrder(view: View) {
         orderFragment.placeOrder()

@@ -83,10 +83,10 @@ class ShopFragment : CallableFragment() {
         itemCount = 0
 
         for ((user, order) in openOrders) {
-            for ((id, count) in order) {
+            for ((id, item) in order) {
                 if (id == itemId) {
-                    currentOrder[user] = count
-                    itemCount += count.toInt()
+                    currentOrder[user] = item
+                    itemCount += item[ITEM_COUNT].toInt()
                 }
             }
         }
@@ -225,8 +225,10 @@ class ShopFragment : CallableFragment() {
             val fulfill = diff > 0
             var itemsLeft = itemCount.toLong()
 
-            for ((orderUserId, count) in currentOrder) {
-                if (itemsLeft < 0) break
+            for ((orderUserId, item) in currentOrder) {
+                if (itemsLeft <= 0) break
+
+                val count = item[ITEM_COUNT]
                 val change = min(count, itemsLeft)
                 itemsLeft -= count
 

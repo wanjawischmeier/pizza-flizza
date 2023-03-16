@@ -132,7 +132,7 @@ class LoginActivity : AppCompatActivity() {
         val date = dateFormat.format(calendar.time)
         val userStruct = User()
         userStruct.creationDate = date
-        userStruct.name = user.email ?: return
+        userStruct.email = user.email ?: return
 
         database.getReference("users/$GROUP_ID/${user.uid}").setValue(userStruct).addOnCompleteListener { task ->
             if (task.isSuccessful) {

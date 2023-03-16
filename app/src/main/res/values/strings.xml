@@ -58,6 +58,10 @@
     <string name="transaction_accept" translatable="false">Accept</string>
     <string name="transaction_reject" translatable="false">Reject</string>
     <string name="info_no_transactions" translatable="false">No transactions</string>
+    <string name="transaction_payed" translatable="false">Payed</string>
+    <string name="sample_name" translatable="false">falkonxx.dinkelacker</string>
+    <string name="sample_date" translatable="false">01.01.1970</string>
+    <string name="sample_order" translatable="false">- 1x Backstein</string>
 
     <!-- Menu -->
     <string name="menu_order">Order</string>
