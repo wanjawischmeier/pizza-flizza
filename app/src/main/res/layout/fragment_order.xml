@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:horizontalSpacing="8dp"
     android:numColumns="2"
-    android:padding="10dp"
     android:tag="swipeChild"
     android:verticalSpacing="8dp"
     tools:context=".OrderFragment" />

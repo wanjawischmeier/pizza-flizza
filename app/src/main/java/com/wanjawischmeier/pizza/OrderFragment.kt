@@ -38,7 +38,6 @@ class OrderFragment : CallableFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        bottomLayoutVisible = false
         itemsGrid = view.findViewById(R.id.items_grid)
 
         main.swipeRefreshLayout.setOnChildScrollUpCallback { _, _ ->
@@ -48,6 +47,7 @@ class OrderFragment : CallableFragment() {
 
     @SuppressLint("DiscouragedApi")
     override fun onShow(): Task<Unit> {
+        bottomLayoutVisible = false
         topBubbleVisible = true
         total = 0f
 
