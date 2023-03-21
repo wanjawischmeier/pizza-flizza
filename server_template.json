@@ -1,26 +1,146 @@
 {
     "users": {},
-
+    "old": [
+        "chocolate_roll",
+        "curd_balls",
+        "oven_baguette",
+        "party_bread"
+    ],
+    "left": [
+        "berliner_vanilla",
+        "borek_snail",
+        "cheese_onion_rolls",
+        "crunchy_roll",
+        "franzbrötchen",
+        "lye_roll",
+        "mini_donut_pink",
+        "mini_flat_loaf",
+        "olive_stick",
+        "pizza"
+    ],
     "shops": {
         "penny_burgtor": {
             "name": "Penny am Burgtor",
             "address": "Große Burgstraße 55, 23552 Lübeck",
             "picture": "https://www.gelbeseiten.de/media/teilnehmer-logo/8000129828554310",
             "items": {
-                "lye_rod": {
-                    "name": "Laugenstange",
-                    "price": 99.5
+                "apple_triangle": {
+                    "name": "Apfeldreieck",
+                    "price": 0.79
+                },
+                "baguette": {
+                    "name": "La baguette",
+                    "price": 0.79
+                },
+                "berliner": {
+                    "name": "Berliner",
+                    "price": 0.49
+                },
+                "berliner_vanilla": {
+                    "name": "Berliner Vanille",
+                    "price": 0.99
+                },
+                "borek_snail": {
+                    "name": "Börekschnecke",
+                    "price": 0.99
+                },
+                "cheese_lye_rod": {
+                    "name": "Käselaugenstange",
+                    "price": 0.59
+                },
+                "cheese_onion_rolls": {
+                    "name": "Käse-Zwiebel-Brötchen",
+                    "price": 0.49
+                },
+                "chicken_snail": {
+                    "name": "Geflügelrolle",
+                    "price": 1.19
+                },
+                "chocolate_roll": {
+                    "name": "Schokobrötchen",
+                    "price": 0.65
+                },
+                "ciabatta": {
+                    "name": "Ciabatta",
+                    "price": 0.89
+                },
+                "croissant": {
+                    "name": "Croissant",
+                    "price": 0.55
+                },
+                "crunchy_roll": {
+                    "name": "Knusperstange mit Hähnchenfüllung",
+                    "price": 0.79
+                },
+                "curd_balls": {
+                    "name": "Quarkbällchen",
+                    "price": 0.29
+                },
+                "donut_whole_milk": {
+                    "name": "Donut Vollmilchschokolade",
+                    "price": 0.59
+                },
+                "franzbrötchen": {
+                    "name": "Franzbrötchen",
+                    "price": 0.79
+                },
+                "ham_cheese_croissant": {
+                    "name": "Schinken-Käse-Croissant",
+                    "price": 0.85
+                },
+                "humus_natural": {
+                    "name": "Humus Natürlich",
+                    "price": 0.99
+                },
+                "humus_pikant": {
+                    "name": "Humus Pikant",
+                    "price": 0.99
+                },
+                "lye_roll": {
+                    "name": "Butterlaugeneck",
+                    "price": 0.79
+                },
+                "mini_donut_pink": {
+                    "name": "Mini Donut Pink",
+                    "price": 0.25
+                },
+                "mini_flat_loaf": {
+                    "name": "Mini Fladenbrot",
+                    "price": 0.59
+                },
+                "nougat_croissant": {
+                    "name": "Croissant Nuss-Nougat",
+                    "price": 0.75
+                },
+                "olive_stick": {
+                    "name": "Oliven Stick",
+                    "price": 0.69
+                },
+                "onion_baguette": {
+                    "name": "Zwiebelbaguette",
+                    "price": 0.99
+                },
+                "oven_baguette": {
+                    "name": "Steinofen Baguette",
+                    "price": 0.89
                 },
                 "party_bread": {
                     "name": "Partybrot",
-                    "price": 12.29
+                    "price": 1.29
                 },
                 "pizza": {
-                    "name": "Pizza Margeritha",
-                    "price": 0.02
+                    "name": "Pizza Margherita",
+                    "price": 1.19
+                },
+                "sunday_roll": {
+                    "name": "Sonntagsbrötchen",
+                    "price": 0.17
+                },
+                "vanilla_rod": {
+                    "name": "Vanillestange vegan",
+                    "price": 0.89
                 }
-            },
-            "orders": {}
+            }
         }
     }
 }

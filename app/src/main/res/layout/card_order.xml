@@ -2,110 +2,139 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/order_parent_constraint"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/order_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:paddingVertical="18dp"
-        android:singleLine="true"
-        android:text="@string/sample_order_name"
-        android:textAppearance="@style/Medium"
-        app:layout_constraintEnd_toStartOf="@+id/order_price"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/order_price"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="20dp"
-        android:singleLine="true"
-        android:text="@string/sample_order_price"
-        android:textAppearance="@style/Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/order_name"
-        app:layout_constraintEnd_toStartOf="@+id/order_constraint"
-        app:layout_constraintStart_toEndOf="@+id/order_name"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/order_constraint"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginVertical="4dp"
-        android:background="@drawable/layout_bg"
-        android:backgroundTint="@color/gray_mid"
+        android:background="@drawable/blue_outline"
         android:padding="4dp"
-        app:layout_constraintBottom_toBottomOf="@+id/order_name"
+        app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/order_price"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="VisualLintBounds">
 
         <TextView
-            android:id="@+id/transaction_reject"
+            android:id="@+id/order_name"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@drawable/layout_bg"
-            android:backgroundTint="@color/gray_light"
-            android:gravity="center"
-            android:onClick="onOrderSub"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
             android:singleLine="true"
-            android:text="@string/order_sub"
-            android:textAppearance="@style/Medium"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="1.2"
-            app:layout_constraintEnd_toStartOf="@+id/guideline_accept"
+            android:text="@string/sample_item_name"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="TouchTargetSizeCheck" />
-
-        <TextView
-            android:id="@+id/order_count"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:gravity="center"
-            android:singleLine="true"
-            android:text="@string/order_def"
-            android:textAppearance="@style/Medium"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/guideline_add"
-            app:layout_constraintStart_toStartOf="@+id/guideline_accept"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/transaction_accept"
+        <ImageView
+            android:id="@+id/order_image"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@drawable/layout_bg"
-            android:backgroundTint="@color/gray_light"
+            android:contentDescription="@string/order_image_description"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toTopOf="@+id/order_mod_constraint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/order_name"
+            app:srcCompat="@drawable/baeckerkroenung" />
+
+        <TextView
+            android:id="@+id/order_price"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_margin="4dp"
+            android:background="@android:drawable/presence_invisible"
+            android:backgroundTint="@color/cream"
             android:gravity="center"
-            android:onClick="onOrderAdd"
-            android:singleLine="true"
-            android:text="@string/order_add"
+            android:padding="8dp"
+            android:rotation="8"
+            android:text="@string/sample_order_price"
             android:textAppearance="@style/Medium"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:layout_constraintDimensionRatio="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/order_name"
+            tools:ignore="TextContrastCheck" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/order_mod_constraint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_marginVertical="4dp"
+            android:background="@drawable/layout_bg"
+            android:backgroundTint="@color/gray_mid"
+            android:padding="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/guideline_add"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="TouchTargetSizeCheck" />
+            app:layout_constraintStart_toStartOf="parent">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_accept"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.35" />
+            <TextView
+                android:id="@+id/order_sub"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/layout_bg"
+                android:backgroundTint="@color/gray_light"
+                android:gravity="center"
+                android:onClick="onOrderSub"
+                android:singleLine="true"
+                android:text="@string/order_sub"
+                android:textAppearance="@style/Medium"
+                app:layout_constraintBottom_toBottomOf="@+id/order_count"
+                app:layout_constraintEnd_toStartOf="@+id/order_count"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/order_count"
+                tools:ignore="TouchTargetSizeCheck" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.65" />
+            <TextView
+                android:id="@+id/order_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/order_def"
+                android:textAlignment="center"
+                android:textAppearance="@style/Medium"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/order_guideline_center"
+                app:layout_constraintStart_toStartOf="@+id/order_guideline_center"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/order_add"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/layout_bg"
+                android:backgroundTint="@color/gray_light"
+                android:gravity="center"
+                android:onClick="onOrderAdd"
+                android:text="@string/order_add"
+                android:textAppearance="@style/Medium"
+                app:layout_constraintBottom_toBottomOf="@+id/order_count"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/order_count"
+                app:layout_constraintTop_toTopOf="@+id/order_count"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/order_guideline_center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.5" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

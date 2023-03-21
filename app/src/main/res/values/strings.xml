@@ -43,6 +43,7 @@
     <string name="order_add" translatable="false">+</string>
     <string name="order_def" translatable="false">0</string>
     <string name="order_button">Order</string>
+    <string name="order_image_description" translatable="false">Product Image</string>
     <string name="sample_order_name" translatable="false">Pizza Margeritha</string>
     <string name="sample_order_price" translatable="false">1,69€</string>
     <string name="sample_total_price" translatable="false">99,99€</string>
