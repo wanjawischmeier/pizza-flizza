@@ -21,7 +21,7 @@ const val CARD_SCALE_EXPANDED = 1.04f
 class ShopFragment : CallableFragment() {
     private lateinit var main: MainActivity
     private lateinit var card: CardView
-    private lateinit var openOrders: HashMap<String, Order>
+    private lateinit var openOrders: HashMap<String, HashMap<String, MutableList<Long>>>
     private lateinit var currentOrder: Order
     private var cardMode = 0
     private var maxItems = 5
@@ -60,12 +60,6 @@ class ShopFragment : CallableFragment() {
         return null
     }
 
-    override fun onHide() {
-        if (this::card.isInitialized) {
-            card.isVisible = false
-        }
-    }
-
     private fun loadOrder() {
         val noItems = view?.findViewById<TextView>(R.id.no_items_text)?.parent
         if (noItems != null) (view as ViewGroup).removeView(noItems as View)
@@ -77,15 +71,14 @@ class ShopFragment : CallableFragment() {
         }
 
         currentOrder = hashMapOf()
-        val userEntry = openOrders.iterator().next()
-        itemId = userEntry.value.iterator().next().key
-        val name = main.shop.items[itemId]?.name ?: return
+        itemId = openOrders.iterator().next().key
+        val name = main.shop.items[itemId]?.name ?: getString(R.string.name_item_unknown)
         itemCount = 0
 
-        for ((user, order) in openOrders) {
-            for ((id, item) in order) {
+        for ((id, order) in openOrders) {
+            for ((userId, item) in order) {
                 if (id == itemId) {
-                    currentOrder[user] = item
+                    currentOrder[userId] = item
                     itemCount += item[ITEM_COUNT].toInt()
                 }
             }
@@ -225,17 +218,44 @@ class ShopFragment : CallableFragment() {
             val fulfill = diff > 0
             var itemsLeft = itemCount.toLong()
 
+            val userItem = currentOrder[main.userId]
+            if (userItem != null) {
+                val count = userItem[ITEM_COUNT]
+                val change = min(count, itemsLeft)
+                itemsLeft -= change
+
+                openOrders[itemId]?.remove(main.userId)
+
+                if (change == count) {
+                    openOrders[itemId]?.remove(main.userId)
+                } else {
+                    openOrders[itemId]?.get(main.userId)?.set(ITEM_COUNT, count - change)
+                }
+
+                if (openOrders[itemId]?.size == 0) {
+                    openOrders.remove(itemId)
+                }
+
+                if (fulfill) {
+                    Shop.fulfillItem(main.users, GROUP_ID, main.userId, SHOP_ID, main.userId, itemId, change)
+                }
+            }
+
             for ((orderUserId, item) in currentOrder) {
                 if (itemsLeft <= 0) break
 
                 val count = item[ITEM_COUNT]
                 val change = min(count, itemsLeft)
-                itemsLeft -= count
+                itemsLeft -= change
 
-                openOrders[orderUserId]?.remove(itemId)
+                if (change == count) {
+                    openOrders[itemId]?.remove(orderUserId)
+                } else {
+                    openOrders[itemId]?.get(orderUserId)?.set(ITEM_COUNT, count - change)
+                }
 
-                if (openOrders[orderUserId]?.size == 0) {
-                    openOrders.remove(orderUserId)
+                if (openOrders[itemId]?.size == 0) {
+                    openOrders.remove(itemId)
                 }
 
                 if (fulfill) {

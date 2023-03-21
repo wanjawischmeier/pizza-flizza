@@ -12,7 +12,7 @@ abstract class CallableFragment : Fragment() {
     }
 
     var topBubbleVisible: Boolean
-        get() = topBubble.alpha == 1f
+        get() = topBubble.alpha != 0f
         set(value) {
             if (value == topBubbleVisible) return
 
@@ -22,7 +22,7 @@ abstract class CallableFragment : Fragment() {
         }
 
     var bottomLayoutVisible: Boolean
-        get() = bottomLayout.translationY == 0f
+        get() = bottomLayout.translationY < bottomLayout.height
         set(value) {
             if (value == bottomLayoutVisible) return
 
@@ -47,6 +47,4 @@ abstract class CallableFragment : Fragment() {
         }
 
     abstract fun onShow(): Task<Unit>?
-
-    abstract fun onHide()
 }

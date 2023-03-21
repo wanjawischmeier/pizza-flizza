@@ -4,6 +4,8 @@
     <string name="app_icon" translatable="false">App Icon</string>
     <string name="web_client_id" translatable="false">207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com</string>
     <string name="price_format" translatable="false">"%.2f€"</string>
+    <string name="name_user_unknown" translatable="false">Unknown Username</string>
+    <string name="name_item_unknown" translatable="false">Unknown Name</string>
 
     <!-- Login -->
     <string name="title_activity_login">LoginActivity</string>
@@ -55,11 +57,12 @@
     <string name="info_no_items" translatable="false">No open orders</string>
 
     <!-- Transactions -->
-    <string name="coming_soon" translatable="false">Coming soon :)</string>
     <string name="transaction_accept" translatable="false">Accept</string>
     <string name="transaction_reject" translatable="false">Reject</string>
     <string name="info_no_transactions" translatable="false">No transactions</string>
-    <string name="transaction_payed" translatable="false">Payed</string>
+    <string name="transaction_clear" translatable="false">Clear</string>
+    <string name="transaction_paid" translatable="false">Paid</string>
+    <string name="your_order" translatable="false">Your Order</string>
     <string name="sample_name" translatable="false">falkonxx.dinkelacker</string>
     <string name="sample_date" translatable="false">01.01.1970</string>
     <string name="sample_order" translatable="false">- 1x Backstein</string>

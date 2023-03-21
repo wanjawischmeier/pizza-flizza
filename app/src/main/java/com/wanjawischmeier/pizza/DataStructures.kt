@@ -8,7 +8,7 @@ import java.util.Calendar
 // userId, user
 typealias Users = Map<String, User>
 // itemId, count
-typealias Order = HashMap<String, List<Long>>
+typealias Order = HashMap<String, MutableList<Long>>
 // fulfillerId, order
 typealias FulfilledOrder = HashMap<String, Order>
 
@@ -68,8 +68,8 @@ class Shop {
 
             for ((userId, user) in users) {
                 for ((itemId, count) in user.orders[shopId] ?: continue) {
-                    val newOrder = hashMapOf(itemId to count)
-                    open[userId] = (open[userId]?.plus(newOrder) ?: newOrder) as HashMap<String, List<Long>>
+                    val newOrder = hashMapOf(userId to count)
+                    open[itemId] = (open[itemId]?.plus(newOrder) ?: newOrder) as Order
                 }
             }
 
@@ -104,11 +104,17 @@ class Shop {
                 Firebase.database.getReference("users/$groupId/$userId/orders/$shopId/$itemId").setValue(
                     listOf(currentOpen - count, time)
                 )
-            }.continueWith {
+            }.continueWith { task ->
+                if (userId == fulfillerId) return@continueWith task
+
                 Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId/$itemId").setValue(
                     listOf(currentFulfilled + count, time)
                 )
             }
+        }
+
+        fun clearOrder(groupId: String, userId: String, shopId: String): Task<Void> {
+            return Firebase.database.getReference("users/$groupId/$userId/orders/$shopId").removeValue()
         }
 
         fun clearFulfilledOrder(groupId: String, userId: String, shopId: String, fulfillerId: String): Task<Void> {

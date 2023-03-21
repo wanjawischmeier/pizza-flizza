@@ -111,7 +111,6 @@ class MainActivity : AppCompatActivity() {
             }
              */
 
-            previousFragment.onHide()
             navigationHeader.text = menuItem.title
             navigationHost.animate()
                 .alpha(0f)
@@ -125,6 +124,7 @@ class MainActivity : AppCompatActivity() {
                                 users = usersTask.result ?: return@continueWith
 
                                 val after = {
+                                    swipeRefreshLayout.isEnabled = true
                                     swipeRefreshLayout.isRefreshing = false
 
                                     navigationHost.animate()

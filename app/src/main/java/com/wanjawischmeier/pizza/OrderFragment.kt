@@ -19,12 +19,13 @@ const val GROUP_ID = "prenski_12"
 const val SHOP_ID = "penny_burgtor"
 
 class OrderFragment : CallableFragment() {
-    private lateinit var itemGridViewAdapter: ItemGridViewAdapter
+    private lateinit var gridViewAdapter: OrderGridViewAdapter
     private lateinit var itemsGrid: GridView
     private lateinit var priceView: TextView
     private lateinit var main: MainActivity
     private lateinit var order: Order
     private var total = 0f
+    private var oldTotal = 0f
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,52 +49,54 @@ class OrderFragment : CallableFragment() {
     @SuppressLint("DiscouragedApi")
     override fun onShow(): Task<Unit> {
         topBubbleVisible = true
-
-        val itemArrayList: ArrayList<ItemModel> = ArrayList<ItemModel>()
-        val items = main.shop.items
-
         total = 0f
+
+        val items = main.shop.items
 
         return User.getUser(GROUP_ID, main.userId).continueWith {
             order = it.result.orders[SHOP_ID] ?: hashMapOf()
 
             // TODO: manage context being null
-            itemGridViewAdapter = ItemGridViewAdapter(context!!, itemArrayList)
-            itemsGrid.adapter = itemGridViewAdapter
+            gridViewAdapter = OrderGridViewAdapter(context!!, ArrayList<OrderModel>())
+            itemsGrid.adapter = gridViewAdapter
 
-            for ((itemId, item) in items) {
-                if (itemGridViewAdapter.contains(itemId)) continue
+            for ((itemId, item) in items.toSortedMap()) {
+                if (gridViewAdapter.contains(itemId)) continue
                 val count = order[itemId]?.get(ITEM_COUNT) ?: 0L
                 total = round((total + item.price * count) * 100) / 100
 
                 val imageId = resources.getIdentifier(itemId, "drawable", context!!.packageName)
-                itemArrayList.add(ItemModel(
-                    itemId, item.name, item.price, count,
-                    if (imageId == 0) R.drawable.baeckerkroenung else imageId
+                gridViewAdapter.add(OrderModel(
+                    itemId,
+                    item.name,
+                    item.price,
+                    count,
+                    if (imageId == 0) {
+                        R.drawable.baeckerkroenung
+                    } else {
+                        imageId
+                    }
                 ))
             }
 
             priceView.text = getString(R.string.price_format).format(total)
+            oldTotal = total
         }
-    }
-
-    override fun onHide() {
-        // TODO: Not yet implemented
     }
 
     fun modifyCount(view: View, change: Long) {
         val parent = view.parent.parent.parent as ConstraintLayout
-        val itemModel = itemGridViewAdapter.getItemByView(parent) ?: return
+        val itemModel = gridViewAdapter.getItemByView(parent) ?: return
         val itemId = itemModel.id
         val item = main.shop.items[itemId] ?: return
 
         itemModel.count = max(0, min(99, itemModel.count + change))
         total = max(0f, min(99f, round((total + item.price * change) * 100) / 100))
         priceView.text = getString(R.string.price_format).format(total)
-        bottomLayoutVisible = total > 0
+        bottomLayoutVisible = total != oldTotal
 
-        order[itemId] = listOf(itemModel.count, Calendar.getInstance().time.time)
-        itemGridViewAdapter.notifyDataSetChanged()
+        order[itemId] = mutableListOf(itemModel.count, Calendar.getInstance().time.time)
+        gridViewAdapter.notifyDataSetChanged()
     }
 
     fun placeOrder() {
