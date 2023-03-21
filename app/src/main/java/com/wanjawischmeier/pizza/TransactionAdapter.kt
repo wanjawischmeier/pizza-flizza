@@ -1,6 +1,7 @@
 package com.wanjawischmeier.pizza
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -89,7 +90,7 @@ class TransactionListViewAdapter(context: Context, private val main: MainActivit
             button.isGone = true
         } else {
             button.text = context.getString(textId)
-            button.setBackgroundColor(context.resources.getColor(backgroundColorId, context.theme))
+            button.backgroundTintList = ColorStateList.valueOf(context.resources.getColor(backgroundColorId, context.theme))
             button.setTextColor(context.resources.getColor(textColorId, context.theme))
         }
 

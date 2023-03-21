@@ -8,5 +8,7 @@
     <dimen name="nav_header_height">176dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <dimen name="card_outline">4dp</dimen>
+
     <dimen name="card_scale_expanded">1.04f</dimen>
 </resources>

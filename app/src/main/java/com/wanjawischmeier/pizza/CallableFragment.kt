@@ -20,7 +20,7 @@ abstract class CallableFragment : Fragment() {
                 .alpha(if (value) 1f else 0f)
                 .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
         }
-
+    
     var bottomLayoutVisible: Boolean
         get() = bottomLayout.translationY < bottomLayout.height
         set(value) {
