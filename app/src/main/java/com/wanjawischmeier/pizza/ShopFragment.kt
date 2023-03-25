@@ -33,7 +33,6 @@ class ShopFragment : CallableFragment() {
     private var cardX = 0f
     private var cardY = 0f
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -218,48 +217,33 @@ class ShopFragment : CallableFragment() {
             val fulfill = diff > 0
             var itemsLeft = itemCount.toLong()
 
-            val userItem = currentOrder[main.userId]
-            if (userItem != null) {
-                val count = userItem[ITEM_COUNT]
-                val change = min(count, itemsLeft)
-                itemsLeft -= change
-
-                openOrders[itemId]?.remove(main.userId)
-
-                if (change == count) {
-                    openOrders[itemId]?.remove(main.userId)
-                } else {
-                    openOrders[itemId]?.get(main.userId)?.set(ITEM_COUNT, count - change)
-                }
-
-                if (openOrders[itemId]?.size == 0) {
-                    openOrders.remove(itemId)
-                }
-
-                if (fulfill) {
-                    Shop.fulfillItem(main.users, GROUP_ID, main.userId, SHOP_ID, main.userId, itemId, change)
+            val sortedOrder = currentOrder.toSortedMap { a, b ->
+                when (main.userId) {
+                    // prioritize own order
+                    a -> -1
+                    b -> 1
+                    // proper priorization here
+                    else -> {
+                        0
+                    }
                 }
             }
 
-            for ((orderUserId, item) in currentOrder) {
+            for ((orderUserId, item) in sortedOrder) {
                 if (itemsLeft <= 0) break
 
                 val count = item[ITEM_COUNT]
                 val change = min(count, itemsLeft)
                 itemsLeft -= change
 
-                if (change == count) {
-                    openOrders[itemId]?.remove(orderUserId)
-                } else {
-                    openOrders[itemId]?.get(orderUserId)?.set(ITEM_COUNT, count - change)
+                if (fulfill) {
+                    Shop.fulfillItem(main.users, GROUP_ID, orderUserId, SHOP_ID, main.userId, itemId, change)
                 }
+
+                openOrders[itemId]?.remove(orderUserId)
 
                 if (openOrders[itemId]?.size == 0) {
                     openOrders.remove(itemId)
-                }
-
-                if (fulfill) {
-                    Shop.fulfillItem(main.users, GROUP_ID, orderUserId, SHOP_ID, main.userId, itemId, change)
                 }
             }
 

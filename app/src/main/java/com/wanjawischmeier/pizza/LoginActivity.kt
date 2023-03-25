@@ -77,28 +77,36 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun checkEmail() {
-        infoField.isInvisible = true
         val email = emailField.text.toString()
         val password = passwordField.text.toString()
 
         if (email != "" && password != "" && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            loginButton.isEnabled = true
 
             auth.fetchSignInMethodsForEmail(email)
-                .addOnCompleteListener { task ->
-                    val methods = task.result.signInMethods
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        val methods = it.result.signInMethods
 
-                    if (methods == null || methods.size == 0) {
-                        // no account found
-                        loginButton.text = getString(R.string.create_account)
+                        if (methods == null || methods.size == 0) {
+                            // no account found
+                            loginButton.text = getString(R.string.create_account)
+                        } else {
+                            // account exists
+                            loginButton.text = getString(R.string.login_button)
+                        }
+
+                        loginButton.isEnabled = true
+                        infoField.isInvisible = true
                     } else {
-                        // account exists
-                        loginButton.text = getString(R.string.login_button)
+                        infoField.text = getString(R.string.info_no_connection)
+                        loginButton.isEnabled = false
+                        infoField.isInvisible = false
                     }
                 }
         } else {
             loginButton.text = getString(R.string.login_button)
             loginButton.isEnabled = false
+            infoField.isInvisible = true
         }
     }
 

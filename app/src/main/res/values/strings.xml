@@ -1,11 +1,18 @@
 <resources>
     <!-- General -->
-    <string name="app_name">Pizza</string>
+    <string name="app_name" translatable="false">PizzaFlizza</string>
     <string name="app_icon" translatable="false">App Icon</string>
     <string name="web_client_id" translatable="false">207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com</string>
     <string name="price_format" translatable="false">"%.2f€"</string>
     <string name="name_user_unknown" translatable="false">Unknown Username</string>
     <string name="name_item_unknown" translatable="false">Unknown Name</string>
+    
+    <!-- VersionHints -->
+    <string name="hint_title_info" translatable="false">Info</string>
+    <string name="hint_title_warning" translatable="false">Warning</string>
+    <string name="hint_title_error" translatable="false">Error</string>
+    <string name="hint_obsolete" translatable="false">This version of the app has been marked as obsolete and may contain bugs, installing a newer version is recommended</string>
+    <string name="hint_disabled" translatable="false">This version of the app has been disabled. It either contains major bugs or is no longer compatible with the server data structure. Please install a newer version.</string>
 
     <!-- Login -->
     <string name="title_activity_login">LoginActivity</string>
@@ -27,6 +34,7 @@
     <string name="info_verify_email" translatable="false">Please verify your E-Mail to create the account</string>
     <string name="info_wrong_password">Wrong password</string>
     <string name="info_invalid_password" translatable="false">Password has to be at least 6 characters</string>
+    <string name="info_no_connection" translatable="false">Please check your internet connection</string>
 
     <!-- Disclaimer -->
     <string name="disclaimer_header" translatable="false">Hey,</string>

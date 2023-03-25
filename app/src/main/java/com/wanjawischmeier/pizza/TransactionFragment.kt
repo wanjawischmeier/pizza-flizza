@@ -30,8 +30,9 @@ class TransactionFragment : CallableFragment() {
     }
 
     override fun onShow(): Task<Unit>? {
-        topBubbleVisible = false
+        main.scrollContainer = transactionsList
         bottomLayoutVisible = false
+        topBubbleVisible = false
 
         gridViewAdapter = TransactionListViewAdapter(context ?: return null, main, ArrayList())
         transactionsList.adapter = gridViewAdapter
@@ -53,7 +54,7 @@ class TransactionFragment : CallableFragment() {
     }
 
     private fun refreshOrder(ids: Pair<String, String>, order: Order, openOrder: Boolean = false) {
-        if (order.isNotEmpty()) {
+        if (order.isNotEmpty() && (ids.first == main.userId || ids.second == main.userId)) {
             var userId = ids.first
             val transactionType = if (openOrder) {
                 TransactionType.OPEN
