@@ -1,19 +1,24 @@
 package com.wanjawischmeier.pizza
 
-import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
-import android.util.AttributeSet
+import android.os.Message
 import android.view.View
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentContainerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.wanjawischmeier.pizza.Database.VersionHintType
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,11 +32,13 @@ class MainActivity : AppCompatActivity() {
     lateinit var shop: Shop
     lateinit var users: Users
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    lateinit var scrollContainer: View
     var userId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // check wether user is signed in
         val user = Firebase.auth.currentUser
         if (user == null) {
             val intent = Intent(this, LoginActivity::class.java)
@@ -42,12 +49,66 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_main)
-
         CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
         CallableFragment.bottomLayout = findViewById(R.id.bottom_layout)
-
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout)
         swipeRefreshLayout.setOnRefreshListener(this::refreshView)
+        swipeRefreshLayout.setOnChildScrollUpCallback { _, _ ->
+            scrollContainer.canScrollVertically(-1)
+        }
+
+        // check for relevant version hints
+        Database.getVersionHint(BuildConfig.VERSION_CODE).continueWith {
+            val hint = it.result ?: return@continueWith startActivity()
+            var type = VersionHintType.values()[hint.type]
+            val dialog = AlertDialog.Builder(this, R.style.AlertStyle).create()
+
+            val message = when (type) {
+                VersionHintType.OBSOLETE -> {
+                    type = VersionHintType.WARNING
+                    getString(R.string.hint_obsolete)
+                }
+                VersionHintType.DISABLED -> {
+                    type = VersionHintType.ERROR
+                    getString(R.string.hint_disabled)
+                }
+                else -> {
+                    hint.message
+                }
+            }
+
+            dialog.setMessage(message)
+
+            val title = when (type) {
+                VersionHintType.INFO -> {
+                    dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Continue") { _: DialogInterface, _: Int -> startActivity() }
+                    dialog.setOnDismissListener { startActivity() }
+                    R.string.hint_title_info
+                }
+                VersionHintType.WARNING -> {
+                    dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Continue") { _: DialogInterface, _: Int -> startActivity() }
+                    dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Exit") { _: DialogInterface, _: Int -> finishAffinity() }
+                    dialog.setOnDismissListener { startActivity() }
+                    R.string.hint_title_warning
+                }
+                // error
+                else -> {
+                    dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Exit") { _: DialogInterface, _: Int -> finishAffinity() }
+                    dialog.setOnDismissListener { finishAffinity() }
+                    R.string.hint_title_error
+                }
+            }
+
+            dialog.setTitle(title)
+            dialog.show()
+
+            val white = getColor(R.color.white)
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(white)
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(white)
+        }
+    }
+
+    private fun startActivity() {
         swipeRefreshLayout.isRefreshing = true
 
         Shop.getShop(SHOP_ID).continueWith { shopTask ->

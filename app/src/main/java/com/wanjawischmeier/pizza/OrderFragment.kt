@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.GridView
+import android.widget.ListAdapter
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.tasks.Task
@@ -39,14 +41,11 @@ class OrderFragment : CallableFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         itemsGrid = view.findViewById(R.id.items_grid)
-
-        main.swipeRefreshLayout.setOnChildScrollUpCallback { _, _ ->
-            itemsGrid.canScrollVertically(-1)
-        }
     }
 
     @SuppressLint("DiscouragedApi")
     override fun onShow(): Task<Unit> {
+        main.scrollContainer = itemsGrid
         bottomLayoutVisible = false
         topBubbleVisible = true
         total = 0f
@@ -89,11 +88,14 @@ class OrderFragment : CallableFragment() {
         val itemModel = gridViewAdapter.getItemByView(parent) ?: return
         val itemId = itemModel.id
         val item = main.shop.items[itemId] ?: return
+        val newCount = itemModel.count + change
 
-        itemModel.count = max(0, min(99, itemModel.count + change))
-        total = max(0f, min(99f, round((total + item.price * change) * 100) / 100))
-        priceView.text = getString(R.string.price_format).format(total)
-        bottomLayoutVisible = total != oldTotal
+        if (newCount >= 0) {
+            itemModel.count = min(99, newCount)
+            total = min(99f, round((total + item.price * change) * 100) / 100)
+            priceView.text = getString(R.string.price_format).format(total)
+            bottomLayoutVisible = total != oldTotal
+        }
 
         order[itemId] = mutableListOf(itemModel.count, Calendar.getInstance().time.time)
         gridViewAdapter.notifyDataSetChanged()
