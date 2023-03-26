@@ -25,7 +25,6 @@ class OrderFragment : CallableFragment() {
     private lateinit var order: Order
     private lateinit var previousOrder: Order
     private var total = 0f
-    private var oldTotal = 0f
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,7 +75,6 @@ class OrderFragment : CallableFragment() {
             }
 
             priceView.text = getString(R.string.price_format).format(total)
-            oldTotal = total
         }
     }
 
@@ -85,14 +83,15 @@ class OrderFragment : CallableFragment() {
         val itemModel = gridViewAdapter.getItemByView(parent) ?: return
         val itemId = itemModel.id
         val item = main.shop.items[itemId] ?: return
+        val newCount = itemModel.count + change
 
-        @Suppress("ConstantConditionIf")
         // TODO: please. please. just a simple conditional statement
-        if (true) {
-            itemModel.count = min(99, itemModel.count + change)
+        if (newCount >= 0) {
+            itemModel.count = min(99L, itemModel.count + change)
             total = min(99f, round((total + item.price * change) * 100) / 100)
             priceView.text = getString(R.string.price_format).format(total)
-            bottomLayoutVisible = total != oldTotal
+            // some simple conditions pls
+            bottomLayoutVisible = true
             gridViewAdapter.notifyDataSetChanged()
         }
 
