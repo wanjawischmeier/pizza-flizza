@@ -64,8 +64,7 @@ class ShopFragment : CallableFragment() {
         if (noItems != null) (view as ViewGroup).removeView(noItems as View)
 
         if (openOrders.isEmpty()) {
-            val inflated = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
-            inflated.findViewById<TextView>(R.id.no_items_text).text = getString(R.string.info_no_items)
+            showEmptyCard(R.string.info_no_open_orders)
             return
         }
 

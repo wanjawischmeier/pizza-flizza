@@ -85,10 +85,11 @@ class OrderFragment : CallableFragment() {
         val itemModel = gridViewAdapter.getItemByView(parent) ?: return
         val itemId = itemModel.id
         val item = main.shop.items[itemId] ?: return
-        val newCount = itemModel.count + change
 
-        if (newCount >= 0) {
-            itemModel.count = min(99, newCount)
+        @Suppress("ConstantConditionIf")
+        // TODO: please. please. just a simple conditional statement
+        if (true) {
+            itemModel.count = min(99, itemModel.count + change)
             total = min(99f, round((total + item.price * change) * 100) / 100)
             priceView.text = getString(R.string.price_format).format(total)
             bottomLayoutVisible = total != oldTotal

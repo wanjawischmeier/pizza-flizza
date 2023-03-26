@@ -82,13 +82,7 @@ class TransactionFragment : CallableFragment() {
         if (noItems != null) (view as ViewGroup).removeView(noItems as View)
 
         if (gridViewAdapter.isEmpty) {
-            val noItemsTextView = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
-                .findViewById<TextView>(R.id.no_items_text)
-
-            noItemsTextView.text = getString(R.string.info_no_transactions)
-            noItemsTextView.alpha = 0f
-            noItemsTextView.animate()
-                .alpha(1f)
+            showEmptyCard(R.string.info_no_transactions)
         }
     }
 

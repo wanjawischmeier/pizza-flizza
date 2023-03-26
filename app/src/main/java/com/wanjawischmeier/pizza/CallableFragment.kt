@@ -1,5 +1,8 @@
 package com.wanjawischmeier.pizza
 
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
@@ -47,4 +50,15 @@ abstract class CallableFragment : Fragment() {
         }
 
     abstract fun onShow(): Task<Unit>?
+
+    fun showEmptyCard(info: Int) {
+        val noItemsTextView = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
+            .findViewById<TextView>(R.id.no_items_text)
+
+        noItemsTextView.text = getString(info)
+        noItemsTextView.alpha = 0f
+        noItemsTextView.animate()
+            .alpha(1f)
+            .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+    }
 }

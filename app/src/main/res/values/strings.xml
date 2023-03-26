@@ -62,7 +62,7 @@
     <!-- Shop -->
     <string name="sample_item_count" translatable="false">5</string>
     <string name="sample_item_name" translatable="false">Pizza</string>
-    <string name="info_no_items" translatable="false">No open orders</string>
+    <string name="info_no_open_orders" translatable="false">No open orders</string>
 
     <!-- Transactions -->
     <string name="transaction_accept" translatable="false">Accept</string>
