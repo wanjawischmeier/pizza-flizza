@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="animation_duration_fragment">75</integer>
+    <integer name="animation_duration_card_out">200</integer>
 </resources>

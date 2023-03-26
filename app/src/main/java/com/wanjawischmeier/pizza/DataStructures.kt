@@ -5,9 +5,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import java.time.DayOfWeek
 import java.util.*
-import kotlin.collections.HashMap
 
 // userId, user
 typealias Users = Map<String, User>

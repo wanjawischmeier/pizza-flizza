@@ -4,8 +4,8 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/siiimon"
-        android:roundIcon="@mipmap/siiimon"
+        android:icon="@mipmap/pizza_icon"
+        android:roundIcon="@mipmap/pizza_icon_round"
         android:label="@string/app_name"
 
         android:supportsRtl="true"

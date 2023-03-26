@@ -18,15 +18,15 @@ enum class TransactionType {
     OPEN, FULFILLED_BY_USER, TO_BE_PAID
 }
 
-class TransactionModel(
+class TransactionCard(
     val ids: Pair<String, String>,
     var transactionType: TransactionType,
     var name: String,
     var order: Order
 )
 
-class TransactionListViewAdapter(context: Context, private val main: MainActivity, private val itemArrayList: ArrayList<TransactionModel>) :
-    ArrayAdapter<TransactionModel>(context, 0, itemArrayList) {
+class TransactionListViewAdapter(context: Context, private val main: MainActivity, private val itemArrayList: ArrayList<TransactionCard>) :
+    ArrayAdapter<TransactionCard>(context, 0, itemArrayList) {
 
     private var views: HashMap<ConstraintLayout, Pair<String, String>> = hashMapOf()
 
@@ -34,16 +34,19 @@ class TransactionListViewAdapter(context: Context, private val main: MainActivit
         val itemView = if (convertView == null) {
             LayoutInflater.from(context).inflate(R.layout.card_transactions, parent, false) as ConstraintLayout
         } else {
+            // undo transforms applied by animation
+            convertView.alpha = 1f
+            convertView.translationY = 0f
             convertView as ConstraintLayout
         }
 
-        val model = getItem(position)!!
+        val card = getItem(position)!!
 
         var date = 0L
         var total = 0f
         var content = ""
 
-        for ((itemId, itemInfo) in model.order.toSortedMap()) {
+        for ((itemId, itemInfo) in card.order.toSortedMap()) {
             val item = main.shop.items[itemId]
             val name = item?.name ?: context.getString(R.string.name_item_unknown)
             val count = itemInfo[ITEM_COUNT]
@@ -66,12 +69,12 @@ class TransactionListViewAdapter(context: Context, private val main: MainActivit
 
         val dateFormatter = SimpleDateFormat("dd.MM.yy HH:mm", SimpleDateFormat.getAvailableLocales()[0])
 
-        var name = model.name
+        var name = card.name
         var textId = R.string.transaction_paid
         var backgroundColorId = R.color.cream
         var textColorId = R.color.white
 
-        val outlineId = when (model.transactionType) {
+        val outlineId = when (card.transactionType) {
             TransactionType.OPEN -> {
                 name = context.resources.getString(R.string.your_order)
                 textId = R.string.transaction_clear
@@ -86,7 +89,7 @@ class TransactionListViewAdapter(context: Context, private val main: MainActivit
             TransactionType.FULFILLED_BY_USER -> 0
         }
 
-        if (model.transactionType == TransactionType.TO_BE_PAID) {
+        if (card.transactionType == TransactionType.TO_BE_PAID) {
             button.isGone = true
         } else {
             button.text = context.getString(textId)
@@ -106,11 +109,11 @@ class TransactionListViewAdapter(context: Context, private val main: MainActivit
         priceView.text = context.getString(R.string.price_format).format(total)
         contentView.text = content.trim()
 
-        views[itemView] = model.ids
+        views[itemView] = card.ids
         return itemView
     }
 
-    fun getItemByIds(ids: Pair<String, String>): TransactionModel? {
+    fun getItemByIds(ids: Pair<String, String>): TransactionCard? {
         val filteredItems = itemArrayList.filter { item -> item.ids == ids }
         return if (filteredItems.isEmpty()) null else filteredItems[0]
     }
@@ -130,16 +133,28 @@ class TransactionListViewAdapter(context: Context, private val main: MainActivit
     }
 
     fun remove(ids: Pair<String, String>) {
-        val view = getViewByIds(ids) ?: return
-        val parent = view.parent as View
-        parent.animate()
-            .translationY(-view.height.toFloat())
-            .setDuration(context.resources.getInteger(R.integer.animation_duration_fragment).toLong())
+        val position = getPosition(getItemByIds(ids) ?: return)
+        var item = itemArrayList[position]
+        var view = getViewByIds(item.ids) ?: return
+        val translation = -view.height.toFloat() - context.resources.getDimension(R.dimen.card_distance)
+
+        view.animate()
+            .alpha(0f)
+            .translationY(translation)
+            .setDuration(context.resources.getInteger(R.integer.animation_duration_card_out).toLong())
             .withEndAction {
-                views.remove(view)
-                itemArrayList.remove(getItemByIds(ids))
-                parent.translationY = 0f
                 notifyDataSetChanged()
             }
+
+        views.remove(view)
+        itemArrayList.remove(item)
+
+        for (i in position until itemArrayList.size) {
+            item = itemArrayList[i]
+            view = getViewByIds(item.ids) ?: continue
+            view.animate()
+                .translationY(translation)
+                .duration = context.resources.getInteger(R.integer.animation_duration_card_out).toLong()
+        }
     }
 }

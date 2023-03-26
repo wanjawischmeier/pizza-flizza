@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 
-class OrderModel(
+class OrderCard(
     val id: String,
     var name: String,
     var price: Float,
@@ -17,8 +17,8 @@ class OrderModel(
     var imageId: Int
 )
 
-class OrderGridViewAdapter(context: Context, private val itemArrayList: ArrayList<OrderModel>) :
-    ArrayAdapter<OrderModel>(context, 0, itemArrayList) {
+class OrderGridViewAdapter(context: Context, private val itemArrayList: ArrayList<OrderCard>) :
+    ArrayAdapter<OrderCard>(context, 0, itemArrayList) {
 
     private var views: HashMap<ConstraintLayout, String> = hashMapOf()
 
@@ -29,27 +29,27 @@ class OrderGridViewAdapter(context: Context, private val itemArrayList: ArrayLis
             convertView as ConstraintLayout
         }
 
-        val model = getItem(position)!!
+        val card = getItem(position)!!
         val nameView = itemView.findViewById<TextView>(R.id.order_name)
         val countView = itemView.findViewById<TextView>(R.id.order_count)
         val priceView = itemView.findViewById<TextView>(R.id.order_price)
         val imageView = itemView.findViewById<ImageView>(R.id.order_image)
 
-        nameView.text = model.name
-        countView.text = model.count.toString()
-        priceView.text = context.getString(R.string.price_format).format(model.price)
-        imageView.setImageResource(model.imageId)
+        nameView.text = card.name
+        countView.text = card.count.toString()
+        priceView.text = context.getString(R.string.price_format).format(card.price)
+        imageView.setImageResource(card.imageId)
 
-        views[itemView] = model.id
+        views[itemView] = card.id
         return itemView
     }
 
-    fun getItemById(id: String): OrderModel? {
+    fun getItemById(id: String): OrderCard? {
         val filteredViews = itemArrayList.filter { item -> item.id == id }
         return if (filteredViews.isEmpty()) null else filteredViews[0]
     }
 
-    fun getItemByView(view: ConstraintLayout): OrderModel? {
+    fun getItemByView(view: ConstraintLayout): OrderCard? {
         val itemId = views[view]
         return if (itemId == null) null else getItemById(itemId)
     }
