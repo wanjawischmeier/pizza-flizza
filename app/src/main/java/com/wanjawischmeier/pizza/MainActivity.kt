@@ -202,10 +202,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkUser() {
+        /*
         val intent = Intent(this, ItemPreferencesAktivity::class.java)
         startActivity(intent)
         finish()
         return
+         */
 
         val currentUser = Firebase.auth.currentUser
         if (currentUser == null) {

@@ -6,6 +6,7 @@ import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.collections.List
 
 // userId, user
 typealias Users = Map<String, User>
@@ -25,6 +26,7 @@ class User {
     var orders = hashMapOf<String, Order>()
     // shopId, fulfilledOrder
     var fulfilled = hashMapOf<String, FulfilledOrder>()
+    var priorities = listOf<String>()
 
     companion object {
         fun getUsers(groupId: String): Task<Users> {
@@ -63,6 +65,10 @@ class User {
             return Firebase.database.getReference("users/$groupId/$userId").get().continueWith {
                 return@continueWith it.result.getValue(User::class.java)
             }
+        }
+
+        fun setPriorities(groupId: String, userId: String, proritizedItems: List<String>): Task<Void> {
+            return Firebase.database.getReference("users/$groupId/$userId/priorities").setValue(proritizedItems)
         }
     }
 }

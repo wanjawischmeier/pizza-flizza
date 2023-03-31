@@ -10,7 +10,7 @@ def compare(a: int, b: int, cache: dict[tuple[int, int], bool] = {}, f = False) 
 
     key = (a, b)
     if key in cache:
-        print("using cache")
+        # print("using cache")
         return cache[key]
     else:
         comparisons += 1
@@ -130,13 +130,13 @@ def approximateIndex2(value: int, list1: list[int], _, limit: int, iterations: i
 # top3 = NmaxElements0(numbers, 3)
 # print(top3)
 # print(approximateIndex(5, [3, 1], 10))
-max_iterations = 100
-noise_samples = 100
-n = 5
-k = 10
+max_iterations = 10
+noise_samples = 10
+n = 10
+k = 50
 numbers = sample(range(k), k)
 numbers = [8, 10, 12, 0, 2, 9, 11, 4, 5, 7, 3, 6, 13, 1]
-k = len(numbers)
+# k = len(numbers)
 print(numbers)
 
 sorted0, c0o = NmaxElements0(numbers, n)
@@ -150,43 +150,44 @@ for i in range(n):
 
 print(sorted1, c1o, error)
 
-"""
-cos = np.zeros(max_iterations)
-c0s = np.zeros(max_iterations)
-c1s = np.zeros(max_iterations)
-errors0 = np.zeros(max_iterations)
-errors1 = np.zeros(max_iterations)
+den = k
+cos = np.zeros(den)
+c0s = np.zeros(den)
+c1s = np.zeros(den)
+errors0 = np.zeros(den)
+errors1 = np.zeros(den)
 
 for i in range(noise_samples):
     numbers = sample(range(k), k)
 
-    for r in range(1, max_iterations):
-        sortedo, co = NmaxElements1(numbers, n)
-        sorted0, c0 = approximateLargest(numbers, n, approximateIndex, r)
-        sorted1, c1 = approximateLargest(numbers, n, approximateIndex2, r)
+    for r in range(1, k):
+        part = numbers[:r]
+        lim = min(n, r) -1
+        sortedo, co = NmaxElements1(part, lim)
+        sorted0, c0 = approximateLargest(part, lim, approximateIndex, max_iterations)
+        sorted1, c1 = approximateLargest(part, lim, approximateIndex2, max_iterations)
         cos[r] = co
         c0s[r] += c0 / noise_samples
         c1s[r] += c1 / noise_samples
 
         error = 0
-        for i in range(n):
+        for i in range(lim):
             error += abs(sortedo[i] - sorted0[i])
         errors0[r] += error / noise_samples
 
         error = 0
-        for i in range(n):
+        for i in range(lim):
             error += abs(sortedo[i] - sorted1[i])
         errors1[r] += error / noise_samples
         
 for i in range(3, 7):
     print(f"{i}:\ts={round(c0s[i] * 100) / 100} | e={round(errors0[i] * 100) / 100}")
 
-plt.xlim([1, max_iterations - 1])
+plt.xlim([1, den - 1])
 plt.plot(cos, label="cos")
 plt.plot(c0s, label="c0s")
-plt.plot(c1s, label="c1s")
+# plt.plot(c1s, label="c1s")
 plt.plot(errors0, label="errors0")
-plt.plot(errors1, label="errors1")
+# plt.plot(errors1, label="errors1")
 plt.legend()
 plt.show()
-"""

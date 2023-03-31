@@ -2,28 +2,30 @@ package com.wanjawischmeier.pizza
 
 import kotlin.math.floor
 import kotlin.math.min
+import kotlin.math.roundToInt
 
-class ItemSorter(
-    list: Iterable<String>,
+class ItemSorter <T> (
+    list: Iterable<T>,
     private val limit: Int,
-    private val callback: (List<String>, Int) -> Unit
+    private val progress: (Int) -> Unit,
+    private val callback: (List<T>, Int) -> Unit
 ) {
     private var minimum = 0
     private var maximum = 0
     private var pointer = 0
     private var listPointer = 1
     private var comparisons = 0
-    private var value = ""
-    private var sorted: MutableList<String>
-    private var cache = mutableMapOf<Pair<String, String>, Boolean>()
-    private var input: List<String> = list.toList()
-    private var key: Pair<String, String>
+    private var value: T
+    private var sorted: MutableList<T>
+    private var cache = mutableMapOf<Pair<T, T>, Boolean>()
+    private var input: List<T> = list.toList()
+    private var key: Pair<T, T>
 
     init {
         sorted = mutableListOf(input[0])
         value = input[listPointer]
         maximum = min(sorted.size, limit)
-        pointer = maximum - 1 // floor(maximum / 2f).toInt()
+        pointer = maximum - 1
         key = value to sorted[pointer]
     }
 
@@ -34,20 +36,22 @@ class ItemSorter(
 
         if (listPointer >= input.size) {
             pointer = -1
-            callback(sorted, comparisons)
+            callback(sorted.subList(0, limit), comparisons)
             return
+        } else {
+            progress((listPointer / input.size.toFloat() * 100).roundToInt())
         }
 
         value = input[listPointer]
         minimum = 0
         maximum = min(sorted.size, limit)
-        pointer = maximum - 1 // floor(maximum / 2f).toInt()
+        pointer = maximum - 1
 
         key = value to sorted[pointer]
         setComparisonResult(cache[key] ?: return)
     }
 
-    fun getNextComparison(): Pair<String, String> {
+    fun getNextComparison(): Pair<T, T> {
         return key
     }
 
@@ -82,6 +86,7 @@ class ItemSorter(
 
         pointer = minimum + floor((maximum - minimum) / 2f).toInt()
         key = value to sorted[pointer]
+
         val cached = cache[key]
         if (cached != null) {
             comparisons--
