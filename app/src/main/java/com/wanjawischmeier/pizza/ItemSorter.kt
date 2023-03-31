@@ -3,35 +3,47 @@ package com.wanjawischmeier.pizza
 import kotlin.math.floor
 import kotlin.math.min
 
-class ItemSorter(list: List<String>, n: Int) {
+class ItemSorter(
+    list: Iterable<String>,
+    private val limit: Int,
+    private val callback: (List<String>, Int) -> Unit
+) {
     private var minimum = 0
     private var maximum = 0
     private var pointer = 0
-    private var listPointer = 0
-    private var limit = n
+    private var listPointer = 1
+    private var comparisons = 0
     private var value = ""
-    private var sorted = mutableListOf<String>()
+    private var sorted: MutableList<String>
     private var cache = mutableMapOf<Pair<String, String>, Boolean>()
-    private var input: List<String> = list
+    private var input: List<String> = list.toList()
     private var key: Pair<String, String>
 
     init {
+        sorted = mutableListOf(input[0])
         value = input[listPointer]
-        maximum = min(input.size, limit)
-        pointer = floor(maximum / 2f).toInt()
-        key = value to input[pointer]
+        maximum = min(sorted.size, limit)
+        pointer = maximum - 1 // floor(maximum / 2f).toInt()
+        key = value to sorted[pointer]
     }
 
     private fun loadNextKey(sortedKey: Int) {
-        sorted[sortedKey] = value
+        sorted.add(min(sorted.size, sortedKey), value)
 
         listPointer++
+
+        if (listPointer >= input.size) {
+            pointer = -1
+            callback(sorted, comparisons)
+            return
+        }
+
         value = input[listPointer]
         minimum = 0
-        maximum = min(input.size, limit)
-        pointer = floor(maximum / 2f).toInt()
-        key = value to input[pointer]
+        maximum = min(sorted.size, limit)
+        pointer = maximum - 1 // floor(maximum / 2f).toInt()
 
+        key = value to sorted[pointer]
         setComparisonResult(cache[key] ?: return)
     }
 
@@ -39,23 +51,13 @@ class ItemSorter(list: List<String>, n: Int) {
         return key
     }
 
-    /*
-    if compare(value, list1[pointer], cache):
-        max1 = pointer
-    else:
-        if min1 == pointer:
-            min1 = max1
-        else:
-            min1 = pointer
-        if min1 > limit:
-            return pointer
-    if min1 == max1:
-        return min1
-
-    pointer = min1 + floor((max1 - min1) / 2)
-     */
-
     fun setComparisonResult(result: Boolean) {
+        if (pointer == -1) {
+            return
+        } else {
+            comparisons++
+        }
+
         cache[key] = result
 
         if (result) {
@@ -79,6 +81,11 @@ class ItemSorter(list: List<String>, n: Int) {
         }
 
         pointer = minimum + floor((maximum - minimum) / 2f).toInt()
-        key = value to input[pointer]
+        key = value to sorted[pointer]
+        val cached = cache[key]
+        if (cached != null) {
+            comparisons--
+            setComparisonResult(cached)
+        }
     }
 }

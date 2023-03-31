@@ -2,6 +2,7 @@ package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,6 +20,8 @@ class ItemPreferencesAktivity : AppCompatActivity() {
     private lateinit var itemNameRight: TextView
     private lateinit var itemImageLeft: ImageView
     private lateinit var itemImageRight: ImageView
+    private lateinit var itemSorter: ItemSorter
+    private lateinit var shop: Shop
     private var currentLeftId = ""
     private var currentRightId = ""
     private var selection = 0
@@ -28,7 +31,6 @@ class ItemPreferencesAktivity : AppCompatActivity() {
         setContentView(R.layout.activity_item_preferences)
     }
 
-    @SuppressLint("DiscouragedApi")
     override fun onStart() {
         super.onStart()
 
@@ -41,12 +43,41 @@ class ItemPreferencesAktivity : AppCompatActivity() {
         itemImageLeft = findViewById(R.id.item_image_left)
         itemImageRight = findViewById(R.id.item_image_right)
 
+        /*
         layoutLeft.setOnClickListener { selection = 1 }
         layoutRight.setOnClickListener  { selection = -1 }
+         */
+
+        layoutLeft.setOnClickListener {
+            itemSorter.setComparisonResult(true)
+            showNextComparison()
+        }
+
+        layoutRight.setOnClickListener {
+            itemSorter.setComparisonResult(false)
+            showNextComparison()
+        }
 
         Shop.getShop(SHOP_ID).continueWith {
-            val shop = it.result ?: return@continueWith
+            shop = it.result ?: return@continueWith
+            val items = Shop.getItemType(shop, Shop.Item.Type.HEARTY)
 
+            itemSorter = ItemSorter(items.keys, 5) { sorted, comparisons ->
+                Toast.makeText(this, sorted.toString(), Toast.LENGTH_SHORT).show()
+
+                var pckd = "\n"
+
+                for ((i, itemId) in sorted.withIndex()) {
+                    pckd += "[$i]: ${items[itemId]?.name}\n"
+                }
+
+                pckd += "$comparisons comparisons"
+
+                Log.d("COMPARISONS", pckd)
+            }
+
+            showNextComparison()
+            /*
             thread {
                 var iters = 0
 
@@ -86,6 +117,34 @@ class ItemPreferencesAktivity : AppCompatActivity() {
 
                 sorted
             }
+             */
+        }
+    }
+
+    @SuppressLint("DiscouragedApi")
+    private fun showNextComparison() {
+        val (leftId, rightId) = itemSorter.getNextComparison()
+
+        if (leftId != currentLeftId) {
+            val imageIdLeft = resources.getIdentifier(leftId, "drawable", packageName)
+
+            animateSlide(
+                layoutLeft, -1,
+                itemNameLeft, shop.items[leftId]?.name ?: return,
+                itemImageLeft, imageIdLeft
+            )
+            currentLeftId = leftId
+        }
+
+        if (rightId != currentRightId) {
+            val imageIdRight = resources.getIdentifier(rightId, "drawable", packageName)
+
+            animateSlide(
+                layoutRight, 1,
+                itemNameRight, shop.items[rightId]?.name ?: return,
+                itemImageRight, imageIdRight
+            )
+            currentRightId = rightId
         }
     }
 

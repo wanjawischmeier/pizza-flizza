@@ -12,8 +12,8 @@ def compare(a: int, b: int, cache: dict[tuple[int, int], bool] = {}, f = False) 
     if key in cache:
         print("using cache")
         return cache[key]
-    
-    comparisons += 1
+    else:
+        comparisons += 1
     if f:
         res = input(f"[{comparisons}]: ({a} > {b})\t>>> ") == "y"
     else:
@@ -73,14 +73,15 @@ def approximateLargest(list1: list[int], n: int, f, max_iterations = 100) -> lis
     return final[0:n]
 
 def approximateIndex(value: int, list1: list[int], cache: dict[tuple[int, int], bool], limit: int, iterations: int) -> int:
-    if len(list1) - 1 >= limit:
-        if not compare(value, list1[limit], cache):
+    """
+    if len(list1) >= limit:
+        if not compare(value, list1[limit -1], cache):
             print("skipped")
             return limit + 1
-
+    """
     min1 = 0
     max1 = min(len(list1), limit)
-    pointer = floor(max1 / 2)
+    pointer = max1 - 1 # floor(max1 / 2)
 
     for i in range(iterations):
         if compare(value, list1[pointer], cache):

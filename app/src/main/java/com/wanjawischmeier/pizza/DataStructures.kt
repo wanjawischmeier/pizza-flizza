@@ -80,10 +80,8 @@ class Shop {
         var price = 0f
         var type = 0
 
-        companion object {
-            enum class Type {
-                HEARTY, SWEET
-            }
+        enum class Type {
+            HEARTY, SWEET, SIDE_DISH
         }
     }
 
@@ -96,6 +94,10 @@ class Shop {
                     return@continueWith null
                 }
             }
+        }
+
+        fun getItemType(shop: Shop, itemType: Item.Type): Map<String, Item> {
+            return shop.items.filter { it.value.type == itemType.ordinal }.toMap()
         }
 
         fun getOpenOrders(users: Users, shopId: String): HashMap<String, Order> {

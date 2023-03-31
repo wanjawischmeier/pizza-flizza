@@ -107,12 +107,12 @@
                 "humus_natural": {
                     "name": "Humus Natürlich",
                     "price": 0.99,
-                    "type": 0
+                    "type": 2
                 },
                 "humus_pikant": {
                     "name": "Humus Pikant",
                     "price": 0.99,
-                    "type": 0
+                    "type": 2
                 },
                 "pizza": {
                     "name": "Pizza Margherita",
