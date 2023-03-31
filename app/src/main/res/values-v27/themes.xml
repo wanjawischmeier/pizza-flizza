@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Pizza" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/cream</item>
+        <item name="colorPrimaryVariant">@color/gray_mid</item>
+        <item name="colorOnPrimary">@color/gray_mid</item>
+        <item name="colorAccent">@color/cream</item>
+
+        <item name="android:navigationBarColor">@color/gray_mid</item>
+        <item name="android:statusBarColor">@color/gray_mid</item>
+        <item name="actionBarStyle">@style/Theme.AppCompat.Light.NoActionBar</item>
+        <item name="android:windowBackground">@color/gray_dark</item>
+
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/gray_light</item>
+        <item name="android:textColorTertiary">@color/gray_mid</item>
+
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>

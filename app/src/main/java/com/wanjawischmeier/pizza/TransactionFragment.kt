@@ -104,7 +104,6 @@ class TransactionFragment : CallableFragment() {
         }
 
         gridViewAdapter.remove(ids)
-        transactionsList.setHeaderDividersEnabled(false)
         refreshNoItemsHint()
     }
 }

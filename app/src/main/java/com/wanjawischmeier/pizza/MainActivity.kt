@@ -11,15 +11,18 @@ import androidx.fragment.app.FragmentContainerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.wanjawischmeier.pizza.Database.VersionHintType
 
 
+@Suppress("UNUSED_PARAMETER")
 class MainActivity : AppCompatActivity() {
     private lateinit var orderFragment: OrderFragment
     private lateinit var shopFragment: ShopFragment
     private lateinit var transactionFragment: TransactionFragment
+    private lateinit var profileFragment: ProfileFragment
     private lateinit var previousFragment: CallableFragment
     private lateinit var currentFragment: CallableFragment
     private lateinit var bottomNavigationView: BottomNavigationView
@@ -28,20 +31,12 @@ class MainActivity : AppCompatActivity() {
     lateinit var users: Users
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     lateinit var scrollContainer: View
+    lateinit var user: FirebaseUser
     var userId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // check wether user is signed in
-        val user = Firebase.auth.currentUser
-        if (user == null) {
-            val intent = Intent(this, LoginActivity::class.java)
-            finish()
-            startActivity(intent)
-        } else {
-            userId = user.uid
-        }
+        checkUser()
 
         setContentView(R.layout.activity_main)
         CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
@@ -107,7 +102,7 @@ class MainActivity : AppCompatActivity() {
         swipeRefreshLayout.isRefreshing = true
 
         Shop.getShop(SHOP_ID).continueWith { shopTask ->
-            shop = shopTask.result
+            shop = shopTask.result ?: return@continueWith
 
             User.getUsers(GROUP_ID).continueWith { usersTask ->
                 users = usersTask.result
@@ -127,6 +122,7 @@ class MainActivity : AppCompatActivity() {
         orderFragment = OrderFragment()
         shopFragment = ShopFragment()
         transactionFragment = TransactionFragment()
+        profileFragment = ProfileFragment()
 
         currentFragment = orderFragment
         previousFragment = currentFragment
@@ -136,8 +132,10 @@ class MainActivity : AppCompatActivity() {
             add(R.id.nav_host_fragment, orderFragment)
             add(R.id.nav_host_fragment, shopFragment)
             add(R.id.nav_host_fragment, transactionFragment)
+            add(R.id.nav_host_fragment, profileFragment)
             hide(shopFragment)
             hide(transactionFragment)
+            hide(orderFragment)
 
             runOnCommit {
                 val after = { swipeRefreshLayout.isRefreshing = false }
@@ -203,16 +201,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun refreshView(): Task<Users> {
-        val user = Firebase.auth.currentUser
-        if (user == null) {
+    private fun checkUser() {
+        val intent = Intent(this, ItemPreferencesAktivity::class.java)
+        startActivity(intent)
+        finish()
+        return
+
+        val currentUser = Firebase.auth.currentUser
+        if (currentUser == null) {
             val intent = Intent(this, LoginActivity::class.java)
-            finish()
             startActivity(intent)
+            finish()
         } else {
+            user = currentUser
             userId = user.uid
         }
+    }
 
+    private fun refreshView(): Task<Users> {
+        checkUser()
+        Firebase.auth.sendPasswordResetEmail("")
+        user.verifyBeforeUpdateEmail("")
         val taskUsers = User.getUsers(GROUP_ID)
         taskUsers.continueWith { usersTask ->
             users = usersTask.result
@@ -236,8 +245,15 @@ class MainActivity : AppCompatActivity() {
         transactionFragment.accept(view)
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun onOrder(view: View) {
         orderFragment.placeOrder()
+    }
+
+    fun onResetEmail(view: View) {
+        profileFragment.resetEmail(view)
+    }
+
+    fun onResetPassword(view: View) {
+        profileFragment.resetPassword(view)
     }
 }

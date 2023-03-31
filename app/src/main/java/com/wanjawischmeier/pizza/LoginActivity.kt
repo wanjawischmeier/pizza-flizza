@@ -195,7 +195,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun onSignedIn() {
         val intent = Intent(this, MainActivity::class.java)
-        finish()
         startActivity(intent)
+        finish()
     }
 }

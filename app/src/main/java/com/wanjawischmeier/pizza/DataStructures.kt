@@ -78,12 +78,23 @@ class Shop {
     class Item {
         var name = ""
         var price = 0f
+        var type = 0
+
+        companion object {
+            enum class Type {
+                HEARTY, SWEET
+            }
+        }
     }
 
     companion object {
-        fun getShop(shopId: String): Task<Shop> {
+        fun getShop(shopId: String): Task<Shop?> {
             return Firebase.database.getReference("shops/$shopId").get().continueWith {
-                return@continueWith it.result.getValue(Shop::class.java)
+                if (it.isSuccessful) {
+                    return@continueWith it.result.getValue(Shop::class.java)
+                } else {
+                    return@continueWith null
+                }
             }
         }
 

@@ -6,7 +6,7 @@
     <string name="price_format" translatable="false">"%.2f€"</string>
     <string name="name_user_unknown" translatable="false">Unknown Username</string>
     <string name="name_item_unknown" translatable="false">Unknown Name</string>
-    
+
     <!-- VersionHints -->
     <string name="hint_title_info" translatable="false">Info</string>
     <string name="hint_title_warning" translatable="false">Warning</string>
