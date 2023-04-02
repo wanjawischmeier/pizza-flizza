@@ -12,4 +12,7 @@
     <dimen name="card_distance">8dp</dimen>
 
     <dimen name="card_scale_expanded">1.04f</dimen>
+
+    <dimen name="corner_radius">10dp</dimen>
+    <dimen name="corner_radius_2x">20dp</dimen>
 </resources>

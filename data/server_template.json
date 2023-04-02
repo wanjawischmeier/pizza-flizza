@@ -37,12 +37,12 @@
                 "baguette_onion": {
                     "name": "Zwiebelbaguette",
                     "price": 0.99,
-                    "type": 0
+                    "type": 3
                 },
                 "baguette_oven": {
                     "name": "Steinofen Baguette",
                     "price": 0.89,
-                    "type": 0
+                    "type": 3
                 },
                 "berliner": {
                     "name": "Berliner",
@@ -132,7 +132,7 @@
                 "rod_olive": {
                     "name": "Oliven Stick",
                     "price": 0.69,
-                    "type": 0
+                    "type": 3
                 },
                 "rod_vanilla": {
                     "name": "Vanillestange vegan",

@@ -4,30 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/order_parent_constraint"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/blue_outline">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/order_constraint"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/blue_outline"
+        android:background="@drawable/layout_bg"
+        android:backgroundTint="@color/gray_mid"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="VisualLintBounds">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/order_guideline_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.25" />
+
         <TextView
             android:id="@+id/order_name"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/card_outline"
+            android:layout_height="0dp"
+            android:background="@drawable/layout_bg"
+            android:backgroundTint="@color/gray_light"
+            android:gravity="center"
             android:padding="8dp"
             android:singleLine="true"
             android:text="@string/sample_item_name"
-            android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/white"
+            app:autoSizeMaxTextSize="18sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@+id/order_guideline_horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -36,13 +49,15 @@
             android:id="@+id/order_image"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             android:contentDescription="@string/order_image_description"
-            android:padding="10dp"
+            android:padding="4dp"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toTopOf="@+id/order_mod_constraint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/order_name"
+            app:layout_constraintTop_toBottomOf="@id/order_guideline_horizontal"
             app:srcCompat="@drawable/baeckerkroenung" />
 
         <TextView
@@ -61,7 +76,7 @@
             android:textStyle="bold"
             app:layout_constraintDimensionRatio="1"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/order_name"
+            app:layout_constraintTop_toBottomOf="@id/order_guideline_horizontal"
             tools:ignore="TextContrastCheck" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -70,8 +85,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="0dp"
             android:layout_marginVertical="4dp"
-            android:background="@drawable/layout_bg"
-            android:backgroundTint="@color/gray_mid"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">

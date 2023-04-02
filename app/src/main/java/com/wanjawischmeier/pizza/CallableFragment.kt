@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Task
 
@@ -49,16 +50,26 @@ abstract class CallableFragment : Fragment() {
                 .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
         }
 
-    abstract fun onShow(): Task<Unit>?
+    abstract fun onShow(refresh: Boolean = false): Task<Unit>?
 
     fun showEmptyCard(info: Int) {
-        val noItemsTextView = layoutInflater.inflate(R.layout.card_no_items, view as ViewGroup)
-            .findViewById<TextView>(R.id.no_items_text)
+        showEmptyCard(getString(info))
+    }
 
-        noItemsTextView.text = getString(info)
+    fun showEmptyCard(info: String) {
+        val noItemsTextView = view?.findViewById<TextView>(R.id.no_items_text) ?: layoutInflater
+            .inflate(R.layout.card_no_items, view as ViewGroup)
+            .findViewById(R.id.no_items_text)
+
+        noItemsTextView.text = info
         noItemsTextView.alpha = 0f
         noItemsTextView.animate()
             .alpha(1f)
             .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+    }
+
+    fun removeEmptyCard() {
+        val parent = view?.findViewById<TextView>(R.id.no_items_text)?.parent ?: return
+        (view as ViewGroup).removeView(parent as View)
     }
 }

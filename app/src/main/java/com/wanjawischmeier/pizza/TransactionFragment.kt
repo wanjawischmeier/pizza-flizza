@@ -1,5 +1,6 @@
 package com.wanjawischmeier.pizza
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,8 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.tasks.Task
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 
 
 class TransactionFragment : CallableFragment() {
@@ -15,6 +18,7 @@ class TransactionFragment : CallableFragment() {
     private lateinit var fulfilled: HashMap<Pair<String, String>, Order>
     private lateinit var transactionsList: ListView
     private lateinit var gridViewAdapter: TransactionListViewAdapter
+    private lateinit var showcaseSequence: MaterialShowcaseSequence
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,12 +33,13 @@ class TransactionFragment : CallableFragment() {
         transactionsList = (view as ViewGroup).findViewById(R.id.transactions_list)
     }
 
-    override fun onShow(): Task<Unit>? {
+    override fun onShow(refresh: Boolean): Task<Unit>? {
         main.scrollContainer = transactionsList
         bottomLayoutVisible = false
         topBubbleVisible = false
 
-        gridViewAdapter = TransactionListViewAdapter(context ?: return null, main, ArrayList())
+        showcaseSequence = MaterialShowcaseSequence(activity)
+        gridViewAdapter = TransactionListViewAdapter(context ?: return null, main, ArrayList(), showcaseSequence)
         transactionsList.adapter = gridViewAdapter
 
         val userOrder = main.users[main.userId]?.orders?.get(SHOP_ID)
@@ -50,6 +55,19 @@ class TransactionFragment : CallableFragment() {
 
         main.swipeRefreshLayout.isRefreshing = false
         refreshNoItemsHint()
+        /*
+        showcaseSequence.addSequenceItem(
+            MaterialShowcaseView.Builder(context as Activity)
+                .setTarget(view)
+                .setDismissText(R.string.tour_accept)
+                .setContentText(R.string.sample_tour_content)
+                .setDelay(resources.getInteger(R.integer.tour_delay))
+                .setDismissOnTouch(true)
+                .withoutShape()
+                // .singleUse("TEST5")
+                .build()
+        ).start()
+         */
         return null
     }
 

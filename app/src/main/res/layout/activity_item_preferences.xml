@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/quiz_constraint"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ItemPreferencesAktivity">
@@ -13,30 +14,55 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent=".5" />
 
+    <ProgressBar
+        android:id="@+id/sorting_bar"
+        style="@style/CustomProgressBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginEnd="64dp"
+        android:background="@drawable/layout_bg"
+        android:backgroundTint="@color/gray_mid"
+        android:progress="40"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_left"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/gray_mid"
-        android:padding="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/layout_bg"
+        android:backgroundTint="@color/gray_mid"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toStartOf="@+id/guideline_center"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="@+id/sorting_bar"
+        app:layout_constraintTop_toBottomOf="@+id/sorting_bar"
+        tools:visibility="visible">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".3" />
 
         <TextView
             android:id="@+id/item_name_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:background="@drawable/layout_bg"
             android:backgroundTint="@color/gray_light"
-            android:paddingStart="20dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
+            android:gravity="center"
             android:text="@string/sample_item_name"
-            android:textAlignment="center"
             android:textAppearance="@style/Large"
+            app:autoSizeMaxTextSize="24sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@+id/guideline_left"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -45,6 +71,8 @@
             android:id="@+id/item_image_left"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,25 +84,37 @@
         android:id="@+id/layout_right"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/layout_bg"
+        android:backgroundTint="@color/gray_mid"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline_center"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="@+id/sorting_bar"
+        app:layout_constraintStart_toEndOf="@+id/guideline_center"
+        app:layout_constraintTop_toBottomOf="@+id/sorting_bar"
+        tools:visibility="visible">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".3" />
 
         <TextView
             android:id="@+id/item_name_right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:background="@drawable/layout_bg"
-            android:backgroundTint="@color/gray_mid"
-            android:paddingStart="20dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
+            android:backgroundTint="@color/gray_light"
+            android:gravity="center"
             android:text="@string/sample_item_name"
-            android:textAlignment="center"
             android:textAppearance="@style/Large"
+            app:autoSizeMaxTextSize="24sp"
+            app:autoSizeTextType="uniform"
+            app:layout_constraintBottom_toTopOf="@+id/guideline_right"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -83,20 +123,27 @@
             android:id="@+id/item_image_right"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_name_right"
-            app:srcCompat="@drawable/apple_triangle" />
+            app:srcCompat="@drawable/baguette_oven" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ProgressBar
-        android:id="@+id/sorting_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/quiz_tour_text"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
+        android:background="@drawable/layout_bg"
+        android:backgroundTint="@color/gray_mid"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="@string/sample_tour_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

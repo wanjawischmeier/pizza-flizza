@@ -2,6 +2,7 @@ package com.wanjawischmeier.pizza
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.drawable.shapes.Shape
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,8 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import java.text.SimpleDateFormat
 
 
@@ -25,8 +28,12 @@ class TransactionCard(
     var order: Order
 )
 
-class TransactionListViewAdapter(context: Context, private val main: MainActivity, private val itemArrayList: ArrayList<TransactionCard>) :
-    ArrayAdapter<TransactionCard>(context, 0, itemArrayList) {
+class TransactionListViewAdapter(
+    context: Context,
+    private val main: MainActivity,
+    private val itemArrayList: ArrayList<TransactionCard>,
+    private val showcaseSequence: MaterialShowcaseSequence
+) : ArrayAdapter<TransactionCard>(context, 0, itemArrayList) {
 
     private var views: HashMap<ConstraintLayout, Pair<String, String>> = hashMapOf()
 
@@ -86,7 +93,22 @@ class TransactionListViewAdapter(context: Context, private val main: MainActivit
             TransactionType.TO_BE_PAID -> {
                 R.drawable.order_to_pay_outline
             }
-            TransactionType.FULFILLED_BY_USER -> 0
+            TransactionType.FULFILLED_BY_USER -> {
+                /*
+                showcaseSequence.addSequenceItem(
+                    MaterialShowcaseView.Builder(main)
+                        .setTarget(itemView)
+                        .setDismissText(R.string.tour_accept)
+                        .setContentText(R.string.sample_tour_content)
+                        .withRectangleShape()
+                        .setDelay(context.resources.getInteger(R.integer.animation_duration_card_out))
+                        .setDismissOnTouch(true)
+                        // .singleUse("")
+                        .build()
+                )
+                 */
+                0
+            }
         }
 
         if (card.transactionType == TransactionType.TO_BE_PAID) {

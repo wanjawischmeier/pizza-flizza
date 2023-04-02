@@ -1,6 +1,7 @@
 package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,8 @@ import android.widget.GridView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.tasks.Task
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import java.util.*
 import kotlin.math.min
 import kotlin.math.round
@@ -24,7 +27,9 @@ class OrderFragment : CallableFragment() {
     private lateinit var main: MainActivity
     private lateinit var order: Order
     private lateinit var previousOrder: Order
+    private lateinit var showcaseSequence: MaterialShowcaseSequence
     private var total = 0f
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,18 +46,19 @@ class OrderFragment : CallableFragment() {
     }
 
     @SuppressLint("DiscouragedApi")
-    override fun onShow(): Task<Unit> {
+    override fun onShow(refresh: Boolean): Task<Unit> {
         main.scrollContainer = itemsGrid
         bottomLayoutVisible = false
         topBubbleVisible = true
         total = 0f
         previousOrder = hashMapOf()
+        showcaseSequence = MaterialShowcaseSequence(activity)
 
         return User.getUser(GROUP_ID, main.userId).continueWith {
             order = it.result.orders[SHOP_ID] ?: hashMapOf()
 
             // TODO: manage context being null
-            gridViewAdapter = OrderGridViewAdapter(context!!, ArrayList<OrderCard>())
+            gridViewAdapter = OrderGridViewAdapter(context!!, ArrayList<OrderCard>(), showcaseSequence)
             itemsGrid.adapter = gridViewAdapter
 
             for ((itemId, item) in main.shop.items.toSortedMap()) {
@@ -75,6 +81,18 @@ class OrderFragment : CallableFragment() {
             }
 
             priceView.text = getString(R.string.price_format).format(total)
+            /*
+            showcaseSequence.addSequenceItem(
+                MaterialShowcaseView.Builder(context as Activity)
+                    .setTarget(topBubble)
+                    .setDismissText(R.string.tour_accept)
+                    .setContentText(R.string.sample_tour_content)
+                    .setDelay(resources.getInteger(R.integer.tour_delay))
+                    .setDismissOnTouch(true)
+                    // .singleUse("TEST5")
+                    .build()
+            ).start()
+             */
         }
     }
 
@@ -93,6 +111,18 @@ class OrderFragment : CallableFragment() {
             // some simple conditions pls
             bottomLayoutVisible = true
             gridViewAdapter.notifyDataSetChanged()
+            /*
+            MaterialShowcaseView.Builder(context as Activity)
+                .setTarget(bottomLayout.findViewById(R.id.bottom_button))
+                .setDismissText(R.string.tour_accept)
+                .setContentText(R.string.sample_tour_content)
+                .setDelay(resources.getInteger(R.integer.tour_delay))
+                .withOvalShape()
+                .setShapePadding(50)
+                .setDismissOnTouch(true)
+                // .singleUse("TEST5")
+                .show()
+             */
         }
 
         if (itemModel.count == 0L) {

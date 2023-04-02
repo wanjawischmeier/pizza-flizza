@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 
 class ProfileFragment : CallableFragment() {
     private lateinit var main: MainActivity
@@ -24,7 +25,7 @@ class ProfileFragment : CallableFragment() {
 
     }
 
-    override fun onShow(): Task<Unit>? {
+    override fun onShow(refresh: Boolean): Task<Unit>? {
         TODO("Not yet implemented")
     }
 

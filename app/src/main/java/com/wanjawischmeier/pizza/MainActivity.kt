@@ -3,6 +3,7 @@ package com.wanjawischmeier.pizza
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -26,6 +27,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var previousFragment: CallableFragment
     private lateinit var currentFragment: CallableFragment
     private lateinit var bottomNavigationView: BottomNavigationView
+    private lateinit var navigationHost: FragmentContainerView
+    private lateinit var navigationHeader: TextView
 
     lateinit var shop: Shop
     lateinit var users: Users
@@ -46,6 +49,15 @@ class MainActivity : AppCompatActivity() {
         swipeRefreshLayout.setOnChildScrollUpCallback { _, _ ->
             scrollContainer.canScrollVertically(-1)
         }
+
+        // Preferences screen bridge
+        CallableFragment.topBubble.setOnClickListener {
+            val intent = Intent(this, ItemPreferencesAktivity::class.java)
+            startActivity(intent)
+        }
+
+        navigationHost = findViewById(R.id.nav_host_fragment)
+        navigationHeader = findViewById(R.id.header)
 
         // check for relevant version hints
         Database.getVersionHint(BuildConfig.VERSION_CODE).continueWith {
@@ -114,15 +126,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initializeFragments() {
-        val navigationHeader = findViewById<TextView>(R.id.header)
-        val navigationHost = findViewById<FragmentContainerView>(R.id.nav_host_fragment)
-
         swipeRefreshLayout.isRefreshing = true
 
         orderFragment = OrderFragment()
         shopFragment = ShopFragment()
         transactionFragment = TransactionFragment()
-        profileFragment = ProfileFragment()
+        // profileFragment = ProfileFragment()
 
         currentFragment = orderFragment
         previousFragment = currentFragment
@@ -132,10 +141,10 @@ class MainActivity : AppCompatActivity() {
             add(R.id.nav_host_fragment, orderFragment)
             add(R.id.nav_host_fragment, shopFragment)
             add(R.id.nav_host_fragment, transactionFragment)
-            add(R.id.nav_host_fragment, profileFragment)
+            // add(R.id.nav_host_fragment, profileFragment)
             hide(shopFragment)
             hide(transactionFragment)
-            hide(orderFragment)
+            // hide(orderFragment)
 
             runOnCommit {
                 val after = { swipeRefreshLayout.isRefreshing = false }
@@ -144,71 +153,10 @@ class MainActivity : AppCompatActivity() {
         }.commit()
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
-        bottomNavigationView.setOnItemSelectedListener { menuItem ->
-            val menuItemId = menuItem.itemId
-            if (menuItemId == bottomNavigationView.selectedItemId) {
-                return@setOnItemSelectedListener false
-            }
-
-            swipeRefreshLayout.isRefreshing = true
-            previousFragment = currentFragment
-
-            when (menuItemId) {
-                R.id.navigation_order -> currentFragment = orderFragment
-                R.id.navigation_shop -> currentFragment = shopFragment
-                R.id.navigation_transaction -> currentFragment = transactionFragment
-            }
-
-            /*
-            // Login screen bridge
-            if (targetFragment == transactionFragment) {
-                val intent = Intent(this, LoginActivity::class.java)
-                finish()
-                startActivity(intent)
-            }
-             */
-
-            navigationHeader.text = menuItem.title
-            navigationHost.animate()
-                .alpha(0f)
-                .withEndAction {
-                    supportFragmentManager.beginTransaction().apply {
-                        hide(previousFragment)
-                        show(currentFragment)
-
-                        runOnCommit {
-                            User.getUsers(GROUP_ID).continueWith { usersTask ->
-                                users = usersTask.result ?: return@continueWith
-
-                                val after = {
-                                    swipeRefreshLayout.isEnabled = true
-                                    swipeRefreshLayout.isRefreshing = false
-
-                                    navigationHost.animate()
-                                        .alpha(1f)
-                                        .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
-                                }
-
-                                val showTask = currentFragment.onShow()
-                                showTask?.continueWith { after.invoke() } ?: after.invoke()
-                            }
-                        }.commit()
-                    }
-                }
-                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
-
-            return@setOnItemSelectedListener true
-        }
+        bottomNavigationView.setOnItemSelectedListener(this::onMenuItemSelected)
     }
 
     private fun checkUser() {
-        /*
-        val intent = Intent(this, ItemPreferencesAktivity::class.java)
-        startActivity(intent)
-        finish()
-        return
-         */
-
         val currentUser = Firebase.auth.currentUser
         if (currentUser == null) {
             val intent = Intent(this, LoginActivity::class.java)
@@ -220,19 +168,70 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun refreshView(): Task<Users> {
+    private fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        val menuItemId = menuItem.itemId
+        if (menuItemId == bottomNavigationView.selectedItemId) {
+            return false
+        }
+
+        swipeRefreshLayout.isRefreshing = true
+        previousFragment = currentFragment
+
+        when (menuItemId) {
+            R.id.navigation_order -> currentFragment = orderFragment
+            R.id.navigation_shop -> currentFragment = shopFragment
+            R.id.navigation_transaction -> currentFragment = transactionFragment
+        }
+
+        /*
+        // Login screen bridge
+        if (currentFragment == transactionFragment) {
+            val intent = Intent(this, LoginActivity::class.java)
+            finish()
+            startActivity(intent)
+        }
+         */
+
+        navigationHeader.text = menuItem.title
+        navigationHost.animate()
+            .alpha(0f)
+            .withEndAction {
+                supportFragmentManager.beginTransaction().apply {
+                    hide(previousFragment)
+                    show(currentFragment)
+
+                    runOnCommit {
+                        User.getUsers(GROUP_ID).continueWith { usersTask ->
+                            users = usersTask.result ?: return@continueWith
+
+                            val after = {
+                                swipeRefreshLayout.isRefreshing = false
+
+                                navigationHost.animate()
+                                    .alpha(1f)
+                                    .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+                            }
+
+                            swipeRefreshLayout.isEnabled = true
+                            currentFragment.onShow()?.continueWith { after.invoke() } ?: after.invoke()
+                        }
+                    }.commit()
+                }
+            }
+            .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+
+        return true
+    }
+
+    private fun refreshView(): Task<Unit> {
         checkUser()
-        Firebase.auth.sendPasswordResetEmail("")
-        user.verifyBeforeUpdateEmail("")
-        val taskUsers = User.getUsers(GROUP_ID)
-        taskUsers.continueWith { usersTask ->
+
+        return User.getUsers(GROUP_ID).continueWith { usersTask ->
             users = usersTask.result
 
             val after = { swipeRefreshLayout.isRefreshing = false }
-            currentFragment.onShow()?.continueWith { after.invoke() } ?: after.invoke()
+            currentFragment.onShow(true)?.continueWith { after.invoke() } ?: after.invoke()
         }
-
-        return taskUsers
     }
 
     fun onOrderSub(view: View) {

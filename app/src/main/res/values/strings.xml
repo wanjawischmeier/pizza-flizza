@@ -63,6 +63,7 @@
     <string name="sample_item_count" translatable="false">5</string>
     <string name="sample_item_name" translatable="false">Pizza</string>
     <string name="info_no_open_orders" translatable="false">No open orders</string>
+    <string name="shop_lock_info" translatable="false">Go shopping</string>
 
     <!-- Transactions -->
     <string name="transaction_accept" translatable="false">Accept</string>
@@ -79,5 +80,13 @@
     <string name="menu_order">Order</string>
     <string name="menu_shop">Shop</string>
     <string name="menu_transactions">Transactions</string>
+
+    <!-- Tour -->
+    <string name="tour_accept" translatable="false">Got it</string>
+    <string name="sample_tour_content" translatable="false">Sample Tour Content</string>
+
+    <!-- Preferences -->
+    <string name="quiz_prompt_hearty" translatable="false">Mal so rein hypothetisch.\nWas schmeckt besser?</string>
+    <string name="quiz_prompt_sweet" translatable="false">Und bei Süßis?</string>
 
 </resources>

@@ -2,27 +2,33 @@ package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.view.View.OnTouchListener
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.gms.tasks.Task
 import java.lang.Float.max
 import java.lang.Integer.max
 import java.lang.Integer.min
+import java.util.Calendar
 import kotlin.math.*
+
 
 const val CARD_SCALE_EXPANDED = 1.04f
 
 class ShopFragment : CallableFragment() {
     private lateinit var main: MainActivity
+    private lateinit var lockButton: TextView
+    private lateinit var lockProgress: View
+    private lateinit var progressBar: ProgressBar
     private lateinit var card: CardView
     private lateinit var openOrders: HashMap<String, HashMap<String, MutableList<Long>>>
     private lateinit var currentOrder: Order
+    private var leftOrders = 0
     private var cardMode = 0
     private var maxItems = 5
     private var itemCount = 5
@@ -32,6 +38,7 @@ class ShopFragment : CallableFragment() {
     private var grabY = 0f
     private var cardX = 0f
     private var cardY = 0f
+    private var lockStartTime = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +52,77 @@ class ShopFragment : CallableFragment() {
         return inflater.inflate(R.layout.fragment_shop, container, false)
     }
 
-    override fun onShow(): Task<Unit>? {
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        lockButton = view.findViewById(R.id.shop_lock_button)
+        lockProgress = view.findViewById(R.id.shop_lock_progress)
+        progressBar = view.findViewById(R.id.shop_progress_bar)
+        lockButton.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    lockProgress.scaleX = 0f
+                    lockProgress.scaleY = 0f
+                    lockProgress.isVisible = true
+
+                    lockProgress.clearAnimation()
+                    lockProgress.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(ViewConfiguration.getLongPressTimeout().toLong())
+                        .withEndAction {
+                            lockButton.animate()
+                                .scaleX(0f)
+                                .scaleY(0f)
+                                .setDuration(resources.getInteger(R.integer.animation_duration_fragment).toLong())
+                                .withEndAction {
+                                    main.swipeRefreshLayout.isEnabled = true
+                                    lockProgress.isVisible = false
+                                    lockButton.isVisible = false
+                                    lockProgress.scaleX = 1f
+                                    lockProgress.scaleY = 1f
+                                    lockButton.scaleX = 1f
+                                    lockButton.scaleY = 1f
+
+                                    loadOrder()
+                                }
+
+                            lockProgress.clearAnimation()
+                            lockProgress.animate()
+                                .scaleX(0f)
+                                .scaleY(0f)
+                                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+                        }
+
+                    lockStartTime = Calendar.getInstance().timeInMillis
+
+                    true
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    lockProgress.clearAnimation()
+                    lockProgress.animate()
+                        .scaleX(0f)
+                        .scaleY(0f)
+                        .setDuration(resources.getInteger(R.integer.animation_duration_fragment).toLong())
+                        .withEndAction {
+                            lockProgress.isVisible = false
+                        }
+
+                    if (Calendar.getInstance().timeInMillis > lockStartTime + ViewConfiguration.getLongPressTimeout().toLong()) {
+
+                    }
+
+                    false
+                }
+
+                else -> true
+            }
+        }
+    }
+
+    override fun onShow(refresh: Boolean): Task<Unit>? {
         topBubbleVisible = false
         bottomLayoutVisible = false
 
@@ -54,22 +131,58 @@ class ShopFragment : CallableFragment() {
         }
 
         openOrders = Shop.getOpenOrders(main.users, SHOP_ID)
-        loadOrder()
+        leftOrders = openOrders.size
+
+        if (refresh) {
+            loadOrder()
+        } else {
+            progressBar.isVisible = false
+            lockButton.isVisible = openOrders.isNotEmpty()
+
+            if (openOrders.isEmpty()) {
+                showEmptyCard(R.string.info_no_open_orders)
+            } else {
+                removeEmptyCard()
+                main.swipeRefreshLayout.isRefreshing = false
+                main.swipeRefreshLayout.isEnabled = false
+            }
+        }
 
         return null
     }
 
     private fun loadOrder() {
-        val noItems = view?.findViewById<TextView>(R.id.no_items_text)?.parent
-        if (noItems != null) (view as ViewGroup).removeView(noItems as View)
-
         if (openOrders.isEmpty()) {
-            showEmptyCard(R.string.info_no_open_orders)
+            if (leftOrders > 0) {
+                showEmptyCard("$leftOrders order${if (leftOrders > 1) "s" else ""} left")
+            } else {
+                showEmptyCard(R.string.info_no_open_orders)
+            }
+            if (progressBar.isVisible) {
+                progressBar.animate()
+                    .translationY(-progressBar.height.toFloat())
+                    .setDuration(resources.getInteger(R.integer.animation_duration_fragment).toLong())
+                    .withEndAction {
+                        progressBar.isVisible = false
+                    }
+            }
             return
         }
 
+        removeEmptyCard()
+
+        if (!progressBar.isVisible) {
+            progressBar.translationY = -progressBar.height.toFloat()
+            progressBar.progress = 0
+            progressBar.isVisible = true
+            progressBar.animate()
+                .translationY(0f)
+                .duration = resources.getInteger(R.integer.animation_duration_fragment).toLong()
+        }
+
+        val keys = openOrders.keys
         currentOrder = hashMapOf()
-        itemId = openOrders.iterator().next().key
+        itemId = keys.iterator().next()
         val name = main.shop.items[itemId]?.name ?: getString(R.string.name_item_unknown)
         itemCount = 0
 
@@ -116,7 +229,7 @@ class ShopFragment : CallableFragment() {
         }
 
         card.setOnTouchListener(
-            View.OnTouchListener { view, event ->
+            OnTouchListener { view, event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> onCardClicked(view, event)
                     MotionEvent.ACTION_MOVE -> onCardMoved(view, event)
@@ -213,6 +326,9 @@ class ShopFragment : CallableFragment() {
         val diff = event.rawX - grabX
 
         if (cardMode == 1 && abs(diff) > screenCenter / 1.5f) {
+            val progress = progressBar.progress + (1f / openOrders.size) * (100 - progressBar.progress)
+            progressBar.setProgress(progress.roundToInt(), true)
+
             val fulfill = diff > 0
             var itemsLeft = itemCount.toLong()
 
@@ -243,6 +359,7 @@ class ShopFragment : CallableFragment() {
 
                 if (openOrders[itemId]?.size == 0) {
                     openOrders.remove(itemId)
+                    if (fulfill) leftOrders--
                 }
             }
 
@@ -255,7 +372,7 @@ class ShopFragment : CallableFragment() {
             card.animate()
                 .x(target)
                 .y(event.rawY - card.height / 1.5f)
-                .setDuration(200)
+                .setDuration(resources.getInteger(R.integer.animation_duration_card_out).toLong())
                 .withEndAction(this::loadOrder)
         } else {
             card.animate()
@@ -264,7 +381,7 @@ class ShopFragment : CallableFragment() {
                 .scaleX(1f)
                 .scaleY(1f)
                 .rotation(0f)
-                .duration = 200
+                .duration = resources.getInteger(R.integer.animation_duration_card_out).toLong()
         }
 
         cardMode = 0

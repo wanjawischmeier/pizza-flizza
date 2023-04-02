@@ -4,4 +4,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ShopFragment"/>
+    tools:context=".ShopFragment">
+
+    <ProgressBar
+        android:id="@+id/shop_progress_bar"
+        style="@style/CustomProgressBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/layout_bg"
+        android:backgroundTint="@color/gray_mid"
+        android:progress="40"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/shop_lock_button"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:background="@drawable/shop_lock_circle"
+            android:gravity="center"
+            android:padding="@dimen/corner_radius_2x"
+            android:text="@string/shop_lock_info"
+            android:textAlignment="gravity"
+            android:textAppearance="@style/Large"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/shop_lock_progress"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/shop_lock_circle"
+            android:backgroundTint="@color/cream"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

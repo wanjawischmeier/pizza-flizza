@@ -26,7 +26,7 @@ class User {
     var orders = hashMapOf<String, Order>()
     // shopId, fulfilledOrder
     var fulfilled = hashMapOf<String, FulfilledOrder>()
-    var priorities = listOf<String>()
+    var priorities = listOf<List<String>>()
 
     companion object {
         fun getUsers(groupId: String): Task<Users> {
@@ -67,7 +67,7 @@ class User {
             }
         }
 
-        fun setPriorities(groupId: String, userId: String, proritizedItems: List<String>): Task<Void> {
+        fun setPriorities(groupId: String, userId: String, proritizedItems: List<List<String>>): Task<Void> {
             return Firebase.database.getReference("users/$groupId/$userId/priorities").setValue(proritizedItems)
         }
     }
@@ -87,7 +87,7 @@ class Shop {
         var type = 0
 
         enum class Type {
-            HEARTY, SWEET, SIDE_DISH
+            HEARTY, SWEET, SIDE_DISH, IRRELEVANT
         }
     }
 
