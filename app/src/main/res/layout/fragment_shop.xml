@@ -6,6 +6,46 @@
     android:layout_height="match_parent"
     tools:context=".ShopFragment">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_hint_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_hint_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <View
+        android:id="@+id/hint_left"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha=".5"
+        android:background="#FF5722"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_hint_left"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <View
+        android:id="@+id/hint_right"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha=".5"
+        android:background="#8BC34A"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline_hint_right"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
     <ProgressBar
         android:id="@+id/shop_progress_bar"
         style="@style/CustomProgressBar"

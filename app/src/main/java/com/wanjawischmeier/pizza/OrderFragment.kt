@@ -61,7 +61,45 @@ class OrderFragment : CallableFragment() {
             gridViewAdapter = OrderGridViewAdapter(context!!, ArrayList<OrderCard>(), showcaseSequence)
             itemsGrid.adapter = gridViewAdapter
 
-            for ((itemId, item) in main.shop.items.toSortedMap()) {
+            val priorities = main.users[main.userId]?.priorities ?: return@continueWith
+            val sortedItems = main.shop.items.toSortedMap { a, b ->
+                val default = a.compareTo(b)
+                val itemA = main.shop.items[a] ?: return@toSortedMap default
+                val itemB = main.shop.items[b] ?: return@toSortedMap default
+
+                if (itemA.type == itemB.type) {
+                    if (priorities.size -1 >= itemA.type) {
+                        val priority = priorities[itemA.type]
+                        if (priority.contains(a)) {
+                            if (priority.contains(b)) {
+                                if (priority.indexOf(a) < priority.indexOf(b)) {
+                                    -1
+                                } else {
+                                    1
+                                }
+                            } else {
+                                -1
+                            }
+                        } else {
+                            if (priority.contains(b)) {
+                                1
+                            } else {
+                                default
+                            }
+                        }
+                    } else {
+                        default
+                    }
+                } else {
+                    if (itemA.type < itemB.type) {
+                        -1
+                    } else {
+                        1
+                    }
+                }
+            }
+
+            for ((itemId, item) in sortedItems) {
                 if (gridViewAdapter.contains(itemId)) continue
                 val count = order[itemId]?.get(ITEM_COUNT) ?: 0L
                 total = round((total + item.price * count) * 100) / 100

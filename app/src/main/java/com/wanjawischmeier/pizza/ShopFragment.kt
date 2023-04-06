@@ -8,7 +8,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.gms.tasks.Task
 import java.lang.Float.max
@@ -24,11 +23,14 @@ class ShopFragment : CallableFragment() {
     private lateinit var main: MainActivity
     private lateinit var lockButton: TextView
     private lateinit var lockProgress: View
+    private lateinit var hintLeft: View
+    private lateinit var hintRight: View
     private lateinit var progressBar: ProgressBar
     private lateinit var card: CardView
     private lateinit var openOrders: HashMap<String, HashMap<String, MutableList<Long>>>
     private lateinit var currentOrder: Order
     private var leftOrders = 0
+    // 0: default, -1: up/down, 1: left/right
     private var cardMode = 0
     private var maxItems = 5
     private var itemCount = 5
@@ -59,6 +61,11 @@ class ShopFragment : CallableFragment() {
         lockButton = view.findViewById(R.id.shop_lock_button)
         lockProgress = view.findViewById(R.id.shop_lock_progress)
         progressBar = view.findViewById(R.id.shop_progress_bar)
+        hintLeft = view.findViewById(R.id.hint_left)
+        hintRight = view.findViewById(R.id.hint_right)
+        hintLeft.alpha = 0f
+        hintRight.alpha = 0f
+
         lockButton.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -125,6 +132,8 @@ class ShopFragment : CallableFragment() {
     override fun onShow(refresh: Boolean): Task<Unit>? {
         topBubbleVisible = false
         bottomLayoutVisible = false
+        hintLeft.isVisible = false
+        hintRight.isVisible = false
 
         if (this::card.isInitialized) {
             card.isVisible = false
@@ -261,7 +270,8 @@ class ShopFragment : CallableFragment() {
 
 
     private fun onCardMoved(card: View, event: MotionEvent) {
-        val diffX = abs(event.rawX - grabX)
+        val rawDiffX = event.rawX - grabX
+        val diffX = abs(rawDiffX)
         val rawDiffY = event.rawY - grabY
         val diffY = abs(rawDiffY)
         val diff = max(diffX, diffY)
@@ -293,7 +303,6 @@ class ShopFragment : CallableFragment() {
             slider.y = ((maxItems - this.itemCount).toFloat() / maxItems) * card.height
 
         } else {
-
             if (cardMode == 0 && diff > screenCenter / 4) {
                 cardMode = max(-1, min(1, (diffX * 4  - diffY).roundToInt()))
 
@@ -315,6 +324,15 @@ class ShopFragment : CallableFragment() {
                     .y(cardY + (event.rawY - grabY) / 4)
                     .rotation((event.rawX - grabX) / (card.width/20))
                     .duration = 0
+
+                if (cardMode == 1 && diff > screenCenter / 1.5f) {
+                    val fulfill = rawDiffX > 0
+                    animateHintVisibility(hintLeft, !fulfill)
+                    animateHintVisibility(hintRight, fulfill)
+                } else {
+                    animateHintVisibility(hintLeft, false)
+                    animateHintVisibility(hintRight, false)
+                }
             }
         }
     }
@@ -322,6 +340,8 @@ class ShopFragment : CallableFragment() {
 
     private fun onCardReleased(card: View, event: MotionEvent) {
         main.swipeRefreshLayout.isEnabled = true
+        animateHintVisibility(hintLeft, false, force = true)
+        animateHintVisibility(hintRight, false, force = true)
 
         val diff = event.rawX - grabX
 
@@ -385,5 +405,25 @@ class ShopFragment : CallableFragment() {
         }
 
         cardMode = 0
+    }
+
+    private fun animateHintVisibility(view: View, visibility: Boolean, force: Boolean = false) {
+        val targetAlpha = if (visibility) 0.5f else 0f
+        if (!force) {
+            if (view.alpha != 0.5f - targetAlpha) {
+                return
+            } else {
+                view.alpha = 0.5f - targetAlpha
+            }
+        }
+
+        view.isVisible = true
+        view.clearAnimation()
+        view.animate()
+            .alpha(targetAlpha)
+            .setDuration(resources.getInteger(R.integer.animation_duration_card_out).toLong())
+            .withEndAction {
+                view.isVisible = visibility
+            }
     }
 }

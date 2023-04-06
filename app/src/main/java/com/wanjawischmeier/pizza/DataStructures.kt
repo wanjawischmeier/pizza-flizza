@@ -4,7 +4,10 @@ import android.os.Build
 import com.google.android.gms.tasks.Task
 import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import java.util.*
 import kotlin.collections.List
 
@@ -178,26 +181,43 @@ class Shop {
 
 class Database {
     enum class VersionHintType {
-        INFO, WARNING, ERROR, OBSOLETE, DISABLED
+        INFO, WARNING, ERROR, DEPRICATED, DISABLED
     }
 
     class VersionHint {
-        val type = 0
+        var type = 0
         val message = ""
     }
 
     companion object {
-        fun getVersionHint(version: Int): Task<VersionHint?> {
-            return Firebase.database.getReference("version_hints/$version").get().continueWith {
-                if (it.isSuccessful) {
-                    return@continueWith try {
-                        it.result.getValue(VersionHint::class.java)
+        fun getVersionHint(version: Int, callback: (VersionHint?) -> Unit) {
+            var hint: VersionHint? = null
+            // I'm really sorry for the call stack that is about to be summoned here
+            Firebase.database.getReference("version_hints/depricated").get().continueWith { depricatedTask ->
+                if (depricatedTask.isSuccessful && (depricatedTask.result.getValue<Long>() ?: 0) >= version) {
+                    hint = VersionHint()
+                    hint?.type = VersionHintType.DEPRICATED.ordinal
+                }
+
+                Firebase.database.getReference("version_hints/disabled").get().continueWith { disabledTask ->
+                    if (disabledTask.isSuccessful && (disabledTask.result.getValue<Long>() ?: 0) >= version) {
+                        hint = VersionHint()
+                        hint?.type = VersionHintType.DISABLED.ordinal
                     }
-                    catch (_: DatabaseException) {
-                        null
+
+                    Firebase.database.getReference("version_hints/$version").get().continueWith { versionTask ->
+                        if (versionTask.isSuccessful) {
+                            try {
+                                val value = versionTask.result.getValue(VersionHint::class.java)
+                                if (value != null) {
+                                    hint = value
+                                }
+                            }
+                            catch (_: DatabaseException) {}
+                        }
+
+                        callback(hint)
                     }
-                } else {
-                    return@continueWith null
                 }
             }
         }

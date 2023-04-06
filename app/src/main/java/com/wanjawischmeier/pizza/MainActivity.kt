@@ -60,13 +60,13 @@ class MainActivity : AppCompatActivity() {
         navigationHeader = findViewById(R.id.header)
 
         // check for relevant version hints
-        Database.getVersionHint(BuildConfig.VERSION_CODE).continueWith {
-            val hint = it.result ?: return@continueWith startActivity()
+        Database.getVersionHint(BuildConfig.VERSION_CODE) { hint ->
+            if (hint == null) return@getVersionHint startActivity()
             var type = VersionHintType.values()[hint.type]
             val dialog = AlertDialog.Builder(this, R.style.AlertStyle).create()
 
             val message = when (type) {
-                VersionHintType.OBSOLETE -> {
+                VersionHintType.DEPRICATED -> {
                     type = VersionHintType.WARNING
                     getString(R.string.hint_obsolete)
                 }
