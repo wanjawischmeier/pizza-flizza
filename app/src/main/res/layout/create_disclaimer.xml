@@ -11,7 +11,7 @@
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="20dp"
-        android:contentDescription="@string/content_realtime_icon"
+        android:contentDescription="@string/disclaimer_description_realtime_icon"
         android:scaleType="centerInside"
         app:layout_constraintBottom_toTopOf="@+id/disclaimer_header"
         app:layout_constraintEnd_toEndOf="parent"

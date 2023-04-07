@@ -1,80 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- General -->
+    <!-- App Info -->
     <string name="app_name" translatable="false">PizzaFlizza</string>
     <string name="app_icon" translatable="false">App Icon</string>
     <string name="web_client_id" translatable="false">207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com</string>
-    <string name="price_format" translatable="false">"%.2f€"</string>
-    <string name="name_user_unknown" translatable="false">Unknown Username</string>
-    <string name="name_item_unknown" translatable="false">Unknown Name</string>
+
+    <!-- General -->
+    <string name="format_price" translatable="false">"%.2f€"</string>
+    <string name="unknown_user">Unknown Username</string>
+    <string name="unknown_item">Unknown Name</string>
+
+    <!-- Samples -->
+    <string name="sample_price" translatable="false">1,69€</string>
+    <string name="sample_price_total" translatable="false">99,99€</string>
+    <string name="sample_item_count" translatable="false">5</string>
+    <string name="sample_item_name">Pizza</string>
+    <string name="sample_user_name" translatable="false">falkonxx.dinkelacker</string>
+    <string name="sample_date" translatable="false">01.01.1970</string>
+    <string name="sample_order">- 1x Brick</string>
+    <string name="sample_tour_content">Sample Tour Content</string>
 
     <!-- VersionHints -->
-    <string name="hint_title_info" translatable="false">Info</string>
-    <string name="hint_title_warning" translatable="false">Warning</string>
-    <string name="hint_title_error" translatable="false">Error</string>
-    <string name="hint_obsolete" translatable="false">This version of the app has been marked as obsolete and may contain bugs, installing a newer version is recommended</string>
-    <string name="hint_disabled" translatable="false">This version of the app has been disabled. It either contains major bugs or is no longer compatible with the server data structure. Please install a newer version.</string>
+    <string name="hint_title_info">Info</string>
+    <string name="hint_title_warning">Warning</string>
+    <string name="hint_title_error">Error</string>
+    <string name="hint_obsolete">This version of the app has been marked as obsolete and may contain bugs. Installing a newer version is recommended.</string>
+    <string name="hint_disabled">This version of the app is no longer supported. It either contains major bugs or is incompatible with the server data structure. Please install a newer version.</string>
 
     <!-- Login -->
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome!"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
-    <string name="email_login_field">E-Mail</string>
+    <string name="login_hint_email">E-Mail</string>
+    <string name="login_hint_password">Password</string>
     <string name="login_button">Log in</string>
-    <string name="what_do_you_want">Wohin möchtest du?</string>
-    <string name="order_view">Zu meinen Bestellungen</string>
-    <string name="to_penny">Zu Penny</string>
-    <string name="create_account">Create Account</string>
-    <string name="password_login_field">Password</string>
-    <string name="info_verify_email" translatable="false">Please verify your E-Mail to create the account</string>
-    <string name="info_wrong_password">Wrong password</string>
-    <string name="info_invalid_password" translatable="false">Password has to be at least 6 characters</string>
-    <string name="info_no_connection" translatable="false">Please check your internet connection</string>
+    <string name="login_button_create">Create Account</string>
+    <string name="login_info_email_verify">Please verify your E-Mail</string>
+    <string name="login_info_password_incorrect">Wrong password</string>
+    <string name="login_info_password_invalid">Password has to be at least 6 characters</string>
+    <string name="login_info_no_connection">Please check your internet connection</string>
 
     <!-- Disclaimer -->
-    <string name="disclaimer_header" translatable="false">Hey,</string>
+    <string name="disclaimer_description_realtime_icon" translatable="false">Firebase Realtime Icon</string>
     <string name="disclaimer_arrow" translatable="false">-</string>
-    <string name="disclaimer_firebase" translatable="false">Dieses Projekt benutzt leider Google Firebase zum speichern speichern der Daten :/</string>
-    <string name="disclaimer_realtime" translatable="false">Alle Informationen zu Bestellungen sind in der Realtime Database gesichert.</string>
-    <string name="disclaimer_location" translatable="false">Wir nutzen den Serverstandort europe-west1 in St. Ghislain, Belgien, falls wer vorbeifahren möchte.</string>
-    <string name="disclaimer_emmisions" translatable="false">Low-carbon nur 110 gCO2eq/kWh jadijadijada.</string>
-    <string name="disclaimer_analythics" translatable="false">Google Analythics wurde deaktiviert, es gibt keine weiteren Auswertungen :)</string>
-    <string name="disclaimer_agree" translatable="false">Ich gewähre Google Einblick in meinen ausufernden Pizza-Konsum.</string>
-    <string name="disclaimer_button" translatable="false">Alles klar</string>
-    <string name="content_realtime_icon" translatable="false">Firebase Realtime Icon</string>
+    <string name="disclaimer_header">Hey,</string>
+    <string name="disclaimer_firebase">This project unfortunately uses Google Firebase to save data :/</string>
+    <string name="disclaimer_realtime">Informations regarding your orders will be saved in the "Realtime database".</string>
+    <string name="disclaimer_location">We use the europe-west1 server location in St. Ghislain, Belgium.</string>
+    <string name="disclaimer_emmisions">The server is has relatively low carbon emissions with 110 gCO2eq/kWh.</string>
+    <string name="disclaimer_analythics">Google Analytics have been deactivated, there are no further evaluations :)</string>
+    <string name="disclaimer_agree">I give Google insight into my excessive pizza consumption.</string>
+    <string name="disclaimer_button">Continue</string>
 
     <!-- Order -->
+    <string name="order_description_image" translatable="false">Product Image</string>
+    <string name="order_description_nav_view" translatable="false">Navigation view</string>
     <string name="order_sub" translatable="false">-</string>
     <string name="order_add" translatable="false">+</string>
     <string name="order_def" translatable="false">0</string>
     <string name="order_button">Order</string>
-    <string name="order_image_description" translatable="false">Product Image</string>
-    <string name="sample_order_name" translatable="false">Pizza Margeritha</string>
-    <string name="sample_order_price" translatable="false">1,69€</string>
-    <string name="sample_total_price" translatable="false">99,99€</string>
-    <string name="order_nav_view_description" translatable="false">Navigation view</string>
 
     <!-- Shop -->
-    <string name="sample_item_count" translatable="false">5</string>
-    <string name="sample_item_name" translatable="false">Pizza</string>
-    <string name="info_no_open_orders" translatable="false">No open orders</string>
-    <string name="shop_lock_info" translatable="false">Go shopping</string>
+    <string name="shop_info_no_open_orders">No orders</string>
+    <string name="shop_lock">Go shopping</string>
 
     <!-- Transactions -->
-    <string name="transaction_accept" translatable="false">Accept</string>
-    <string name="transaction_reject" translatable="false">Reject</string>
-    <string name="info_no_transactions" translatable="false">No transactions</string>
-    <string name="transaction_clear" translatable="false">Clear</string>
-    <string name="transaction_paid" translatable="false">Paid</string>
-    <string name="your_order" translatable="false">Your Order</string>
-    <string name="sample_name" translatable="false">falkonxx.dinkelacker</string>
-    <string name="sample_date" translatable="false">01.01.1970</string>
-    <string name="sample_order" translatable="false">- 1x Backstein</string>
+    <string name="transaction_info_no_transactions">No transactions</string>
+    <string name="transaction_clear">Clear</string>
+    <string name="transaction_paid">Paid</string>
+    <string name="transaction_your_order">Your Order</string>
 
     <!-- Menu -->
     <string name="menu_order">Order</string>
@@ -82,11 +73,9 @@
     <string name="menu_transactions">Transactions</string>
 
     <!-- Tour -->
-    <string name="tour_accept" translatable="false">Got it</string>
-    <string name="sample_tour_content" translatable="false">Sample Tour Content</string>
+    <string name="tour_accept">Got it</string>
 
-    <!-- Preferences -->
-    <string name="quiz_prompt_hearty" translatable="false">Mal so rein hypothetisch.\nWas schmeckt besser?</string>
-    <string name="quiz_prompt_sweet" translatable="false">Und bei Süßis?</string>
-
+    <!-- Quiz -->
+    <string name="quiz_prompt_hearty">What tastes better?</string>
+    <string name="quiz_prompt_sweet">Great!\nNow the same for sweets.</string>
 </resources>

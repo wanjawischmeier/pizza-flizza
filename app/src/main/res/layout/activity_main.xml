@@ -54,7 +54,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:gravity="center"
-                android:text="@string/sample_total_price"
+                android:text="@string/sample_price_total"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="@color/gray_dark"
                 android:textStyle="bold"
@@ -83,7 +83,7 @@
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/order_nav_view_description"
+            android:contentDescription="@string/order_description_nav_view"
             app:defaultNavHost="true"
             app:navGraph="@navigation/navigation"
             tools:ignore="SpeakableTextPresentCheck" />

@@ -1,6 +1,5 @@
 package com.wanjawischmeier.pizza
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +9,6 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.tasks.Task
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 
 
 class TransactionFragment : CallableFragment() {
@@ -100,12 +98,12 @@ class TransactionFragment : CallableFragment() {
         if (noItems != null) (view as ViewGroup).removeView(noItems as View)
 
         if (gridViewAdapter.isEmpty) {
-            showEmptyCard(R.string.info_no_transactions)
+            showEmptyCard(R.string.transaction_info_no_transactions)
         }
     }
 
     private fun getPseudoUsername(userId: String): String {
-        val email = main.users[userId]?.email ?: return getString(R.string.name_user_unknown)
+        val email = main.users[userId]?.email ?: return getString(R.string.unknown_user)
         return email.split('@')[0]
     }
 

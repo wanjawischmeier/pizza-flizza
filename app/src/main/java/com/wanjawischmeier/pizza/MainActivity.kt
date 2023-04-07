@@ -18,7 +18,6 @@ import com.google.firebase.ktx.Firebase
 import com.wanjawischmeier.pizza.Database.VersionHintType
 
 
-@Suppress("UNUSED_PARAMETER")
 class MainActivity : AppCompatActivity() {
     private lateinit var orderFragment: OrderFragment
     private lateinit var shopFragment: ShopFragment
@@ -52,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
         // Preferences screen bridge
         CallableFragment.topBubble.setOnClickListener {
-            val intent = Intent(this, ItemPreferencesAktivity::class.java)
+            val intent = Intent(this, PreferenceQuizAktivity::class.java)
             startActivity(intent)
         }
 
@@ -113,11 +112,11 @@ class MainActivity : AppCompatActivity() {
     private fun startActivity() {
         swipeRefreshLayout.isRefreshing = true
 
-        Shop.getShop(SHOP_ID).continueWith { shopTask ->
-            shop = shopTask.result ?: return@continueWith
+        Shop.getShop(SHOP_ID).continueWith getShop@ { shopTask ->
+            shop = shopTask.result ?: return@getShop
 
-            User.getUsers(GROUP_ID).continueWith { usersTask ->
-                users = usersTask.result
+            User.getUsers(GROUP_ID).continueWith getUsers@ { usersTask ->
+                users = usersTask.result ?: return@getUsers
                 swipeRefreshLayout.isRefreshing = false
 
                 runOnUiThread(this::initializeFragments)
@@ -201,8 +200,8 @@ class MainActivity : AppCompatActivity() {
                     show(currentFragment)
 
                     runOnCommit {
-                        User.getUsers(GROUP_ID).continueWith { usersTask ->
-                            users = usersTask.result ?: return@continueWith
+                        User.getUsers(GROUP_ID).continueWith continueUsers@ { usersTask ->
+                            users = usersTask.result ?: return@continueUsers
 
                             val after = {
                                 swipeRefreshLayout.isRefreshing = false
@@ -226,8 +225,8 @@ class MainActivity : AppCompatActivity() {
     private fun refreshView(): Task<Unit> {
         checkUser()
 
-        return User.getUsers(GROUP_ID).continueWith { usersTask ->
-            users = usersTask.result
+        return User.getUsers(GROUP_ID).continueWith continueUsers@ { usersTask ->
+            users = usersTask.result ?: return@continueUsers
 
             val after = { swipeRefreshLayout.isRefreshing = false }
             currentFragment.onShow(true)?.continueWith { after.invoke() } ?: after.invoke()
@@ -246,7 +245,7 @@ class MainActivity : AppCompatActivity() {
         transactionFragment.accept(view)
     }
 
-    fun onOrder(view: View) {
+    fun onOrder(@Suppress("UNUSED_PARAMETER") view: View) {
         orderFragment.placeOrder()
     }
 

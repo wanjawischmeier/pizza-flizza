@@ -1,7 +1,6 @@
 package com.wanjawischmeier.pizza
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.gms.tasks.Task
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import java.util.*
 import kotlin.math.min
 import kotlin.math.round
@@ -54,14 +52,14 @@ class OrderFragment : CallableFragment() {
         previousOrder = hashMapOf()
         showcaseSequence = MaterialShowcaseSequence(activity)
 
-        return User.getUser(GROUP_ID, main.userId).continueWith {
-            order = it.result.orders[SHOP_ID] ?: hashMapOf()
+        return User.getUser(GROUP_ID, main.userId).continueWith continueUser@ { userTask ->
+            order = userTask.result?.orders?.get(SHOP_ID) ?: hashMapOf()
 
             // TODO: manage context being null
             gridViewAdapter = OrderGridViewAdapter(context!!, ArrayList<OrderCard>(), showcaseSequence)
             itemsGrid.adapter = gridViewAdapter
 
-            val priorities = main.users[main.userId]?.priorities ?: return@continueWith
+            val priorities = main.users[main.userId]?.priorities ?: return@continueUser
             val sortedItems = main.shop.items.toSortedMap { a, b ->
                 val default = a.compareTo(b)
                 val itemA = main.shop.items[a] ?: return@toSortedMap default
@@ -118,7 +116,7 @@ class OrderFragment : CallableFragment() {
                 ))
             }
 
-            priceView.text = getString(R.string.price_format).format(total)
+            priceView.text = getString(R.string.format_price).format(total)
             /*
             showcaseSequence.addSequenceItem(
                 MaterialShowcaseView.Builder(context as Activity)
@@ -145,7 +143,7 @@ class OrderFragment : CallableFragment() {
         if (newCount >= 0) {
             itemModel.count = min(99L, itemModel.count + change)
             total = min(99f, round((total + item.price * change) * 100) / 100)
-            priceView.text = getString(R.string.price_format).format(total)
+            priceView.text = getString(R.string.format_price).format(total)
             // some simple conditions pls
             bottomLayoutVisible = true
             gridViewAdapter.notifyDataSetChanged()

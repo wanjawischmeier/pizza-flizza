@@ -1,26 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Passwort</string>
-    <string name="action_sign_in">Anmelden oder registrieren</string>
-    <string name="action_sign_in_short">Anmelder</string>
-    <string name="welcome">"Willkommen!"</string>
-    <string name="invalid_username">Benutzername ungütig</string>
-    <string name="invalid_password">Passwort muss >5 Zeichen sein</string>
-    <string name="login_failed">"Anmeldung fehlgeschlagen"</string>
-    <string name="email_login_field">E-Mail</string>
-    <string name="login_button">Anmelden</string>
-    <string name="what_do_you_want">Wohin möchtest du?</string>
-    <string name="order_view">Zu meinen Bestellungen</string>
-    <string name="to_penny">Zu Penny</string>
-    <string name="create_account">Account erstellen</string>
-    <string name="password_login_field">Passwort</string>
+    <!-- General -->
+    <string name="unknown_user">Unbekannter Benutzer</string>
+    <string name="unknown_item">Unbekanntes Produkt</string>
 
+    <!-- Samples -->
+    <string name="sample_item_name">Pizza</string>
+    <string name="sample_order">- 1x Backstein</string>
+    <string name="sample_tour_content">Tour-Platzhalter</string>
+
+    <!-- VersionHints -->
+    <string name="hint_title_info">Info</string>
+    <string name="hint_title_warning">Warnung</string>
+    <string name="hint_title_error">Fehler</string>
+    <string name="hint_obsolete">Diese Version der App wurde als veraltet markiert und kann Fehler enthalten. Das Installieren einer neueren Version wird empfohlen.</string>
+    <string name="hint_disabled">Diese Version der App wird nicht mehr unterstützt. Sie ist entweder fehlerhaft oder nicht mit der Datenstruktur der Server kompatibel. Bitte installieren sie eine neuere Version.</string>
+
+    <!-- Login -->
+    <string name="login_hint_email">E-Mail</string>
+    <string name="login_hint_password">Passwort</string>
+    <string name="login_button">Anmelden</string>
+    <string name="login_button_create">Konto erstellen</string>
+    <string name="login_info_email_verify">Bitte verifiziere deine E-Mail</string>
+    <string name="login_info_password_incorrect">Falsches Passwort</string>
+    <string name="login_info_password_invalid">Das Passwort muss mindestens 6 Zeichen enthalten</string>
+    <string name="login_info_no_connection">Bitte überprüfe deine Internetverbindung</string>
+
+    <!-- Disclaimer -->
+    <string name="disclaimer_header">Hey,</string>
+    <string name="disclaimer_firebase">Dieses Projekt benutzt leider Google Firebase zum Speichern der Daten :/</string>
+    <string name="disclaimer_realtime">Informationen zu deinen Bestellungen werden in der "Realtime Database" gesichert.</string>
+    <string name="disclaimer_location">Wir nutzen den Serverstandort europe-west1 in St. Ghislain, Belgien, falls wer vorbeifahren möchte.</string>
+    <string name="disclaimer_emmisions">Low-carbon nur 110 gCO2eq/kWh jadijadijada.</string>
+    <string name="disclaimer_analythics">Google Analytics wurden deaktiviert, es gibt keine weiteren Auswertungen :)</string>
+    <string name="disclaimer_agree">Ich gewähre Google Einblick in meinen ausufernden Pizza-Konsum.</string>
+    <string name="disclaimer_button">Alles klar</string>
+
+    <!-- Order -->
     <string name="order_button">Bestellen</string>
 
-    <string name="menu_order">Bestellung</string>
-    <string name="menu_shop">Einkaufen</string>
-    <string name="menu_transactions">Transaktionen</string>
-    <string name="info_wrong_password">Falsches Passwort</string>
+    <!-- Shop -->
+    <string name="shop_info_no_open_orders">Keine Bestellungen</string>
+    <string name="shop_lock">Einkaufen</string>
+
+    <!-- Transactions -->
+    <string name="transaction_info_no_transactions">Keine Transaktionen</string>
+    <string name="transaction_clear">Entfernen</string>
+    <string name="transaction_paid">Bezahlt</string>
+    <string name="transaction_your_order">Deine Bestellung</string>
+
+    <!-- Menu -->
+    <string name="menu_order">Order</string>
+    <string name="menu_shop">Shop</string>
+    <string name="menu_transactions">Transactions</string>
+
+    <!-- Tour -->
+    <string name="tour_accept">Verstanden</string>
+
+    <!-- Preferences -->
+    <string name="quiz_prompt_hearty">Was schmeckt besser?</string>
+    <string name="quiz_prompt_sweet">Und bei Süßis?</string>
 </resources>

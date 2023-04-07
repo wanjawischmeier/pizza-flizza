@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -16,7 +15,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-class ItemPreferencesAktivity : AppCompatActivity() {
+class PreferenceQuizAktivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
     private lateinit var quizConstraint: ConstraintLayout
     private lateinit var layoutLeft: ConstraintLayout
@@ -34,7 +33,7 @@ class ItemPreferencesAktivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_preferences)
+        setContentView(R.layout.activity_preference_quiz)
     }
 
     override fun onStart() {
@@ -71,7 +70,7 @@ class ItemPreferencesAktivity : AppCompatActivity() {
         quizConstraint.setOnClickListener { startHeartyQuiz(shopTask) }
     }
 
-    private fun startHeartyQuiz(shopTask: Task<Shop?>) {
+    private fun startHeartyQuiz(previousShopTask: Task<Shop?>) {
         // clear onClick listener
         quizConstraint.setOnClickListener {  }
 
@@ -84,8 +83,8 @@ class ItemPreferencesAktivity : AppCompatActivity() {
         layoutLeft.isVisible = true
         layoutRight.isVisible = true
 
-        shopTask.continueWith {
-            shop = it.result ?: return@continueWith
+        previousShopTask.continueWith continueShop@ { shopTask ->
+            shop = shopTask.result ?: return@continueShop
             val heartyItems = Shop.getItemType(shop, Shop.Item.Type.HEARTY)
 
             itemSorter = ItemSorter(heartyItems.keys, 5, this::updateProgress) { sortedHearty, comparisonsHearty ->
@@ -123,7 +122,7 @@ class ItemPreferencesAktivity : AppCompatActivity() {
         }
     }
 
-    private fun startSweetsQuiz(view: View) {
+    private fun startSweetsQuiz(@Suppress("UNUSED_PARAMETER") view: View) {
         quizConstraint.setOnClickListener {  }
 
         tourText.animate()
@@ -143,7 +142,7 @@ class ItemPreferencesAktivity : AppCompatActivity() {
             pckd += "$comparisonsSweet comparisons"
             Log.d("COMPARISONS", pckd)
 
-            User.setPriorities(GROUP_ID, Firebase.auth.currentUser?.uid ?: return@ItemSorter, sorted).continueWith {
+            User.setPreferences(GROUP_ID, Firebase.auth.currentUser?.uid ?: return@ItemSorter, sorted).continueWith {
                 val intent = Intent(this, MainActivity::class.java)
                 finish()
                 startActivity(intent)

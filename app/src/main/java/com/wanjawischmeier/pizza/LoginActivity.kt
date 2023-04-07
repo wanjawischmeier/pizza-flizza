@@ -89,7 +89,7 @@ class LoginActivity : AppCompatActivity() {
 
                         if (methods == null || methods.size == 0) {
                             // no account found
-                            loginButton.text = getString(R.string.create_account)
+                            loginButton.text = getString(R.string.login_button_create)
                         } else {
                             // account exists
                             loginButton.text = getString(R.string.login_button)
@@ -98,7 +98,7 @@ class LoginActivity : AppCompatActivity() {
                         loginButton.isEnabled = true
                         infoField.isInvisible = true
                     } else {
-                        infoField.text = getString(R.string.info_no_connection)
+                        infoField.text = getString(R.string.login_info_no_connection)
                         loginButton.isEnabled = false
                         infoField.isInvisible = false
                     }
@@ -117,7 +117,7 @@ class LoginActivity : AppCompatActivity() {
 
         if (email == "" || password == "") return
         if (password.length < 6) {
-            infoField.text = getString(R.string.info_invalid_password)
+            infoField.text = getString(R.string.login_info_password_invalid)
             infoField.isInvisible = false
             return
         }
@@ -159,13 +159,13 @@ class LoginActivity : AppCompatActivity() {
                     if (user.isEmailVerified) {
                         checkUser()
                     } else {
-                        infoField.text = getString(R.string.info_verify_email)
+                        infoField.text = getString(R.string.login_info_email_verify)
                         infoField.isInvisible = false
                         user.sendEmailVerification()
                         Firebase.auth.signOut()
                     }
                 } else {
-                    infoField.text = getString(R.string.info_wrong_password)
+                    infoField.text = getString(R.string.login_info_password_incorrect)
                     infoField.isInvisible = false
                 }
             }

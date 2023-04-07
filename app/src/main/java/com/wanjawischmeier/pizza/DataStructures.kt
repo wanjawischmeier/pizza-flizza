@@ -6,10 +6,7 @@ import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
 import java.util.*
-import kotlin.collections.List
 
 // userId, user
 typealias Users = Map<String, User>
@@ -32,11 +29,13 @@ class User {
     var priorities = listOf<List<String>>()
 
     companion object {
-        fun getUsers(groupId: String): Task<Users> {
-            return Firebase.database.getReference("users/$groupId").get().continueWith { userTask ->
-                return@continueWith userTask.result.children.mapNotNull {
-                    val uid = it.key ?: return@mapNotNull null
-                    val user = it.getValue(User::class.java) ?: return@mapNotNull null
+        fun getUsers(groupId: String): Task<Users?> {
+            return Firebase.database.getReference("users/$groupId").get().continueWith continueGroup@ { groupTask ->
+                if (!groupTask.isSuccessful) return@continueGroup null
+
+                return@continueGroup groupTask.result.children.mapNotNull { userEntry ->
+                    val uid = userEntry.key ?: return@mapNotNull null
+                    val user = userEntry.getValue(User::class.java) ?: return@mapNotNull null
 
                     // clear old orders
                     for ((shopId, order) in user.orders)
@@ -64,14 +63,16 @@ class User {
             }
         }
 
-        fun getUser(groupId: String, userId: String): Task<User> {
-            return Firebase.database.getReference("users/$groupId/$userId").get().continueWith {
-                return@continueWith it.result.getValue(User::class.java)
+        fun getUser(groupId: String, userId: String): Task<User?> {
+            return Firebase.database.getReference("users/$groupId/$userId").get().continueWith continueUser@ { userTask ->
+                return@continueUser if (userTask.isSuccessful) {
+                    userTask.result.getValue(User::class.java)
+                } else null
             }
         }
 
-        fun setPriorities(groupId: String, userId: String, proritizedItems: List<List<String>>): Task<Void> {
-            return Firebase.database.getReference("users/$groupId/$userId/priorities").setValue(proritizedItems)
+        fun setPreferences(groupId: String, userId: String, preferredItems: List<List<String>>): Task<Void> {
+            return Firebase.database.getReference("users/$groupId/$userId/preferences").setValue(preferredItems)
         }
     }
 }
@@ -96,12 +97,10 @@ class Shop {
 
     companion object {
         fun getShop(shopId: String): Task<Shop?> {
-            return Firebase.database.getReference("shops/$shopId").get().continueWith {
-                if (it.isSuccessful) {
-                    return@continueWith it.result.getValue(Shop::class.java)
-                } else {
-                    return@continueWith null
-                }
+            return Firebase.database.getReference("shops/$shopId").get().continueWith continueShop@ { shopTask ->
+                return@continueShop if (shopTask.isSuccessful) {
+                    shopTask.result.getValue(Shop::class.java)
+                } else null
             }
         }
 
@@ -156,8 +155,8 @@ class Shop {
                 Firebase.database.getReference("users/$groupId/$userId/orders/$shopId/$itemId").setValue(
                     listOf(currentOpen - count, time)
                 )
-            }.continueWith { task ->
-                if (userId == fulfillerId) return@continueWith task
+            }.continueWith continueModify@ { modifyItemTask ->
+                if (userId == fulfillerId) return@continueModify modifyItemTask
 
                 Firebase.database.getReference("users/$groupId/$userId/fulfilled/$shopId/$fulfillerId/$itemId").setValue(
                     listOf(currentFulfilled + count, time)

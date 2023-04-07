@@ -74,7 +74,7 @@
             android:background="@drawable/shop_lock_circle"
             android:gravity="center"
             android:padding="@dimen/corner_radius_2x"
-            android:text="@string/shop_lock_info"
+            android:text="@string/shop_lock"
             android:textAlignment="gravity"
             android:textAppearance="@style/Large"
             android:textColor="@color/white"

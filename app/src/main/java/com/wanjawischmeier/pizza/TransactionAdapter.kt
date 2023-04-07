@@ -2,7 +2,6 @@ package com.wanjawischmeier.pizza
 
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.drawable.shapes.Shape
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 import java.text.SimpleDateFormat
 
 
@@ -55,7 +53,7 @@ class TransactionListViewAdapter(
 
         for ((itemId, itemInfo) in card.order.toSortedMap()) {
             val item = main.shop.items[itemId]
-            val name = item?.name ?: context.getString(R.string.name_item_unknown)
+            val name = item?.name ?: context.getString(R.string.unknown_item)
             val count = itemInfo[ITEM_COUNT]
 
             // get latest change
@@ -83,7 +81,7 @@ class TransactionListViewAdapter(
 
         val outlineId = when (card.transactionType) {
             TransactionType.OPEN -> {
-                name = context.resources.getString(R.string.your_order)
+                name = context.resources.getString(R.string.transaction_your_order)
                 textId = R.string.transaction_clear
                 backgroundColorId = R.color.gray_light
                 textColorId = R.color.white
@@ -128,7 +126,7 @@ class TransactionListViewAdapter(
 
         nameView.text = name
         dateView.text = dateFormatter.format(date)
-        priceView.text = context.getString(R.string.price_format).format(total)
+        priceView.text = context.getString(R.string.format_price).format(total)
         contentView.text = content.trim()
 
         views[itemView] = card.ids

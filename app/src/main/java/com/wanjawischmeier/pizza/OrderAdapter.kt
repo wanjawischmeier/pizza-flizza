@@ -1,17 +1,14 @@
 package com.wanjawischmeier.pizza
 
-import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView
 
 
 class OrderCard(
@@ -61,7 +58,7 @@ class OrderGridViewAdapter(
 
         nameView.text = card.name
         countView.text = card.count.toString()
-        priceView.text = context.getString(R.string.price_format).format(card.price)
+        priceView.text = context.getString(R.string.format_price).format(card.price)
         imageView.setImageResource(card.imageId)
 
         views[itemView] = card.id

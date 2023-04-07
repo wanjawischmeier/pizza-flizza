@@ -149,7 +149,7 @@ class ShopFragment : CallableFragment() {
             lockButton.isVisible = openOrders.isNotEmpty()
 
             if (openOrders.isEmpty()) {
-                showEmptyCard(R.string.info_no_open_orders)
+                showEmptyCard(R.string.shop_info_no_open_orders)
             } else {
                 removeEmptyCard()
                 main.swipeRefreshLayout.isRefreshing = false
@@ -165,7 +165,7 @@ class ShopFragment : CallableFragment() {
             if (leftOrders > 0) {
                 showEmptyCard("$leftOrders order${if (leftOrders > 1) "s" else ""} left")
             } else {
-                showEmptyCard(R.string.info_no_open_orders)
+                showEmptyCard(R.string.shop_info_no_open_orders)
             }
             if (progressBar.isVisible) {
                 progressBar.animate()
@@ -192,7 +192,7 @@ class ShopFragment : CallableFragment() {
         val keys = openOrders.keys
         currentOrder = hashMapOf()
         itemId = keys.iterator().next()
-        val name = main.shop.items[itemId]?.name ?: getString(R.string.name_item_unknown)
+        val name = main.shop.items[itemId]?.name ?: getString(R.string.unknown_item)
         itemCount = 0
 
         for ((id, order) in openOrders) {

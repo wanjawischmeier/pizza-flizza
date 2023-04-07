@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pizza">
         <activity
-            android:name=".ItemPreferencesAktivity"
+            android:name=".PreferenceQuizAktivity"
             android:exported="false"
             android:theme="@style/Theme.Pizza.Fullscreen"
             android:screenOrientation="userLandscape"
