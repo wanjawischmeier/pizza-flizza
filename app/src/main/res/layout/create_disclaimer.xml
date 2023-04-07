@@ -10,7 +10,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:contentDescription="@string/disclaimer_description_realtime_icon"
         android:scaleType="centerInside"
         app:layout_constraintBottom_toTopOf="@+id/disclaimer_header"
@@ -26,16 +26,16 @@
         android:layout_margin="@dimen/disclaimer_points_margin_horizontal"
         android:text="@string/disclaimer_header"
         android:textAppearance="@style/Large"
-        app:layout_constraintBottom_toTopOf="@+id/guideline_header"
+        app:layout_constraintBottom_toTopOf="@id/linearLayout2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/disclaimer_continue_constraint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline_header">
@@ -53,7 +53,6 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginHorizontal="@dimen/disclaimer_points_margin_horizontal"
                 android:layout_marginVertical="@dimen/disclaimer_points_margin_vertical"
-                android:autoSizeTextType="none"
                 android:text="@string/disclaimer_arrow"
                 android:textAppearance="@style/MediumBulletPoints"
                 android:textSize="34sp" />
@@ -184,35 +183,70 @@
 
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/checkBox"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/disclaimer_continue_constraint"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:onClick="onToggleCheck"
-        android:text="@string/disclaimer_agree"
-        android:textAppearance="@style/Small"
-        android:textColor="@color/gray_light"
-        app:layout_constraintBottom_toTopOf="@+id/continue_disclaimer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline_button"
-        tools:ignore="TextContrastCheck" />
-
-    <Button
-        android:id="@+id/continue_disclaimer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="20dp"
-        android:enabled="false"
-        android:onClick="onContinueDisclaimer"
-        android:text="@string/disclaimer_button"
-        android:textAppearance="@style/Medium"
+        android:paddingTop="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/checkBox" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <View
+            android:id="@+id/disclaimer_bottom_backdrop"
+            android:layout_width="0dp"
+            android:layout_height="1000dp"
+            android:background="@drawable/layout_bg"
+            android:backgroundTint="@color/gray_mid"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/disclaimer_constraint_layout"
+            tools:ignore="VisualLintBounds" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/disclaimer_constraint_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <CheckBox
+                android:id="@+id/checkBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:foregroundGravity="center"
+                android:gravity="center"
+                android:onClick="onToggleCheck"
+                android:text="@string/disclaimer_agree"
+                android:textAppearance="@style/Small"
+                android:textColor="@color/cream"
+                app:layout_constraintBottom_toTopOf="@+id/disclaimer_continue_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:ignore="TextContrastCheck" />
+
+            <Button
+                android:id="@+id/disclaimer_continue_button"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:onClick="onOrder"
+                android:paddingHorizontal="100dp"
+                android:text="@string/disclaimer_button"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/gray_dark"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_header"
@@ -220,12 +254,5 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.35" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
