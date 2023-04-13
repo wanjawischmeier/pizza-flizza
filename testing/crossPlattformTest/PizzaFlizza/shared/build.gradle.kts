@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -32,6 +30,7 @@ kotlin {
             }
         }
         val androidMain by getting
+        val androidUnitTest by getting
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
@@ -54,7 +53,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.wanjawischmeier.pizza.shared"
+    namespace = "com.wanjawischmeier.pizzaflizza"
     compileSdk = 33
     defaultConfig {
         minSdk = 24
