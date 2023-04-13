@@ -27,7 +27,7 @@ class IntroActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        /*
         // on below line we are initializing all
         // our variables with their ids.
         viewPager = findViewById(R.id.idViewPager)
@@ -75,9 +75,9 @@ class IntroActivity : AppCompatActivity() {
         // on below line we are adding page change
         // listener for our view pager.
         viewPager.addOnPageChangeListener(viewListener)
-
+        */
     }
-
+    /*
     // creating a method for view pager for on page change listener.
     var viewListener: ViewPager.OnPageChangeListener = object : ViewPager.OnPageChangeListener {
         override fun onPageScrolled(
@@ -111,4 +111,5 @@ class IntroActivity : AppCompatActivity() {
         // below method is use to check scroll state.
         override fun onPageScrollStateChanged(state: Int) {}
     }
+     */
 }

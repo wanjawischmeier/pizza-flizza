@@ -7,6 +7,8 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 import java.util.*
+import kotlin.experimental.and
+import kotlin.streams.asSequence
 
 // userId, user
 typealias Users = Map<String, User>
@@ -219,6 +221,16 @@ class Database {
                     }
                 }
             }
+        }
+
+        // based on: https://www.baeldung.com/kotlin/random-alphanumeric-string
+        fun generateTimeBasedId(length: Long = 6): String {
+            val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+            return Random(Calendar.getInstance().timeInMillis)
+                .ints(length, 0, charPool.size)
+                .asSequence()
+                .map(charPool::get)
+                .joinToString("")
         }
     }
 }

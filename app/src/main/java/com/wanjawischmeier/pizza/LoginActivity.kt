@@ -130,8 +130,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun onToggleCheck(@Suppress("UNUSED_PARAMETER") view: View) {
+        /*
         val button = findViewById<Button>(R.id.continue_button)
         button.isEnabled = !button.isEnabled
+         */
     }
 
     fun onContinueDisclaimer(@Suppress("UNUSED_PARAMETER") view: View) {

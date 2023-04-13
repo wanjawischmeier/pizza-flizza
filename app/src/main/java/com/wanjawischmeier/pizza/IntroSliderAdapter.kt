@@ -48,7 +48,7 @@ class IntroSliderAdapter(
 
         // below line is use to inflate the
         // layout file which we created.
-
+        /*
         // below line is use to inflate the
         // layout file which we created.
         val view: View = layoutInflater.inflate(R.layout.slider_item, container, false)
@@ -71,6 +71,8 @@ class IntroSliderAdapter(
 
         // on below line we are returning our view.
         return view
+         */
+        return layoutInflater
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
