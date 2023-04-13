@@ -139,7 +139,7 @@ class OrderFragment : CallableFragment() {
         val item = main.shop.items[itemId] ?: return
         val newCount = itemModel.count + change
 
-        Database.getID("widderichleo@gmail.com1681326025")
+        Database.generateTimeBasedId()
 
         // TODO: please. please. just a simple conditional statement
         if (newCount >= 0) {

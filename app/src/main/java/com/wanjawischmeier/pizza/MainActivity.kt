@@ -3,6 +3,7 @@ package com.wanjawischmeier.pizza
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -16,6 +17,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.wanjawischmeier.pizza.Database.VersionHintType
+import com.wanjawischmeier.pizza.shared.Greeting
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkUser()
+
+        Log.i("GREET", Greeting().greet())
 
         setContentView(R.layout.activity_main)
         CallableFragment.topBubble = findViewById(R.id.top_bubble_constraint)
