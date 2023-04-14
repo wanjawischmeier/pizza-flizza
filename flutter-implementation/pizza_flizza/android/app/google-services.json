@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "207376636349",
+    "firebase_url": "https://pizza-ffc84-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "pizza-ffc84",
+    "storage_bucket": "pizza-ffc84.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:207376636349:android:edf8de993d643a6a171ad4",
+        "android_client_info": {
+          "package_name": "com.wanjawischmeier.pizza"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3kNia4oUqf3XGPFHkcyDS6dfjC7hej9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "207376636349-kfvc9cjn3a36n51vhs0ljlce6go8fdff.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wanjawischmeier.pizzaflizza.iosApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:207376636349:android:bc8351974802ff8c171ad4",
+        "android_client_info": {
+          "package_name": "com.wanjawischmeier.pizza_flizza"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3kNia4oUqf3XGPFHkcyDS6dfjC7hej9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "207376636349-kfvc9cjn3a36n51vhs0ljlce6go8fdff.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.wanjawischmeier.pizzaflizza.iosApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
