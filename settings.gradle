@@ -5,7 +5,7 @@ pluginManagement {
         mavenCentral()
     }
 }
-// remove and reinsert for succesful compilation
+// remove and reinsert for successful compilation
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
