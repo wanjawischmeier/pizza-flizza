@@ -32,9 +32,9 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
     super.initState();
 
     // based on: https://dev.to/snowcodes/flutter-firebase-authentication-dynamic-routing-by-authstatechanges-9k0
-    _sub = FirebaseAuth.instance.authStateChanges().listen((event) {
+    _sub = FirebaseAuth.instance.authStateChanges().listen((user) {
       _navigatorKey.currentState!.pushReplacementNamed(
-        event != null ? 'home' : 'login',
+        user != null ? 'login' : 'home',
       );
     });
   }
@@ -54,7 +54,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       ),
       navigatorKey: _navigatorKey,
       initialRoute:
-          FirebaseAuth.instance.currentUser == null ? 'login' : 'home',
+          FirebaseAuth.instance.currentUser != null ? 'login' : 'home',
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case 'home':

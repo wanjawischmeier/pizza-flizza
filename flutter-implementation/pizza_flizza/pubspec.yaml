@@ -1,7 +1,7 @@
 name: pizza_flizza
 description: A new Flutter project.
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
+# The follckage from being accidentally published to
+# pub.dev using `flutter pub publishowing line prevents the pa`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
@@ -38,6 +38,13 @@ dependencies:
   firebase_core: ^2.9.0
   firebase_auth: ^4.4.1
   firebase_database: ^10.1.0
+
+  
+  appinio_swiper:
+    git:
+      url: https://github.com/wanjawischmeier/flutter_packages.git
+      ref: slide_cards
+      path: packages/appinio_swiper/
 
 dev_dependencies:
   flutter_test:

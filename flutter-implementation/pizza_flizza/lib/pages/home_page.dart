@@ -10,18 +10,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
 
   static const List<Widget> _widgetOptions = <Widget>[
     OrderFragment(),
     ShopFragment(),
   ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +28,16 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'Order'),
-          BottomNavigationBarItem(icon: Icon(Icons.shop_2), label: 'Order'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.online_prediction_rounded), label: 'Order'),
+          BottomNavigationBarItem(icon: Icon(Icons.shop_2), label: 'Shop'),
         ],
         currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        onTap: (value) {
+          setState(() {
+            _selectedIndex = value;
+          });
+        },
       ),
     );
   }

@@ -9,6 +9,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  appinio_swiper:
+    dependency: "direct main"
+    description:
+      path: "packages/appinio_swiper"
+      ref: slide_cards
+      resolved-ref: "44655065dac1f7040722a60a9b5a3537fec9efdc"
+      url: "https://github.com/wanjawischmeier/flutter_packages.git"
+    source: git
+    version: "2.0.0"
   async:
     dependency: transitive
     description:
