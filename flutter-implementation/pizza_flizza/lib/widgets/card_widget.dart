@@ -17,20 +17,24 @@ class CardWidget extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                spreadRadius: 2,
-                blurRadius: 4,
-                offset: const Offset(0, 2))
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 2,
+              blurRadius: 4,
+              offset: const Offset(0, 2))
+        ],
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.tertiary,
+            Theme.of(context).colorScheme.primary
           ],
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: const [Colors.blueGrey, Colors.blueAccent],
-            stops: [stop, stop],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          )),
+          stops: [stop, stop],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
       child: Text("$name\n$currentCount"),
     );
   }

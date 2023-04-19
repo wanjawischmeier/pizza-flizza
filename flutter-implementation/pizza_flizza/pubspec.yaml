@@ -45,6 +45,7 @@ dependencies:
       url: https://github.com/wanjawischmeier/flutter_packages.git
       ref: slide_cards
       path: packages/appinio_swiper/
+  tuple: ^2.0.1
 
 dev_dependencies:
   flutter_test:

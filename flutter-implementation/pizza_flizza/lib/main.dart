@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/pages/login_page.dart';
+import 'package:pizza_flizza/theme.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,9 +50,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: Themes.darkTheme,
       navigatorKey: _navigatorKey,
       initialRoute:
           FirebaseAuth.instance.currentUser != null ? 'login' : 'home',
