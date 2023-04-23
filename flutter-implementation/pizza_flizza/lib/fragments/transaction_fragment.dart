@@ -5,10 +5,6 @@ class TransactionFragment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Image(
-        image: AssetImage('images/items/penny_burgtor/apple_triangle.png'),
-      ),
-    );
+    return const Scaffold();
   }
 }

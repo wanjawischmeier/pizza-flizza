@@ -24,6 +24,7 @@ class OrderCardWidget extends StatefulWidget {
 
 class _OrderCardWidgetState extends State<OrderCardWidget> {
   int _itemCount = 0;
+  static const String basePath = 'assets/images/items/penny_burgtor';
 
   @override
   Widget build(BuildContext context) {
@@ -126,11 +127,10 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
   Future<Image> getItemImage(String path) async {
     try {
       await DefaultAssetBundle.of(context)
-          .load('images/items/penny_burgtor/${widget.itemId}.png');
-      return Image.asset('images/items/penny_burgtor/${widget.itemId}.png');
+          .load('$basePath/${widget.itemId}.png');
+      return Image.asset('$basePath/${widget.itemId}.png');
     } catch (_) {
-      return const Image(
-          image: AssetImage('images/items/penny_burgtor/baeckerkroenung.png'));
+      return const Image(image: AssetImage('$basePath/baeckerkroenung.png'));
     }
   }
 }
