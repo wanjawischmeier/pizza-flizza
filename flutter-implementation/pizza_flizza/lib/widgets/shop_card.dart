@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-class CardWidget extends StatelessWidget {
-  const CardWidget({
+class ShopCardWidget extends StatelessWidget {
+  final double stop;
+  final String name;
+  final int currentCount;
+
+  const ShopCardWidget({
     super.key,
     required this.stop,
     required this.name,
     required this.currentCount,
   });
-
-  final double stop;
-  final String name;
-  final int currentCount;
 
   @override
   Widget build(BuildContext context) {

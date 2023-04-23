@@ -1,7 +1,6 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/widgets/card_widget.dart';
+import 'package:pizza_flizza/widgets/shop_card.dart';
 import 'package:appinio_swiper/appinio_slide_swiper.dart';
 
 class ShopFragment extends StatefulWidget {
@@ -45,7 +44,7 @@ class _ShopFragmentState extends State<ShopFragment> {
             }
           }
 
-          return CardWidget(
+          return ShopCardWidget(
               stop: foreground ? 1 - _gradient : 0,
               name: itemName,
               currentCount: currentCount);

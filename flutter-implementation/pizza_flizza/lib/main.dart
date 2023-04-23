@@ -51,6 +51,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: Themes.darkTheme,
+      debugShowCheckedModeBanner: false,
       navigatorKey: _navigatorKey,
       initialRoute:
           FirebaseAuth.instance.currentUser != null ? 'login' : 'home',
