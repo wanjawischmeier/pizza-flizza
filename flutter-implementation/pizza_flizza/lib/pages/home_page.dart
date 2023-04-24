@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   final ValueNotifier<int> _cartCount = ValueNotifier<int>(0);
 
   static const Map<String, Tuple3<IconData, AppBarType, Widget>>

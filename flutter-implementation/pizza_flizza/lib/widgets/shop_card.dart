@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
 
+// TODO: make this statefull
 class ShopCardWidget extends StatelessWidget {
   final double stop;
   final String name;
-  final int currentCount;
+  final int count;
 
   const ShopCardWidget({
     super.key,
     required this.stop,
     required this.name,
-    required this.currentCount,
+    required this.count,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
+      padding: const EdgeInsets.all(40),
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: const Offset(0, 2))
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          )
         ],
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
@@ -35,7 +38,28 @@ class ShopCardWidget extends StatelessWidget {
           end: Alignment.bottomCenter,
         ),
       ),
-      child: Text("$name\n$currentCount"),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 4,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(count.toString()),
+              ),
+            ),
+          ),
+          Expanded(
+            child: FittedBox(
+                fit: BoxFit.contain,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(name),
+                )),
+          )
+        ],
+      ),
     );
   }
 }
