@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/theme.dart';
-
-typedef OnCountChanged = bool Function(int count);
+import 'package:pizza_flizza/widgets/order_bubble.dart';
 
 class OrderCardWidget extends StatefulWidget {
   final String itemId;
@@ -23,7 +20,6 @@ class OrderCardWidget extends StatefulWidget {
 }
 
 class _OrderCardWidgetState extends State<OrderCardWidget> {
-  int _itemCount = 0;
   static const String basePath = 'assets/images/items/penny_burgtor';
 
   @override
@@ -41,7 +37,7 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -68,55 +64,9 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
               ).format(widget.price),
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            DefaultTextStyle(
-              style: const TextStyle(fontSize: 25, color: Colors.white),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(
-                    MediaQuery.of(context).size.width / 2,
-                  ),
-                  color: Themes.grayLight,
-                ),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _itemCount = max(0, min(99, _itemCount - 1));
-                        });
-                        widget.onCountChanged(_itemCount);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 16),
-                        child: const Text('-'),
-                      ),
-                    ),
-                    Container(
-                      color: Themes.grayLight,
-                      child: Text(
-                        _itemCount.toString(),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _itemCount = max(0, min(99, _itemCount + 1));
-                        });
-                        widget.onCountChanged(_itemCount);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 16),
-                        child: const Text('+',
-                            style: TextStyle(color: Themes.cream)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: OrderBubbleWidget(onCountChanged: widget.onCountChanged))
           ]),
         ],
       ),
