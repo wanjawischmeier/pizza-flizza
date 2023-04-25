@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/widgets/shopping_cart.dart';
 import 'package:tuple/tuple.dart';
 import 'package:pizza_flizza/fragments/order_fragment.dart';
 import 'package:pizza_flizza/fragments/shop_fragment.dart';
@@ -13,7 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 1;
+  OverlayEntry? overlayEntry;
+  int _selectedIndex = 0;
   final ValueNotifier<int> _cartCount = ValueNotifier<int>(0);
 
   static const Map<String, Tuple3<IconData, AppBarType, Widget>>
@@ -34,6 +37,39 @@ class _HomePageState extends State<HomePage> {
       TransactionFragment(),
     ),
   };
+
+  void createShoppingCartOverlay() {
+    removeShoppingCartOverlay();
+    assert(overlayEntry == null);
+
+    // based on: https://stackoverflow.com/a/75487808/13215204
+    overlayEntry = OverlayEntry(
+      builder: (context) => SizedBox(
+        child: Stack(
+          children: [
+            ModalBarrier(
+              color: Themes.grayDark.withOpacity(0.5),
+              onDismiss: () {
+                removeShoppingCartOverlay();
+              },
+            ),
+            Positioned(
+              child: ShoppingCart(
+                onRemoveOverlay: removeShoppingCartOverlay,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry!);
+  }
+
+  void removeShoppingCartOverlay() {
+    overlayEntry?.remove();
+    overlayEntry = null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +92,7 @@ class _HomePageState extends State<HomePage> {
         cartCount: _cartCount,
         items: shops,
         onCartClicked: () {
-          setState(() {
-            _cartCount.value++;
-          });
+          createShoppingCartOverlay();
           return true;
         },
       ),

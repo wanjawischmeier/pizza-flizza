@@ -27,7 +27,7 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
     return Container(
       decoration: BoxDecoration(
         color: Themes.grayMid,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),

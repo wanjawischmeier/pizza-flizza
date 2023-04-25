@@ -24,7 +24,7 @@ class _ShopFragmentState extends State<ShopFragment> {
     };
 
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
       child: AspectRatio(
         aspectRatio: 0.65,
         child: AppinioSlideSwiper(

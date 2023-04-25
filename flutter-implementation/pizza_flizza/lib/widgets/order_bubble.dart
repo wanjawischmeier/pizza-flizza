@@ -35,69 +35,82 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
         borderRadius:
             BorderRadius.circular(MediaQuery.of(context).size.width / 2),
       ),
-      child: DefaultTextStyle(
-        style: const TextStyle(fontSize: 25, color: Colors.white),
-        child: Row(
-          children: [
-            InkWell(
-              customBorder: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  MediaQuery.of(context).size.height / 2,
-                ),
-              ),
-              onTap: () {
-                setState(() {
-                  _itemCount = max(0, min(99, _itemCount - 1));
-                });
-                widget.onCountChanged(_itemCount);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SizedBox(
-                  width: _addTextPainter.height,
-                  height: _addTextPainter.height,
-                  child: const FittedBox(
-                    fit: BoxFit.fill,
-                    child: Text('-'),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              color: Themes.grayLight,
-              width: _countTextPainter.width,
-              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
-              child: Text(
-                _itemCount.toString(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            InkWell(
-              customBorder: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  MediaQuery.of(context).size.width / 2,
-                ),
-              ),
-              onTap: () {
-                setState(() {
-                  _itemCount = max(0, min(99, _itemCount + 1));
-                });
-                widget.onCountChanged(_itemCount);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SizedBox(
-                  width: _addTextPainter.height,
-                  height: _addTextPainter.height,
-                  child: const FittedBox(
-                    fit: BoxFit.cover,
-                    child: Text('+', style: TextStyle(color: Themes.cream)),
-                  ),
-                ),
-              ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius:
+              BorderRadius.circular(MediaQuery.of(context).size.width / 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 2,
+              offset: const Offset(2, 2),
             ),
           ],
+        ),
+        child: DefaultTextStyle(
+          style: const TextStyle(fontSize: 25, color: Colors.white),
+          child: Row(
+            children: [
+              InkWell(
+                customBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    MediaQuery.of(context).size.height / 2,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _itemCount = max(0, min(99, _itemCount - 1));
+                  });
+                  widget.onCountChanged(_itemCount);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    width: _addTextPainter.height,
+                    height: _addTextPainter.height,
+                    child: const FittedBox(
+                      fit: BoxFit.fill,
+                      child: Text('-'),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: _countTextPainter.width,
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
+                child: Text(
+                  _itemCount.toString(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              InkWell(
+                customBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    MediaQuery.of(context).size.width / 2,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _itemCount = max(0, min(99, _itemCount + 1));
+                  });
+                  widget.onCountChanged(_itemCount);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    width: _addTextPainter.height,
+                    height: _addTextPainter.height,
+                    child: const FittedBox(
+                      fit: BoxFit.cover,
+                      child: Text('+', style: TextStyle(color: Themes.cream)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
