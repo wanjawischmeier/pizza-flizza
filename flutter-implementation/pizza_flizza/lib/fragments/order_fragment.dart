@@ -1,11 +1,18 @@
+import 'package:cached_firestorage/remote_picture.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/order_card.dart';
-import 'package:sticky_headers/sticky_headers.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
-class OrderFragment extends StatelessWidget {
+class OrderFragment extends StatefulWidget {
   const OrderFragment({super.key});
 
+  @override
+  State<OrderFragment> createState() => _OrderFragmentState();
+}
+
+class _OrderFragmentState extends State<OrderFragment> {
   static const Map<String, Map<String, double>> items =
       <String, Map<String, double>>{
     'hearty': {
@@ -35,16 +42,28 @@ class OrderFragment extends StatelessWidget {
     },
   };
 
+  Map<String, List<OrderCardWidget>> map = {};
+  static const String _basePath = '/items/penny_burgtor';
+  final Reference _storage = FirebaseStorage.instance.ref();
+  List<Reference>? _itemReferences;
+
+  @override
+  void initState() {
+    super.initState();
+    _storage.child(_basePath).listAll().then((list) {
+      _itemReferences = list.items;
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
+    return CustomScrollView(
+      slivers: List.generate(items.length, (index) {
         var category = items.entries.elementAt(index);
-        var categoryName = category.key;
-        var categoryItems = category.value.entries;
 
-        return StickyHeader(
+        return SliverStickyHeader(
+          overlapsContent: false,
           header: Container(
             color: Themes.grayDark.withOpacity(0.9),
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -52,40 +71,49 @@ class OrderFragment extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Text(categoryName),
+                  child: Text(category.key),
                 ),
                 const Flexible(
-                    fit: FlexFit.tight,
-                    child: Divider(
-                      color: Themes.grayMid,
-                      thickness: 2,
-                    )),
+                  fit: FlexFit.tight,
+                  child: Divider(
+                    color: Themes.grayMid,
+                    thickness: 2,
+                  ),
+                ),
               ],
             ),
           ),
-          content: LayoutBuilder(
-            builder: (context, constraints) => GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: categoryItems.length,
-              padding: const EdgeInsets.all(8),
-              itemBuilder: (context, index) => OrderCardWidget(
-                itemId: categoryItems.elementAt(index).key,
-                price: categoryItems.elementAt(index).value,
-                onCountChanged: (count) {
-                  return true;
-                },
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: (constraints.maxWidth / 225).round(),
-                childAspectRatio: 1,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-            ),
+          sliver: SliverGrid.count(
+            crossAxisCount: 2,
+            childAspectRatio: 1,
+            children: List.generate(category.value.length, (itemIndex) {
+              var item = category.value.entries.elementAt(itemIndex);
+
+              return Padding(
+                padding: const EdgeInsets.all(8),
+                child: OrderCardWidget(
+                  itemId: item.key,
+                  price: item.value,
+                  image: _getCachedImage(item.key),
+                  onCountChanged: (count) {
+                    return true;
+                  },
+                ),
+              );
+            }),
           ),
         );
-      },
+      }),
     );
+  }
+
+  RemotePicture? _getCachedImage(String imageName) {
+    var path = '$_basePath/$imageName.png';
+
+    if (_itemReferences?.contains(_storage.child(path)) ?? false) {
+      return RemotePicture(imagePath: path, mapKey: imageName);
+    } else {
+      return null;
+    }
   }
 }

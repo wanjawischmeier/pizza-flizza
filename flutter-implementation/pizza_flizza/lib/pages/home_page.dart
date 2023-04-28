@@ -18,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   OverlayEntry? overlayEntry;
   int _selectedIndex = 0;
   final ValueNotifier<int> _cartCount = ValueNotifier<int>(0);
+  late List<BottomNavigationBarItem> _bottomNavigationBarItems;
 
   static const Map<String, Tuple3<IconData, AppBarType, Widget>>
       _widgetOptions = {
@@ -37,6 +38,13 @@ class _HomePageState extends State<HomePage> {
       TransactionFragment(),
     ),
   };
+
+  static const List<DropdownMenuItem<String>> shops = [
+    DropdownMenuItem(
+      value: 'penny_burgtor',
+      child: Text('Penny am Burgtor'),
+    ),
+  ];
 
   void createShoppingCartOverlay() {
     removeShoppingCartOverlay();
@@ -72,18 +80,25 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    _bottomNavigationBarItems = List<BottomNavigationBarItem>.generate(
+      _widgetOptions.length,
+      (index) {
+        var entry = _widgetOptions.entries.elementAt(index);
+        return BottomNavigationBarItem(
+            icon: Icon(entry.value.item1), label: entry.key);
+      },
+    );
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var entry = _widgetOptions.entries.elementAt(_selectedIndex);
     var name = entry.key;
     var type = entry.value.item2;
     var widget = entry.value.item3;
-
-    List<DropdownMenuItem<String>> shops = const [
-      DropdownMenuItem(
-        value: 'penny_burgtor',
-        child: Text('Penny am Burgtor'),
-      ),
-    ];
 
     return Scaffold(
       appBar: DynamicAppBar(
@@ -100,14 +115,7 @@ class _HomePageState extends State<HomePage> {
         child: widget,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: List<BottomNavigationBarItem>.generate(
-          _widgetOptions.length,
-          (index) {
-            var entry = _widgetOptions.entries.elementAt(index);
-            return BottomNavigationBarItem(
-                icon: Icon(entry.value.item1), label: entry.key);
-          },
-        ),
+        items: _bottomNavigationBarItems,
         currentIndex: _selectedIndex,
         onTap: (value) {
           setState(() {

@@ -1,3 +1,4 @@
+import 'package:cached_firestorage/remote_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -6,12 +7,14 @@ import 'package:pizza_flizza/widgets/order_bubble.dart';
 class OrderCardWidget extends StatefulWidget {
   final String itemId;
   final double price;
+  final RemotePicture? image;
   final OnCountChanged onCountChanged;
 
   const OrderCardWidget({
     super.key,
     required this.itemId,
     required this.price,
+    required this.image,
     required this.onCountChanged,
   });
 
@@ -20,8 +23,6 @@ class OrderCardWidget extends StatefulWidget {
 }
 
 class _OrderCardWidgetState extends State<OrderCardWidget> {
-  static const String basePath = 'assets/images/items/penny_burgtor';
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -42,11 +43,7 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            child: FutureBuilder(
-              future: getItemImage(widget.itemId),
-              builder: (BuildContext context, AsyncSnapshot<Image> snapshot) =>
-                  snapshot.data ?? Text(widget.itemId),
-            ),
+            child: widget.image ?? const Text('not loaded'),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -71,16 +68,5 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
         ],
       ),
     );
-  }
-
-  // based on: https://stackoverflow.com/a/71037750/13215204
-  Future<Image> getItemImage(String path) async {
-    try {
-      await DefaultAssetBundle.of(context)
-          .load('$basePath/${widget.itemId}.png');
-      return Image.asset('$basePath/${widget.itemId}.png');
-    } catch (_) {
-      return const Image(image: AssetImage('$basePath/baeckerkroenung.png'));
-    }
   }
 }
