@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pizza_flizza/custom_icons.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/google_signin_button.dart';
@@ -77,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             TextButton(
               onPressed: () {
-                //TODO FORGOT PASSWORD SCREEN GOES HERE
+                // TODO: FORGOT PASSWORD SCREEN GOES HERE
               },
               child: const Text(
                 'Forgot Password',

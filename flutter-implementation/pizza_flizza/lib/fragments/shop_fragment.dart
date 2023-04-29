@@ -39,7 +39,7 @@ class _ShopFragmentState extends State<ShopFragment> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: Center(child: Text('general info'))),
+                    const Expanded(child: Center(child: Text('general info'))),
                     SlideAction(
                       sliderRotate: false,
                       outerColor: Themes.grayLight,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// TODO: make this statefull
 class ShopCardWidget extends StatelessWidget {
   final double stop;
   final String name;
