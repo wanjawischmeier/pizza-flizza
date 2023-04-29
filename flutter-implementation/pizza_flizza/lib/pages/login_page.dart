@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:pizza_flizza/custom_icons.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/google_signin_button.dart';
 
@@ -21,23 +22,39 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: const Text("Login Page"),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Column(children: [
             Padding(
-              padding: const EdgeInsets.only(top: 60.0),
+              padding: const EdgeInsets.only(bottom: 40),
               child: Center(
                 child: Container(
                   width: 200,
                   height: 150,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(50.0)),
+                    color: Themes.grayMid,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: const Offset(2, 2),
+                      )
+                    ],
+                  ),
+                  child: const FittedBox(
+                    child: Icon(
+                      PizzaIcons.logo,
+                      color: Themes.cream,
+                    ),
+                  ),
                 ),
               ),
             ),
             const Padding(
-              //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 decoration: InputDecoration(
@@ -94,13 +111,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
               ),
             ),
-            const SizedBox(
-              height: 130,
-            ),
-            const GoogleSignInButton(),
-            const Text('New User? Create Account')
-          ],
-        ),
+          ]),
+          const GoogleSignInButton(),
+        ],
       ),
     );
   }
