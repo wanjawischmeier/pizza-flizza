@@ -15,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com",
+          "client_id": "207376636349-s9cvu612un2qa31d7oerfvhdl1paq7ls.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -51,7 +51,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "207376636349-p6k929bqjc43p1eq7bck31dai1q8brsu.apps.googleusercontent.com",
+          "client_id": "207376636349-bf2rjmgaf352v6r7tjn2mp5bi1dj5j5d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wanjawischmeier.pizza_flizza",
+            "certificate_hash": "c35aaad8017c85e559e2bcda1955509f567a8784"
+          }
+        },
+        {
+          "client_id": "207376636349-s9cvu612un2qa31d7oerfvhdl1paq7ls.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

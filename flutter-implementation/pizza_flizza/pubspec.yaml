@@ -57,6 +57,7 @@ dependencies:
   cached_firestorage:
     git:
       url: https://github.com/wanjawischmeier/cached_firestorage.git
+  google_sign_in: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/google_logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -43,7 +43,7 @@ class _OrderFragmentState extends State<OrderFragment> {
   };
 
   Map<String, List<OrderCardWidget>> map = {};
-  static const String _basePath = '/items/penny_burgtor';
+  static const String _basePath = '/shops/penny_burgtor/items';
   final Reference _storage = FirebaseStorage.instance.ref();
   List<Reference>? _itemReferences;
 
@@ -71,7 +71,13 @@ class _OrderFragmentState extends State<OrderFragment> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: Text(category.key),
+                  child: Text(
+                    category.key,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const Flexible(
                   fit: FlexFit.tight,
@@ -90,7 +96,7 @@ class _OrderFragmentState extends State<OrderFragment> {
               var item = category.value.entries.elementAt(itemIndex);
 
               return Padding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(4),
                 child: OrderCardWidget(
                   itemId: item.key,
                   price: item.value,

@@ -32,11 +32,6 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
   void initState() {
     super.initState();
 
-    FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: 'wanja.wischmeier@gmail.com',
-      password: 'testing2',
-    );
-
     // based on: https://dev.to/snowcodes/flutter-firebase-authentication-dynamic-routing-by-authstatechanges-9k0
     _sub = FirebaseAuth.instance.authStateChanges().listen((user) {
       _navigatorKey.currentState!.pushReplacementNamed(
@@ -62,11 +57,6 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
           FirebaseAuth.instance.currentUser == null ? 'login' : 'home',
       onGenerateRoute: (settings) {
         switch (settings.name) {
-          case 'home':
-            return MaterialPageRoute(
-              settings: settings,
-              builder: (_) => const HomePage(),
-            );
           case 'login':
             return MaterialPageRoute(
               settings: settings,

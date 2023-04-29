@@ -43,7 +43,15 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            child: widget.image ?? const Text('not loaded'),
+            child: widget.image ??
+                const FittedBox(
+                  fit: BoxFit.fill,
+                  child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Icon(Icons.image_not_supported,
+                        color: Themes.grayLight),
+                  ),
+                ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,

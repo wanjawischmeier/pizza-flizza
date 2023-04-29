@@ -28,20 +28,36 @@ class _ShopFragmentState extends State<ShopFragment> {
 
     return Container(
       padding: const EdgeInsets.all(24),
-      child: AspectRatio(
-        aspectRatio: 0.65,
-        child: _locked
-            ? SlideAction(
-                sliderRotate: false,
-                outerColor: Themes.cream,
-                animationDuration: const Duration(milliseconds: 100),
-                onSubmit: () {
-                  setState(() {
-                    _locked = false;
-                  });
-                },
-              )
-            : AppinioSlideSwiper(
+      child: _locked
+          ? AspectRatio(
+              aspectRatio: 0.75,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Themes.grayMid,
+                  borderRadius: BorderRadius.circular(35),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(child: Center(child: Text('general info'))),
+                    SlideAction(
+                      sliderRotate: false,
+                      outerColor: Themes.grayLight,
+                      animationDuration: const Duration(milliseconds: 100),
+                      text: 'Slide to shop',
+                      onSubmit: () {
+                        setState(() {
+                          _locked = false;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : AspectRatio(
+              aspectRatio: 0.7,
+              child: AppinioSlideSwiper(
                 cardsCount: orders.length,
                 threshold: 100,
                 duration: const Duration(milliseconds: 150),
@@ -82,7 +98,7 @@ class _ShopFragmentState extends State<ShopFragment> {
                   }
                 },
               ),
-      ),
+            ),
     );
   }
 }

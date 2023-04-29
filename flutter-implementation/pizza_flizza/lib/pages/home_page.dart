@@ -1,3 +1,5 @@
+import 'package:cached_firestorage/lib.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/shopping_cart.dart';
@@ -39,12 +41,39 @@ class _HomePageState extends State<HomePage> {
     ),
   };
 
-  static const List<DropdownMenuItem<String>> shops = [
-    DropdownMenuItem(
-      value: 'penny_burgtor',
-      child: Text('Penny am Burgtor'),
-    ),
+  static const List<String> _shopIds = [
+    'penny_burgtor',
+    'essen_und_trinken',
   ];
+
+  List<DropdownMenuItem<String>> shops =
+      List.generate(_shopIds.length, (index) {
+    String shopId = _shopIds[index];
+
+    return DropdownMenuItem(
+      value: shopId,
+      child: Row(
+        children: [
+          Center(
+            child: Container(
+              height: double.infinity,
+              padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: RemotePicture(
+                  imagePath: '/shops/$shopId/logo.png',
+                  mapKey: '${shopId}_logo',
+                  useAvatarView: true,
+                  avatarViewRadius: 8,
+                ),
+              ),
+            ),
+          ),
+          Text(shopId, style: const TextStyle(fontSize: 20)),
+        ],
+      ),
+    );
+  });
 
   void createShoppingCartOverlay() {
     removeShoppingCartOverlay();
@@ -107,7 +136,11 @@ class _HomePageState extends State<HomePage> {
         cartCount: _cartCount,
         items: shops,
         onCartClicked: () {
-          createShoppingCartOverlay();
+          if (FirebaseAuth.instance.currentUser != null) {
+            FirebaseAuth.instance.signOut();
+          }
+
+          // createShoppingCartOverlay();
           return true;
         },
       ),

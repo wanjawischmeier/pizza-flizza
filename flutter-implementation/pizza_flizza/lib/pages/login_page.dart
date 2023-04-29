@@ -1,4 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/widgets/google_signin_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Themes.grayDark,
       appBar: AppBar(
         title: const Text("Login Page"),
       ),
@@ -93,6 +97,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(
               height: 130,
             ),
+            const GoogleSignInButton(),
             const Text('New User? Create Account')
           ],
         ),
