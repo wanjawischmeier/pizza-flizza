@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/widgets/transaction_card.dart';
 
 typedef OnRemoveOverlay = void Function();
 
@@ -47,81 +48,74 @@ class _ShoppingCartState extends State<ShoppingCart> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(
+                borderRadius: BorderRadius.vertical(
                   top: Radius.circular(8),
                   bottom: Radius.zero,
                 ),
-                child: Container(
-                  color: Themes.grayLight,
-                  padding: const EdgeInsets.all(16),
-                  child: const Center(
-                    child: Text(
-                      'Your Orders',
-                      style: TextStyle(
-                        fontSize: 24,
-                        decoration: TextDecoration.none,
-                      ),
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Flexible(
+                          child: Text(
+                            'Your Orders',
+                            style: TextStyle(
+                              fontSize: 24,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Themes.cream,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: Center(
+                            child: Text(
+                              'total',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
               Flexible(
-                child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: _orders.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 8),
-                  itemBuilder: (BuildContext context, int index) {
-                    String order = _orders[index];
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  child: ListView.separated(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    itemCount: _orders.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 8),
+                    itemBuilder: (BuildContext context, int index) {
+                      String order = _orders[index];
 
-                    return Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Themes.grayMid,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Dismissible(
-                              key: Key(order),
-                              direction: DismissDirection.endToStart,
-                              onDismissed: (direction) {
-                                setState(() {
-                                  _orders.remove(order);
-                                });
-                              },
-                              background: Container(
-                                padding: const EdgeInsets.only(right: 16),
-                                color: Themes.cream,
-                                child: const Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Icon(Icons.delete),
-                                ),
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.only(left: 8),
-                                title: Text(
-                                    '$order\nesfesfaefa\nawefawefeaw\nadadsaa\nadawda'),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 16,
-                            decoration: BoxDecoration(
-                              color: Themes.cream,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                      return TransactionCardWidget(
+                        backgroundColor: Themes.grayLight,
+                        accentColor: Themes.cream,
+                        header: order,
+                        content: '1x',
+                        icon: const Icon(Icons.delete),
+                        dismissable: true,
+                        onDismiss: () {
+                          setState(() {
+                            _orders.remove(order);
+                          });
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
