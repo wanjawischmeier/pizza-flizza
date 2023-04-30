@@ -90,9 +90,15 @@ class _HomePageState extends State<HomePage> {
                 removeShoppingCartOverlay();
               },
             ),
-            Positioned(
-              child: ShoppingCart(
-                onRemoveOverlay: removeShoppingCartOverlay,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 40),
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 0.6,
+                  child: ShoppingCart(
+                    onRemoveOverlay: removeShoppingCartOverlay,
+                  ),
+                ),
               ),
             ),
           ],
@@ -136,11 +142,13 @@ class _HomePageState extends State<HomePage> {
         cartCount: _cartCount,
         items: shops,
         onCartClicked: () {
+          /*
           if (FirebaseAuth.instance.currentUser != null) {
             FirebaseAuth.instance.signOut();
           }
+          */
 
-          // createShoppingCartOverlay();
+          createShoppingCartOverlay();
           return true;
         },
       ),
