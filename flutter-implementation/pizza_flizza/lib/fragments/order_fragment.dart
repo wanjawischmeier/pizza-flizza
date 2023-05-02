@@ -1,6 +1,7 @@
 import 'package:cached_firestorage/remote_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/order_card.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,54 +14,23 @@ class OrderFragment extends StatefulWidget {
 }
 
 class _OrderFragmentState extends State<OrderFragment> {
-  static const Map<String, Map<String, double>> items =
-      <String, Map<String, double>>{
-    'hearty': {
-      'pizza': 1.2,
-      'baguette': 2.9,
-      'bread_party': 2.9,
-      'bread_ciabatta': 2.9,
-      'baguette_oven': 2.9,
-      'rod_chicken': 2.9,
-      'roll_sunday': 2.9,
-    },
-    'sweet': {
-      'apple_triangle': 10.3,
-      'donut_whole_milk': 2.9,
-      'humus_natural': 2.9,
-      'berliner_vanilla': 2.9,
-      'berliner': 2.9,
-      'croissant': 2.9,
-    },
-    'dips': {
-      'baguette': 2.9,
-      'bread_party': 2.9,
-      'bread_ciabatta': 2.9,
-      'humus_natural': 2.9,
-      'berliner_vanilla': 2.9,
-      'berliner': 2.9,
-    },
-  };
-
   Map<String, List<OrderCardWidget>> map = {};
-  static const String _basePath = '/shops/penny_burgtor/items';
-  final Reference _storage = FirebaseStorage.instance.ref();
-  List<Reference>? _itemReferences;
+  static const String _basePath = 'shops/penny_burgtor/items';
 
   @override
   void initState() {
     super.initState();
-    _storage.child(_basePath).listAll().then((list) {
-      _itemReferences = list.items;
-      setState(() {});
-    });
+    Shop.onChanged = () => setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
-      slivers: List.generate(items.length, (index) {
-        var category = items.entries.elementAt(index);
+      slivers: List.generate(Shop.items.length, (index) {
+        var category = Shop.items.entries.elementAt(index);
+        var categoryName = category.value['0_name'];
+        var categoryItems = Map.from(category.value);
+        categoryItems.remove('0_name');
 
         return SliverStickyHeader(
           overlapsContent: false,
@@ -72,7 +42,7 @@ class _OrderFragmentState extends State<OrderFragment> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: Text(
-                    category.key,
+                    categoryName,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -92,14 +62,16 @@ class _OrderFragmentState extends State<OrderFragment> {
           sliver: SliverGrid.count(
             crossAxisCount: 2,
             childAspectRatio: 1,
-            children: List.generate(category.value.length, (itemIndex) {
-              var item = category.value.entries.elementAt(itemIndex);
+            children: List.generate(categoryItems.length, (itemIndex) {
+              var item = categoryItems.entries.elementAt(itemIndex);
+              String name = item.value['name'];
+              double price = item.value['price'];
 
               return Padding(
                 padding: const EdgeInsets.all(4),
                 child: OrderCardWidget(
-                  itemId: item.key,
-                  price: item.value,
+                  name: name,
+                  price: price,
                   image: _getCachedImage(item.key),
                   onCountChanged: (count) {
                     return true;
@@ -113,13 +85,13 @@ class _OrderFragmentState extends State<OrderFragment> {
     );
   }
 
-  RemotePicture? _getCachedImage(String imageName) {
-    var path = '$_basePath/$imageName.png';
+  RemotePicture? _getCachedImage(String itemId) {
+    var path = Shop.getItemImageReference(itemId);
 
-    if (_itemReferences?.contains(_storage.child(path)) ?? false) {
-      return RemotePicture(imagePath: path, mapKey: imageName);
-    } else {
+    if (path == null) {
       return null;
+    } else {
+      return RemotePicture(imagePath: path, mapKey: itemId);
     }
   }
 }

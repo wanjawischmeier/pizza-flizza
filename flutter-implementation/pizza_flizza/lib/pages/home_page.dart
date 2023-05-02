@@ -1,6 +1,7 @@
 import 'package:cached_firestorage/lib.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/shopping_cart.dart';
 import 'package:tuple/tuple.dart';
@@ -41,14 +42,10 @@ class _HomePageState extends State<HomePage> {
     ),
   };
 
-  static const List<String> _shopIds = [
-    'penny_burgtor',
-    'essen_und_trinken',
-  ];
-
   List<DropdownMenuItem<String>> shops =
-      List.generate(_shopIds.length, (index) {
-    String shopId = _shopIds[index];
+      List.generate(Shop.shops.length, (index) {
+    var shop = Shop.shops.entries.elementAt(index);
+    String shopId = shop.key;
 
     return DropdownMenuItem(
       value: shopId,
@@ -69,7 +66,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          Text(shopId, style: const TextStyle(fontSize: 20)),
+          Text(shop.value['name'], style: const TextStyle(fontSize: 20)),
         ],
       ),
     );

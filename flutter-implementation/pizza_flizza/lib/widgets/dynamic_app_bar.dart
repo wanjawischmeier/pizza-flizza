@@ -1,6 +1,7 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
 
 enum AppBarType { name, location }
@@ -34,12 +35,10 @@ class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
 }
 
 class _DynamicAppBarState extends State<DynamicAppBar> {
-  String? _dropdownValue;
   late bool _showCartBadge;
 
   @override
   void initState() {
-    _dropdownValue = widget.items.first.value;
     super.initState();
   }
 
@@ -57,11 +56,11 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
             dropdownColor: Themes.grayLight,
             // appBarTheme.titleTextStyle is null for some reason :/
             style: Theme.of(context).textTheme.titleLarge,
-            value: _dropdownValue,
+            value: Shop.shopId,
             items: widget.items,
             onChanged: (String? value) {
               if (value == null) return;
-              setState(() => _dropdownValue = value);
+              setState(() => Shop.shopId = value);
             },
           ),
         );

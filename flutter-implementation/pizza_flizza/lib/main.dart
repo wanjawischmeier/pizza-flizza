@@ -1,6 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/pages/login_page.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'firebase_options.dart';
@@ -13,6 +13,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await Shop.loadAll();
 
   runApp(const PizzaFlizzaApp());
 }

@@ -5,14 +5,14 @@ import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/order_bubble.dart';
 
 class OrderCardWidget extends StatefulWidget {
-  final String itemId;
+  final String name;
   final double price;
   final RemotePicture? image;
   final OnCountChanged onCountChanged;
 
   const OrderCardWidget({
     super.key,
-    required this.itemId,
+    required this.name,
     required this.price,
     required this.image,
     required this.onCountChanged,
@@ -56,9 +56,12 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                widget.itemId,
-                textAlign: TextAlign.left,
+              Flexible(
+                child: Text(
+                  widget.name,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                ),
               ),
             ],
           ),
