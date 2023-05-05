@@ -2,21 +2,22 @@ import 'package:cached_firestorage/remote_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/widgets/cached_remote_picture.dart';
 import 'package:pizza_flizza/widgets/order_bubble.dart';
 
 class OrderCardWidget extends StatefulWidget {
-  final String name;
+  final String categoryId, itemId, name;
   final double price;
-  final RemotePicture? image;
   final OnCountChanged onCountChanged;
 
   const OrderCardWidget({
-    super.key,
+    Key? key,
+    required this.categoryId,
+    required this.itemId,
     required this.name,
     required this.price,
-    required this.image,
     required this.onCountChanged,
-  });
+  }) : super(key: key);
 
   @override
   State<OrderCardWidget> createState() => _OrderCardWidgetState();
@@ -43,15 +44,10 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            child: widget.image ??
-                const FittedBox(
-                  fit: BoxFit.fill,
-                  child: Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Icon(Icons.image_not_supported,
-                        color: Themes.grayLight),
-                  ),
-                ),
+            child: RemoteItemImage(
+              key: ValueKey(widget.itemId),
+              itemId: widget.itemId,
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -73,8 +69,13 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: OrderBubbleWidget(onCountChanged: widget.onCountChanged))
+              padding: const EdgeInsets.only(top: 4),
+              child: OrderBubbleWidget(
+                categoryId: widget.categoryId,
+                itemId: widget.itemId,
+                onCountChanged: widget.onCountChanged,
+              ),
+            )
           ]),
         ],
       ),

@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:badges/badges.dart' as badges;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -12,7 +13,6 @@ typedef OnCartClicked = bool Function();
 class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
   final String name;
   final AppBarType type;
-  final ValueListenable<int> cartCount;
   final List<DropdownMenuItem<String>> items;
   final OnLocationChanged? onLocationChanged;
   final OnCartClicked? onCartClicked;
@@ -21,7 +21,6 @@ class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
     super.key,
     required this.name,
     required this.type,
-    required this.cartCount,
     required this.items,
     this.onLocationChanged,
     this.onCartClicked,
@@ -36,15 +35,30 @@ class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
 
 class _DynamicAppBarState extends State<DynamicAppBar> {
   late bool _showCartBadge;
+  int _orderCount = 0;
+  late StreamSubscription<int> _orderCountSubscription;
 
   @override
   void initState() {
     super.initState();
+
+    _orderCountSubscription = Shop.subscribeToOrderCount((orderCount) {
+      setState(() {
+        _orderCount = orderCount;
+      });
+      print(_orderCount);
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _orderCountSubscription.cancel();
   }
 
   @override
   AppBar build(BuildContext context) {
-    _showCartBadge = widget.cartCount.value > 0;
+    _showCartBadge = _orderCount > 0;
     Widget child;
 
     switch (widget.type) {
@@ -81,7 +95,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
             badgeColor: Themes.grayLight,
           ),
           badgeContent: Text(
-            widget.cartCount.value.toString(),
+            _orderCount.toString(),
             style: const TextStyle(color: Colors.white),
           ),
           child: Center(

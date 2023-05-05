@@ -3,12 +3,19 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/theme.dart';
 
-typedef OnCountChanged = bool Function(int count);
+typedef OnCountChanged = bool Function(
+    String categoryId, String idemId, int count);
 
 class OrderBubbleWidget extends StatefulWidget {
+  final String categoryId, itemId;
   final OnCountChanged onCountChanged;
 
-  const OrderBubbleWidget({super.key, required this.onCountChanged});
+  const OrderBubbleWidget({
+    super.key,
+    required this.categoryId,
+    required this.itemId,
+    required this.onCountChanged,
+  });
 
   @override
   State<OrderBubbleWidget> createState() => _OrderBubbleWidgetState();
@@ -62,7 +69,7 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
                   setState(() {
                     _itemCount = max(0, min(99, _itemCount - 1));
                   });
-                  widget.onCountChanged(_itemCount);
+                  widget.onCountChanged(widget.categoryId, widget.itemId, -1);
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(10),
@@ -95,7 +102,7 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
                   setState(() {
                     _itemCount = max(0, min(99, _itemCount + 1));
                   });
-                  widget.onCountChanged(_itemCount);
+                  widget.onCountChanged(widget.categoryId, widget.itemId, 1);
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(10),

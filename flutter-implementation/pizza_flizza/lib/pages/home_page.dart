@@ -1,5 +1,4 @@
 import 'package:cached_firestorage/lib.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -20,7 +19,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   OverlayEntry? overlayEntry;
   int _selectedIndex = 0;
-  final ValueNotifier<int> _cartCount = ValueNotifier<int>(0);
   late List<BottomNavigationBarItem> _bottomNavigationBarItems;
 
   static const Map<String, Tuple3<IconData, AppBarType, Widget>>
@@ -113,6 +111,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    super.initState();
+
     _bottomNavigationBarItems = List<BottomNavigationBarItem>.generate(
       _widgetOptions.length,
       (index) {
@@ -121,8 +121,6 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(entry.value.item1), label: entry.key);
       },
     );
-
-    super.initState();
   }
 
   @override
@@ -136,7 +134,6 @@ class _HomePageState extends State<HomePage> {
       appBar: DynamicAppBar(
         name: name,
         type: type,
-        cartCount: _cartCount,
         items: shops,
         onCartClicked: () {
           /*
