@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
 
-typedef OnCountChanged = bool Function(
+typedef OnCountChanged = void Function(
     String categoryId, String idemId, int count);
 
 class OrderBubbleWidget extends StatefulWidget {
@@ -23,6 +25,9 @@ class OrderBubbleWidget extends StatefulWidget {
 
 class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
   int _itemCount = 0;
+  late StreamSubscription<String> _shopChangedSubscription;
+  late StreamSubscription<Map> _orderPushedSubscription;
+
   final TextPainter _addTextPainter = TextPainter(
       text: const TextSpan(text: '+', style: TextStyle(fontSize: 14)),
       maxLines: 1,
@@ -33,6 +38,28 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
       maxLines: 1,
       textDirection: ui.TextDirection.ltr)
     ..layout(minWidth: 0, maxWidth: double.infinity);
+
+  @override
+  void initState() {
+    super.initState();
+    _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
+      setState(() {
+        _itemCount = 0;
+      });
+    });
+    _orderPushedSubscription = Shop.subscribeToOrderUpdated((order) {
+      setState(() {
+        _itemCount = 0;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _shopChangedSubscription.cancel();
+    _orderPushedSubscription.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +96,11 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
                   setState(() {
                     _itemCount = max(0, min(99, _itemCount - 1));
                   });
-                  widget.onCountChanged(widget.categoryId, widget.itemId, -1);
+                  widget.onCountChanged(
+                    widget.categoryId,
+                    widget.itemId,
+                    _itemCount,
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(10),
@@ -102,7 +133,11 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
                   setState(() {
                     _itemCount = max(0, min(99, _itemCount + 1));
                   });
-                  widget.onCountChanged(widget.categoryId, widget.itemId, 1);
+                  widget.onCountChanged(
+                    widget.categoryId,
+                    widget.itemId,
+                    _itemCount,
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(10),

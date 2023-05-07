@@ -7,15 +7,16 @@ class RemoteItemImage extends StatelessWidget {
   final String itemId;
 
   const RemoteItemImage({
-    Key? key,
+    super.key,
     required this.itemId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    var path = Shop.getItemImageReference(itemId);
-
-    if (path == null) {
+    String path = 'shops/${Shop.shopId}/items/$itemId.png';
+    if (Shop.containsReference(path)) {
+      return RemotePicture(imagePath: path, mapKey: path);
+    } else {
       return const FittedBox(
         fit: BoxFit.fill,
         child: Padding(
@@ -23,8 +24,6 @@ class RemoteItemImage extends StatelessWidget {
           child: Icon(Icons.image_not_supported, color: Themes.grayLight),
         ),
       );
-    } else {
-      return RemotePicture(imagePath: path, mapKey: path);
     }
   }
 }

@@ -1,4 +1,3 @@
-import 'package:cached_firestorage/remote_picture.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -11,13 +10,13 @@ class OrderCardWidget extends StatefulWidget {
   final OnCountChanged onCountChanged;
 
   const OrderCardWidget({
-    Key? key,
+    super.key,
     required this.categoryId,
     required this.itemId,
     required this.name,
     required this.price,
     required this.onCountChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<OrderCardWidget> createState() => _OrderCardWidgetState();
@@ -44,10 +43,7 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
-            child: RemoteItemImage(
-              key: ValueKey(widget.itemId),
-              itemId: widget.itemId,
-            ),
+            child: RemoteItemImage(itemId: widget.itemId),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,

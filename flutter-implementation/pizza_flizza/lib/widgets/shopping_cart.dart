@@ -1,8 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/transaction_card.dart';
 
 typedef OnRemoveOverlay = void Function();
+
+class CartItem {
+  String shopId, id;
+  int count;
+
+  CartItem(
+    this.shopId,
+    this.id,
+    this.count,
+  );
+}
 
 class ShoppingCart extends StatefulWidget {
   final OnRemoveOverlay onRemoveOverlay;
@@ -14,27 +28,36 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
-  final List<String> _orders = [
-    'order0',
-    'order1',
-    'order2',
-    'order3',
-    'order4',
-    'order5',
-    'order6',
-    'order7',
-    'order8',
-    'order9',
-    'order10',
-    'order11',
-    'order12',
-    'order13',
-    'order14',
-    'order15',
-    'order16',
-    'order17',
-    'order18',
-  ];
+  late StreamSubscription<Map<String, Map>> _openOrdersSubscription;
+  var _allOrders = <CartItem>[];
+  set rawOrders(Map<String, Map> value) {
+    var orders = <CartItem>[];
+
+    value.forEach((shopId, order) {
+      order.forEach((itemId, count) {
+        orders.add(CartItem(shopId, itemId, count));
+      });
+    });
+
+    _allOrders = orders;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
+      setState(() {
+        rawOrders = orders;
+      });
+    });
+    rawOrders = Shop.openOrders;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _openOrdersSubscription.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +71,12 @@ class _ShoppingCartState extends State<ShoppingCart> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.vertical(
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(8),
                   bottom: Radius.zero,
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   child: IntrinsicHeight(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -95,23 +118,31 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   child: ListView.separated(
                     padding:
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                    itemCount: _orders.length,
+                    itemCount: _allOrders.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 8),
                     itemBuilder: (BuildContext context, int index) {
-                      String order = _orders[index];
+                      var item = _allOrders[index];
+                      String name = Shop.getItemName(item.id);
+                      String shopId = Shop.getShopName(item.shopId);
 
                       return TransactionCardWidget(
                         backgroundColor: Themes.grayLight,
                         accentColor: Themes.cream,
-                        header: order,
-                        content: '1x',
+                        id: item,
+                        header: name,
+                        content: '${item.count}x',
+                        trailing: shopId,
                         icon: const Icon(Icons.delete),
                         dismissable: true,
-                        onDismiss: () {
+                        onDismiss: (id) {
+                          var item = id as CartItem;
+
                           setState(() {
-                            _orders.remove(order);
+                            _allOrders.remove(item);
                           });
+
+                          Shop.removeItemFromOrders(item.shopId, item.id);
                         },
                       );
                     },

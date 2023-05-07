@@ -13,6 +13,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  String? uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid != null) {
+    Database.groupId = 'prenski_12';
+    Database.userId = uid;
+  }
+
   await Shop.loadAll();
 
   runApp(const PizzaFlizzaApp());

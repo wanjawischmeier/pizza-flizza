@@ -36,24 +36,35 @@ class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
 class _DynamicAppBarState extends State<DynamicAppBar> {
   late bool _showCartBadge;
   int _orderCount = 0;
-  late StreamSubscription<int> _orderCountSubscription;
+  late StreamSubscription<Map<String, Map>> _openOrdersSubscription;
+
+  int countOrders(Map<String, Map> orders) {
+    int count = 0;
+
+    orders.forEach((shopId, order) {
+      for (int itemCount in order.values) {
+        count += itemCount;
+      }
+    });
+
+    return count;
+  }
 
   @override
   void initState() {
     super.initState();
 
-    _orderCountSubscription = Shop.subscribeToOrderCount((orderCount) {
+    _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
       setState(() {
-        _orderCount = orderCount;
+        _orderCount = countOrders(orders);
       });
-      print(_orderCount);
     });
   }
 
   @override
   void dispose() {
     super.dispose();
-    _orderCountSubscription.cancel();
+    _openOrdersSubscription.cancel();
   }
 
   @override
@@ -101,7 +112,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
           child: Center(
             child: IconButton(
               icon: const Icon(Icons.shopping_cart),
-              onPressed: widget.onCartClicked,
+              onPressed: (_orderCount == 0) ? null : widget.onCartClicked,
             ),
           ),
         ),

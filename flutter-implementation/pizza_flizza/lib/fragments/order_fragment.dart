@@ -1,9 +1,10 @@
-import 'package:cached_firestorage/remote_picture.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/widgets/order_bottom_bar.dart';
 import 'package:pizza_flizza/widgets/order_card.dart';
 
 class OrderFragment extends StatefulWidget {
@@ -14,19 +15,27 @@ class OrderFragment extends StatefulWidget {
 }
 
 class _OrderFragmentState extends State<OrderFragment> {
-  Map<String, List<OrderCardWidget>> map = {};
-  double _currentTotal = 0;
+  late StreamSubscription<String> _shopChangedSubscription;
 
   @override
   void initState() {
     super.initState();
-    Shop.onChanged = () => setState(() {});
+    _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _shopChangedSubscription.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // item list
         Expanded(
           child: CustomScrollView(
             slivers: List.generate(Shop.items.length, (index) {
@@ -63,11 +72,13 @@ class _OrderFragmentState extends State<OrderFragment> {
                     ],
                   ),
                 ),
-                sliver: SliverGrid.count(
-                  crossAxisCount: 2,
-                  childAspectRatio: 1,
-                  children: List.generate(categoryItems.length, (itemIndex) {
-                    var item = categoryItems.entries.elementAt(itemIndex);
+                sliver: SliverGrid.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                  ),
+                  itemCount: categoryItems.length,
+                  itemBuilder: (context, index) {
+                    var item = categoryItems.entries.elementAt(index);
                     String name = item.value['name'];
                     double price = item.value['price'];
 
@@ -78,78 +89,16 @@ class _OrderFragmentState extends State<OrderFragment> {
                         itemId: item.key,
                         name: name,
                         price: price,
-                        onCountChanged: (categoryId, itemId, count) {
-                          setState(() {
-                            _currentTotal += count *
-                                Shop.items[categoryId]?[itemId]?['price'];
-                          });
-                          return true;
-                        },
+                        onCountChanged: Shop.setCurrentOrderItemCount,
                       ),
                     );
-                  }),
+                  },
                 ),
               );
             }),
           ),
         ),
-        Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Themes.grayDark,
-            borderRadius:
-                BorderRadiusDirectional.vertical(top: Radius.circular(8)),
-            boxShadow: [
-              BoxShadow(
-                color: Themes.grayMid,
-                spreadRadius: 2,
-                blurRadius: 4,
-              )
-            ],
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('list'),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Themes.grayLight,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: Center(
-                      child: Text(
-                        NumberFormat.simpleCurrency(
-                          locale:
-                              'de_DE', // Localizations.localeOf(context).scriptCode,
-                        ).format(_currentTotal),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Shop.pushOrder({
-                      'hearty': {'baguette': 2}
-                    });
-                    setState(() {});
-                  },
-                  child: const Text('Order'),
-                ),
-              ),
-            ],
-          ),
-        ),
+        const OrderBottomBar(),
       ],
     );
   }

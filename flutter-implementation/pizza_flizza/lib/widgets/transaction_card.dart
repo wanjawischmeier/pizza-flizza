@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/theme.dart';
 
-typedef OnDismiss = void Function();
+typedef OnDismiss = void Function(Object id);
 
 class TransactionCardWidget extends StatelessWidget {
   static const double borderRadius = 8;
 
   final Color backgroundColor;
   final Color accentColor;
-  final String header;
-  final String content;
+  final Object id;
+  final String header, content, trailing;
   final Icon icon;
   final bool dismissable;
   final OnDismiss? onDismiss;
@@ -18,8 +17,10 @@ class TransactionCardWidget extends StatelessWidget {
     super.key,
     required this.backgroundColor,
     required this.accentColor,
+    required this.id,
     required this.header,
     required this.content,
+    this.trailing = '',
     required this.icon,
     this.dismissable = false,
     this.onDismiss,
@@ -34,21 +35,20 @@ class TransactionCardWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Flexible(
-              child: Text(header),
-            ),
-            Flexible(
+            Expanded(
               child: Text(
-                'date',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                header,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+            Text(trailing),
           ],
         ),
       ),
       subtitle: Text(content),
-      trailing: Padding(
-        padding: const EdgeInsets.only(right: borderRadius * 4),
+      trailing: const Padding(
+        padding: EdgeInsets.only(right: borderRadius * 4),
+        /*
         child: AspectRatio(
           aspectRatio: 2,
           child: Container(
@@ -68,6 +68,7 @@ class TransactionCardWidget extends StatelessWidget {
             ),
           ),
         ),
+        */
       ),
     );
 
@@ -84,7 +85,7 @@ class TransactionCardWidget extends StatelessWidget {
                 ? Dismissible(
                     key: Key(header),
                     direction: DismissDirection.endToStart,
-                    onDismissed: (direction) => onDismiss?.call(),
+                    onDismissed: (direction) => onDismiss?.call(id),
                     background: Container(
                       padding: const EdgeInsets.only(right: borderRadius * 2),
                       color: accentColor,

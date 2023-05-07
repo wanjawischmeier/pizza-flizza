@@ -53,14 +53,15 @@ class _TransactionFragmentState extends State<TransactionFragment> {
         return TransactionCardWidget(
           backgroundColor: Themes.grayMid,
           accentColor: color,
+          id: order.key,
           header: order.key,
           content:
               '1x adadwwdad\n2x sadads\n3x asfasdsdawda\n4x adwdfa\n5x awdwa',
           icon: Icon(iconData),
           dismissable: dismissable,
-          onDismiss: () {
+          onDismiss: (orderId) {
             setState(() {
-              _orders.remove(order.key);
+              _orders.remove(orderId);
             });
           },
         );
