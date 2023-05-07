@@ -18,9 +18,9 @@ void main() async {
   if (uid != null) {
     Database.groupId = 'prenski_12';
     Database.userId = uid;
-  }
 
-  await Shop.loadAll();
+    await Shop.loadAll();
+  }
 
   runApp(const PizzaFlizzaApp());
 }
@@ -42,9 +42,15 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
 
     // based on: https://dev.to/snowcodes/flutter-firebase-authentication-dynamic-routing-by-authstatechanges-9k0
     _sub = FirebaseAuth.instance.authStateChanges().listen((user) {
-      _navigatorKey.currentState!.pushReplacementNamed(
-        user == null ? 'login' : 'home',
-      );
+      if (user == null) {
+        _navigatorKey.currentState?.pushReplacementNamed('login');
+      } else {
+        Database.groupId = 'prenski_12';
+        Database.userId = user.uid;
+
+        Shop.loadAll().then((value) =>
+            _navigatorKey.currentState?.pushReplacementNamed('home'));
+      }
     });
   }
 
