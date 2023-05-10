@@ -28,12 +28,14 @@ class Shop {
     _shopChangedController.add(_shopId);
   }
 
+  static get shopName => _getShopName(_shopId);
+
   static Map<dynamic, dynamic> shops = {};
   static Map<dynamic, dynamic> get items {
     return shops[_shopId]['items'];
   }
 
-  static String getShopName(String shopId) {
+  static String _getShopName(String shopId) {
     return shops[shopId]?['name'] ?? 'Unknown Shop';
   }
 
@@ -67,7 +69,7 @@ class Shop {
     String result = '';
 
     for (var item in _currentOrder.entries) {
-      result += '- ${item.value}x\t${item.key}\n';
+      result += '- ${item.value}x\t${getItemName(item.key)}\n';
     }
 
     return result;

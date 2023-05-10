@@ -124,15 +124,15 @@ class _ShoppingCartState extends State<ShoppingCart> {
                     itemBuilder: (BuildContext context, int index) {
                       var item = _allOrders[index];
                       String name = Shop.getItemName(item.id);
-                      String shopId = Shop.getShopName(item.shopId);
+                      String shopName = Shop.shopName;
 
                       return TransactionCardWidget(
                         backgroundColor: Themes.grayLight,
                         accentColor: Themes.cream,
                         id: item,
-                        header: name,
-                        content: '${item.count}x',
-                        trailing: shopId,
+                        header: '${item.count}x\t$name',
+                        content: shopName,
+                        trailing: '9.99 §',
                         icon: const Icon(Icons.delete),
                         dismissable: true,
                         onDismiss: (id) {

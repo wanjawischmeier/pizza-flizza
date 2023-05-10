@@ -57,6 +57,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
           header: order.key,
           content:
               '1x adadwwdad\n2x sadads\n3x asfasdsdawda\n4x adwdfa\n5x awdwa',
+          trailing: '9.99 §',
           icon: Icon(iconData),
           dismissable: dismissable,
           onDismiss: (orderId) {

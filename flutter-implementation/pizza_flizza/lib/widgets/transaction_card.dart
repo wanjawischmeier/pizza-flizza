@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/theme.dart';
 
 typedef OnDismiss = void Function(Object id);
 
@@ -20,7 +21,7 @@ class TransactionCardWidget extends StatelessWidget {
     required this.id,
     required this.header,
     required this.content,
-    this.trailing = '',
+    required this.trailing,
     required this.icon,
     this.dismissable = false,
     this.onDismiss,
@@ -28,47 +29,53 @@ class TransactionCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var tile = ListTile(
-      contentPadding: const EdgeInsets.only(left: borderRadius),
-      title: SizedBox(
-        height: 20,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                header,
-                overflow: TextOverflow.ellipsis,
+    var tile = Padding(
+      padding: const EdgeInsets.all(borderRadius),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(bottom: borderRadius),
+                  child: Text(
+                    header,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    content,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: borderRadius * 2),
+            child: Container(
+              decoration: BoxDecoration(
+                color: accentColor,
+                borderRadius: BorderRadius.circular(borderRadius),
               ),
-            ),
-            Text(trailing),
-          ],
-        ),
-      ),
-      subtitle: Text(content),
-      trailing: const Padding(
-        padding: EdgeInsets.only(right: borderRadius * 4),
-        /*
-        child: AspectRatio(
-          aspectRatio: 2,
-          child: Container(
-            decoration: BoxDecoration(
-              color: accentColor,
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
-            padding: EdgeInsets.zero,
-            child: Center(
-              child: Text(
-                'price',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              padding: const EdgeInsets.all(borderRadius),
+              child: Center(
+                child: Text(
+                  trailing,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        */
+        ],
       ),
     );
 
