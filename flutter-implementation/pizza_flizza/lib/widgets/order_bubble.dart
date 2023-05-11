@@ -26,7 +26,7 @@ class OrderBubbleWidget extends StatefulWidget {
 class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
   int _itemCount = 0;
   late StreamSubscription<String> _shopChangedSubscription;
-  late StreamSubscription<Map> _orderPushedSubscription;
+  late StreamSubscription<List<OrderItem>> _orderPushedSubscription;
 
   final TextPainter _addTextPainter = TextPainter(
       text: const TextSpan(text: '+', style: TextStyle(fontSize: 14)),

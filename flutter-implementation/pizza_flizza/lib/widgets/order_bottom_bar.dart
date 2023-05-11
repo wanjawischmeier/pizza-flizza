@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database.dart';
+import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/theme.dart';
 
 class OrderBottomBar extends StatefulWidget {
@@ -105,10 +106,7 @@ class _OrderBottomBarState extends State<OrderBottomBar>
                     padding: const EdgeInsets.all(8),
                     child: Center(
                       child: Text(
-                        NumberFormat.simpleCurrency(
-                          locale:
-                              'de_DE', // Localizations.localeOf(context).scriptCode,
-                        ).format(_currentTotal),
+                        Helper.formatPrice(_currentTotal),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

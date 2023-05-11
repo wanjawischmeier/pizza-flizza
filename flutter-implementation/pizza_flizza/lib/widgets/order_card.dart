@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/cached_remote_picture.dart';
 import 'package:pizza_flizza/widgets/order_bubble.dart';
@@ -59,9 +60,7 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
           ),
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Text(
-              NumberFormat.simpleCurrency(
-                locale: 'de_DE', // Localizations.localeOf(context).scriptCode,
-              ).format(widget.price),
+              Helper.formatPrice(widget.price),
               style: Theme.of(context).textTheme.bodySmall,
             ),
             Padding(

@@ -2,21 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/database.dart';
+import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/transaction_card.dart';
 
 typedef OnRemoveOverlay = void Function();
-
-class CartItem {
-  String shopId, id;
-  int count;
-
-  CartItem(
-    this.shopId,
-    this.id,
-    this.count,
-  );
-}
 
 class ShoppingCart extends StatefulWidget {
   final OnRemoveOverlay onRemoveOverlay;
@@ -28,29 +18,18 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
-  late StreamSubscription<Map<String, Map>> _openOrdersSubscription;
-  var _allOrders = <CartItem>[];
-  set rawOrders(Map<String, Map> value) {
-    var orders = <CartItem>[];
-
-    value.forEach((shopId, order) {
-      order.forEach((itemId, count) {
-        orders.add(CartItem(shopId, itemId, count));
-      });
-    });
-
-    _allOrders = orders;
-  }
+  late StreamSubscription<List<OrderItem>> _openOrdersSubscription;
+  var _orders = <OrderItem>[];
 
   @override
   void initState() {
     super.initState();
     _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
       setState(() {
-        rawOrders = orders;
+        _orders = orders;
       });
     });
-    rawOrders = Shop.openOrders;
+    _orders = Shop.flattenedOpenOrders;
   }
 
   @override
@@ -83,7 +62,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                       children: [
                         const Flexible(
                           child: Text(
-                            'Your Orders',
+                            'Your Order',
                             style: TextStyle(
                               fontSize: 24,
                               decoration: TextDecoration.none,
@@ -98,7 +77,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                           padding: const EdgeInsets.all(8),
                           child: Center(
                             child: Text(
-                              'total',
+                              Helper.formatPrice(Shop.openTotal),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -118,31 +97,29 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   child: ListView.separated(
                     padding:
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                    itemCount: _allOrders.length,
+                    itemCount: _orders.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 8),
                     itemBuilder: (BuildContext context, int index) {
-                      var item = _allOrders[index];
-                      String name = Shop.getItemName(item.id);
-                      String shopName = Shop.shopName;
+                      var item = _orders[index];
 
                       return TransactionCardWidget(
                         backgroundColor: Themes.grayLight,
                         accentColor: Themes.cream,
                         id: item,
-                        header: '${item.count}x\t$name',
-                        content: shopName,
-                        trailing: '9.99 §',
+                        header: '${item.count}x\t${item.name}',
+                        content: item.shopName,
+                        trailing: Helper.formatPrice(item.price),
                         icon: const Icon(Icons.delete),
                         dismissable: true,
                         onDismiss: (id) {
-                          var item = id as CartItem;
+                          var item = id as OrderItem;
 
                           setState(() {
-                            _allOrders.remove(item);
+                            _orders.remove(item);
                           });
 
-                          Shop.removeItemFromOrders(item.shopId, item.id);
+                          Shop.removeItem(item);
                         },
                       );
                     },
