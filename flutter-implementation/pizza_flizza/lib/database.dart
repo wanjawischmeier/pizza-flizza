@@ -249,10 +249,13 @@ class Shop {
     });
   }
 
-  static Future<void> fulfillItem(OrderItem item) {
-    return item.databaseReference.remove().then((value) {
-      _openOrders[shopId]?.remove(item.id);
-      pushOpenOrderStream();
-    });
+  static Future<void> fulfillItem(OrderItem item, int count) {
+    int openCount = _openOrders[_shopId]?[item.id] ?? 0;
+
+    if (openCount == count) {
+      return item.databaseReference.remove();
+    } else {
+      return item.databaseReference.set(openCount - count);
+    }
   }
 }
