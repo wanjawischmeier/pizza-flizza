@@ -4,20 +4,17 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class OrderItem {
-  String id, shopId, name, shopName;
+  String id, shopId, userId, name, shopName;
+  // null means not fulfilled
+  String? fulfillerId;
   int count;
   double price;
   DatabaseReference get databaseReference =>
       Database.userReference.child('orders/$shopId/$id');
 
-  OrderItem(
-    this.id,
-    this.shopId,
-    this.name,
-    this.shopName,
-    this.count,
-    this.price,
-  );
+  OrderItem(this.id, this.shopId, this.userId, this.name, this.shopName,
+      this.count, this.price,
+      {this.fulfillerId});
 }
 
 class Database {
@@ -97,13 +94,20 @@ class Shop {
   }
 
   static double _openTotal = 0;
-  static final _openOrders = <String, Map>{};
+  // shopId, itemId -> count
+  static final _openOrders = <String, Map<String, int>>{};
+  // shopId, fulfillerId, itemId -> count
+  static final _fulfilledOrders = <String, Map<String, Map<String, int>>>{};
   static final _flattenedOpenOrders = <OrderItem>[];
+  static final _flattenedFulfilledOrders = <OrderItem>[];
 
   static double get openTotal => _openTotal;
   static Map? get openOrder => _openOrders[_shopId];
   static Map<String, Map> get openOrders => _openOrders;
+  static Map<String, Map> get fulfilledOrders => _fulfilledOrders;
   static List<OrderItem> get flattenedOpenOrders => _flattenedOpenOrders;
+  static List<OrderItem> get flattenedFulfilledOrders =>
+      _flattenedFulfilledOrders;
 
   static final StreamController<List<OrderItem>> _ordersUpdatedController =
       StreamController.broadcast();
@@ -120,12 +124,13 @@ class Shop {
     _openOrders.forEach((shopId, order) {
       order.forEach((itemId, count) {
         var item = _getItem(itemId);
-        var price = count * item['price'];
+        var price = count * (item['price'] as double);
         _openTotal += price;
 
         _flattenedOpenOrders.add(OrderItem(
           itemId,
           shopId,
+          Database.userId,
           item['name'],
           _getShopName(shopId),
           count,
@@ -148,6 +153,48 @@ class Shop {
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
+  static void setOpenOrders(DataSnapshot snapshot) {
+    if (snapshot.value == null) {
+      return;
+    }
+
+    _openOrders.clear();
+
+    for (var shop in (snapshot.value as Map).entries) {
+      if (!_openOrders.containsKey(shop.key)) {
+        _openOrders[shop.key] = {};
+      }
+
+      for (var item in shop.value.entries) {
+        _openOrders[shop.key]?[item.key] = item.value;
+      }
+    }
+  }
+
+  static void setFulfilledOrders(DataSnapshot snapshot) {
+    if (snapshot.value == null) {
+      return;
+    }
+
+    _fulfilledOrders.clear();
+
+    for (var shop in (snapshot.value as Map).entries) {
+      if (!_fulfilledOrders.containsKey(shop.key)) {
+        _fulfilledOrders[shop.key] = {};
+      }
+
+      for (var fulfiller in shop.value.entries) {
+        if (!_fulfilledOrders[shop.key]!.containsKey(fulfiller.key)) {
+          _fulfilledOrders[shop.key]?[fulfiller.key] = {};
+        }
+
+        for (var item in fulfiller.value.entries) {
+          _fulfilledOrders[shop.key]?[fulfiller.key]?[item.key] = item.value;
+        }
+      }
+    }
+  }
+
   static Future<void> loadAll() async {
     var snapshot = await Database.realtime.child('shops').get();
     shops = snapshot.value as Map;
@@ -162,30 +209,38 @@ class Shop {
       _itemReferences[currentShopId] = snapshot.items;
 
       // get users open orders for the shop
-      orderFutures.add(Database.userReference
-          .child('orders/$currentShopId')
-          .get()
-          .then((snapshot) {
-        var order = snapshot.value;
-        if (order != null) {
-          _openOrders[currentShopId] = order as Map;
-        }
-      }));
+      orderFutures.add(
+        Database.userReference
+            .child('orders')
+            .get()
+            .then((snapshot) => setOpenOrders(snapshot)),
+      );
+
+      orderFutures.add(
+        Database.userReference
+            .child('fulfilled')
+            .get()
+            .then((snapshot) => setFulfilledOrders(snapshot)),
+      );
 
       // notify subscribers once all orders are loaded
-      Future.wait(orderFutures).then((value) {
+      Future.wait(orderFutures).then((_) {
         pushOpenOrderStream();
       });
     }
 
     orderUpdateListener(event) {
-      _openOrders.clear();
-      var orders = event.snapshot.value as Map?;
-      orders?.forEach((currentShopId, order) {
-        _openOrders[currentShopId] = order as Map;
-      });
-
-      pushOpenOrderStream();
+      switch (event.snapshot.key) {
+        case 'orders':
+          setOpenOrders(event.snapshot);
+          pushOpenOrderStream();
+          break;
+        case 'fulfilled':
+          setFulfilledOrders(event.snapshot);
+          break;
+        default:
+          break;
+      }
     }
 
     Database.userReference.onChildAdded.listen(orderUpdateListener);
@@ -218,44 +273,54 @@ class Shop {
   }
 
   static Future<void> pushCurrentShopOrder() {
-    var reference = Database.userReference.child('orders/$_shopId');
-    return reference.get().then((snapshot) {
-      var order = snapshot.value as Map?;
-      if (order == null) {
-        order = _currentOrder;
-      } else {
-        _currentOrder.forEach((key, value) {
-          int count = order![key] ?? 0;
-          order[key] = count + value;
-        });
-      }
+    var order = _openOrders[_shopId] ?? <String, int>{};
 
-      var future = reference.set(order);
-      _openOrders[_shopId] = order;
-
-      _currentTotal = 0;
-      _currentOrder.clear();
-      _currentTotalController.add(_currentTotal);
-      pushOpenOrderStream();
-
-      return future;
+    _currentOrder.forEach((key, value) {
+      int count = order[key] ?? 0;
+      order[key] = count + value;
     });
+
+    var future = Database.userReference.child('orders/$_shopId').set(order);
+    _openOrders[_shopId] = order;
+
+    _currentTotal = 0;
+    _currentOrder.clear();
+    _currentTotalController.add(_currentTotal);
+    pushOpenOrderStream();
+
+    return future;
   }
 
   static Future<void> removeItem(OrderItem item) {
-    return item.databaseReference.remove().then((value) {
+    return item.databaseReference.remove().then((_) {
       _openOrders[shopId]?.remove(item.id);
       pushOpenOrderStream();
     });
   }
 
-  static Future<void> fulfillItem(OrderItem item, int count) {
-    int openCount = _openOrders[_shopId]?[item.id] ?? 0;
-
-    if (openCount == count) {
-      return item.databaseReference.remove();
-    } else {
-      return item.databaseReference.set(openCount - count);
+  static Future<void>? fulfillItem(OrderItem item, int count) {
+    if (item.fulfillerId == null) {
+      return null;
     }
+
+    var futures = <Future>[];
+
+    // skip fulfilling own order
+    if (item.fulfillerId != Database.userId) {
+      int fulfilledCount =
+          _fulfilledOrders[_shopId]?[item.fulfillerId]?[item.id] ?? 0;
+
+      futures.add(Database.userReference
+          .child('fulfilled/$_shopId/${item.fulfillerId}/${item.id}')
+          .set(fulfilledCount + count));
+    }
+
+    if (item.count == count) {
+      futures.add(item.databaseReference.remove());
+    } else {
+      futures.add(item.databaseReference.set(item.count - count));
+    }
+
+    return Future.wait(futures);
   }
 }
