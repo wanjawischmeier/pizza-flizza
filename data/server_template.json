@@ -1,5 +1,15 @@
 {
-    "users": {},
+    "users": {
+        "jGR1ULC7TgXGtQU0FNquwgnTtxC2": {
+            "orders": {
+                "penny_burgtor": {
+                    "baguette": 1,
+                    "baguette_onion": 2,
+                    "bread_ciabatta": 9
+                }
+            }
+        }
+    },
     "old": [
         "roll_chocolate",
         "curd_balls",

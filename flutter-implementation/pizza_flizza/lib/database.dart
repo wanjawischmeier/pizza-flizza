@@ -22,6 +22,8 @@ class Database {
   static var realtime = FirebaseDatabase.instance.ref();
 
   static late String groupId, userId;
+  static DatabaseReference get groupReference =>
+      Database.realtime.child('users/${Database.groupId}');
   static DatabaseReference get userReference =>
       Database.realtime.child('users/${Database.groupId}/${Database.userId}');
 
@@ -94,8 +96,8 @@ class Shop {
   }
 
   static double _openTotal = 0;
-  // shopId, itemId -> count
-  static final _openOrders = <String, Map<String, int>>{};
+  // userId, shopId, itemId -> count
+  static final _openOrders = <String, Map<String, Map<String, int>>>{};
   // shopId, fulfillerId, itemId -> count
   static final _fulfilledOrders = <String, Map<String, Map<String, int>>>{};
   static final _flattenedOpenOrders = <OrderItem>[];
@@ -121,21 +123,23 @@ class Shop {
     _flattenedOpenOrders.clear();
 
     // flatten orders
-    _openOrders.forEach((shopId, order) {
-      order.forEach((itemId, count) {
-        var item = _getItem(itemId);
-        var price = count * (item['price'] as double);
-        _openTotal += price;
+    _openOrders.forEach((userId, userOrders) {
+      userOrders.forEach((shopId, order) {
+        order.forEach((itemId, count) {
+          var item = _getItem(itemId);
+          var price = count * (item['price'] as double);
+          _openTotal += price;
 
-        _flattenedOpenOrders.add(OrderItem(
-          itemId,
-          shopId,
-          Database.userId,
-          item['name'],
-          _getShopName(shopId),
-          count,
-          price,
-        ));
+          _flattenedOpenOrders.add(OrderItem(
+            itemId,
+            shopId,
+            Database.userId,
+            item['name'],
+            _getShopName(shopId),
+            count,
+            price,
+          ));
+        });
       });
     });
 
@@ -160,13 +164,19 @@ class Shop {
 
     _openOrders.clear();
 
-    for (var shop in (snapshot.value as Map).entries) {
-      if (!_openOrders.containsKey(shop.key)) {
-        _openOrders[shop.key] = {};
+    for (var user in (snapshot.value as Map).entries) {
+      if (!_openOrders.containsKey(user.key)) {
+        _openOrders[user.key] = {};
       }
 
-      for (var item in shop.value.entries) {
-        _openOrders[shop.key]?[item.key] = item.value;
+      for (var shop in user.value) {
+        if (!_openOrders[user.key]!.containsKey(shop.key)) {
+          _openOrders[user.key]?[shop.key] = {};
+        }
+
+        for (var item in shop.value.entries) {
+          _openOrders[user.key]?[shop.key]?[item.key] = item.value;
+        }
       }
     }
   }
@@ -210,19 +220,18 @@ class Shop {
 
       // get users open orders for the shop
       orderFutures.add(
-        Database.userReference
-            .child('orders')
+        Database.groupReference
             .get()
             .then((snapshot) => setOpenOrders(snapshot)),
       );
-
+      /*
       orderFutures.add(
         Database.userReference
             .child('fulfilled')
             .get()
             .then((snapshot) => setFulfilledOrders(snapshot)),
       );
-
+      */
       // notify subscribers once all orders are loaded
       Future.wait(orderFutures).then((_) {
         pushOpenOrderStream();
@@ -243,8 +252,9 @@ class Shop {
       }
     }
 
-    Database.userReference.onChildAdded.listen(orderUpdateListener);
-    Database.userReference.onChildChanged.listen(orderUpdateListener);
+    var users = Database.realtime.child('users');
+    users.onChildAdded.listen(orderUpdateListener);
+    users.onChildChanged.listen(orderUpdateListener);
   }
 
   static bool containsReference(String referencePath) {
@@ -273,7 +283,7 @@ class Shop {
   }
 
   static Future<void> pushCurrentShopOrder() {
-    var order = _openOrders[_shopId] ?? <String, int>{};
+    var order = _openOrders[_shopId]?[Database.userId] ?? <String, int>{};
 
     _currentOrder.forEach((key, value) {
       int count = order[key] ?? 0;
@@ -281,7 +291,7 @@ class Shop {
     });
 
     var future = Database.userReference.child('orders/$_shopId').set(order);
-    _openOrders[_shopId] = order;
+    _openOrders[_shopId]?[Database.userId] = order;
 
     _currentTotal = 0;
     _currentOrder.clear();
