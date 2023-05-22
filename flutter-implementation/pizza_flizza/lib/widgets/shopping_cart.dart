@@ -21,15 +21,21 @@ class _ShoppingCartState extends State<ShoppingCart> {
   late StreamSubscription<List<OrderItem>> _openOrdersSubscription;
   var _orders = <OrderItem>[];
 
+  List<OrderItem> filterOrders(List<OrderItem> orders) {
+    return orders.where((order) {
+      return order.userId == Database.userId;
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
     _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
       setState(() {
-        _orders = orders;
+        _orders = filterOrders(orders);
       });
     });
-    _orders = Shop.flattenedOpenOrders;
+    _orders = filterOrders(Shop.flattenedOpenOrders);
   }
 
   @override

@@ -38,11 +38,13 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
   int _orderCount = 0;
   late StreamSubscription<List<OrderItem>> _openOrdersSubscription;
 
-  int countOrders(List<OrderItem> orders) {
+  int countUserOrders(List<OrderItem> orders) {
     int count = 0;
 
     for (var item in orders) {
-      count += item.count;
+      if (item.userId == Database.userId) {
+        count += item.count;
+      }
     }
 
     return count;
@@ -54,10 +56,10 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
 
     _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
       setState(() {
-        _orderCount = countOrders(orders);
+        _orderCount = countUserOrders(orders);
       });
     });
-    _orderCount = countOrders(Shop.flattenedOpenOrders);
+    _orderCount = countUserOrders(Shop.flattenedOpenOrders);
   }
 
   @override

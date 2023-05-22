@@ -59,7 +59,7 @@ class Shop {
     return shops[shopId]?['name'] ?? 'Unknown Shop';
   }
 
-  static dynamic _getItem(String itemId) {
+  static dynamic _getItemInfo(String itemId) {
     for (var shop in shops.values) {
       for (var category in shop['items'].values) {
         for (var item in category.entries) {
@@ -89,7 +89,7 @@ class Shop {
     String result = '';
 
     for (var item in _currentOrder.entries) {
-      result += '- ${item.value}x\t${_getItem(item.key)['name']}\n';
+      result += '- ${item.value}x\t${_getItemInfo(item.key)['name']}\n';
     }
 
     return result;
@@ -120,21 +120,24 @@ class Shop {
 
   static void pushOpenOrderStream() {
     _openTotal = 0;
+
+    // don't flatten all orders on every update
+    /*
     _flattenedOpenOrders.clear();
 
     // flatten orders
     _openOrders.forEach((userId, userOrders) {
       userOrders.forEach((shopId, order) {
         order.forEach((itemId, count) {
-          var item = _getItem(itemId);
-          var price = count * (item['price'] as double);
+          var itemInfo = _getItemInfo(itemId);
+          double price = count * (itemInfo['price'] as double);
           _openTotal += price;
 
           _flattenedOpenOrders.add(OrderItem(
             itemId,
             shopId,
             Database.userId,
-            item['name'],
+            itemInfo['name'],
             _getShopName(shopId),
             count,
             price,
@@ -144,6 +147,7 @@ class Shop {
     });
 
     _ordersUpdatedController.add(_flattenedOpenOrders);
+    */
   }
 
   static double _currentTotal = 0;
@@ -157,28 +161,55 @@ class Shop {
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
-  static void setOpenOrders(DataSnapshot snapshot) {
-    if (snapshot.value == null) {
+  static void setOpenUserOrders(String userId, Map? userOrders) {
+    if (userOrders == null) {
       return;
     }
 
-    _openOrders.clear();
+    // create empty map
+    if (!_openOrders.containsKey(userId)) {
+      _openOrders[userId] = {};
+    }
 
-    for (var user in (snapshot.value as Map).entries) {
-      if (!_openOrders.containsKey(user.key)) {
-        _openOrders[user.key] = {};
+    // iterate over all shops containing orders
+    for (var shop in userOrders.entries) {
+      if (!_openOrders[userId]!.containsKey(shop.key)) {
+        _openOrders[userId]?[shop.key] = {};
       }
 
-      for (var shop in user.value) {
-        if (!_openOrders[user.key]!.containsKey(shop.key)) {
-          _openOrders[user.key]?[shop.key] = {};
-        }
+      for (var item in shop.value.entries) {
+        _openOrders[userId]?[shop.key]?[item.key] = item.value;
 
-        for (var item in shop.value.entries) {
-          _openOrders[user.key]?[shop.key]?[item.key] = item.value;
+        var itemInfo = _getItemInfo(item.key);
+        int count = item.value;
+        double price = count * (itemInfo['price'] as double);
+        var orderItem = OrderItem(
+          item.key,
+          shop.key,
+          userId,
+          itemInfo['name'],
+          _getShopName(shop.key),
+          count,
+          price,
+        );
+
+        // get existing order item with potentially different count
+        var matching = _flattenedOpenOrders.where((matchingItem) {
+          return matchingItem.id == orderItem.id &&
+              matchingItem.shopId == orderItem.shopId &&
+              matchingItem.userId == orderItem.userId;
+        });
+
+        if (matching.isNotEmpty) {
+          int index = _flattenedOpenOrders.indexOf(matching.first);
+          _flattenedOpenOrders[index] = orderItem;
+        } else {
+          _flattenedOpenOrders.add(orderItem);
         }
       }
     }
+
+    _ordersUpdatedController.add(_flattenedOpenOrders);
   }
 
   static void setFulfilledOrders(DataSnapshot snapshot) {
@@ -218,12 +249,14 @@ class Shop {
           await Database.storage.child('shops/$currentShopId/items').listAll();
       _itemReferences[currentShopId] = snapshot.items;
 
+      /*
       // get users open orders for the shop
       orderFutures.add(
         Database.groupReference
             .get()
-            .then((snapshot) => setOpenOrders(snapshot)),
+            .then((snapshot) => setOpenUserOrders(snapshot.value as Map?)),
       );
+      */
       /*
       orderFutures.add(
         Database.userReference
@@ -239,20 +272,20 @@ class Shop {
     }
 
     orderUpdateListener(event) {
-      switch (event.snapshot.key) {
-        case 'orders':
-          setOpenOrders(event.snapshot);
-          pushOpenOrderStream();
-          break;
-        case 'fulfilled':
-          setFulfilledOrders(event.snapshot);
-          break;
-        default:
-          break;
+      String updatedUserId = event.snapshot.key;
+      Map? data = event.snapshot.value;
+      if (data == null) {
+        return;
+      }
+
+      setOpenUserOrders(updatedUserId, data['orders']);
+
+      if (data.containsKey('fulfilled')) {
+        setFulfilledOrders(data['fulfilled']);
       }
     }
 
-    var users = Database.realtime.child('users');
+    var users = Database.realtime.child('users/${Database.groupId}');
     users.onChildAdded.listen(orderUpdateListener);
     users.onChildChanged.listen(orderUpdateListener);
   }
