@@ -18,7 +18,7 @@ class ShopFragment extends StatefulWidget {
 }
 
 class _ShopFragmentState extends State<ShopFragment> {
-  OrderItem? _foregroundItem, _backgroundItem;
+  OpenItem? _foregroundItem, _backgroundItem;
   double _gradient = 1;
   bool _locked = true;
   double _swiped = 0;
@@ -26,11 +26,11 @@ class _ShopFragmentState extends State<ShopFragment> {
   late int _count;
 
   late StreamSubscription<String> _shopChangedSubscription;
-  late StreamSubscription<List<OrderItem>> _openOrdersSubscription;
-  var _orders = <OrderItem>[];
+  late StreamSubscription<List<OpenItem>> _openOrdersSubscription;
+  var _orders = <OpenItem>[];
   final _fulfilled = <String, int>{};
 
-  List<OrderItem> filterOrders(List<OrderItem> orders) {
+  List<OpenItem> filterOrders(List<OpenItem> orders) {
     var tmp = orders.toList();
     for (var i = 0; i < tmp.length; i++) {
       var item = tmp[i];
@@ -64,7 +64,7 @@ class _ShopFragmentState extends State<ShopFragment> {
       setState(() {
         _locked = true;
         _fulfilled.clear();
-        _orders = filterOrders(Shop.flattenedOpenOrders);
+        _orders = filterOrders(Shop.openOrders);
       });
     });
     _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
@@ -75,9 +75,8 @@ class _ShopFragmentState extends State<ShopFragment> {
         _orders = tmp;
       });
     });
-    _orders = Shop.flattenedOpenOrders
-        .where((item) => item.shopId == Shop.shopId)
-        .toList();
+    _orders =
+        Shop.openOrders.where((item) => item.shopId == Shop.shopId).toList();
 
     if (_orders.isNotEmpty) {
       _foregroundItem = _orders.elementAt(0);

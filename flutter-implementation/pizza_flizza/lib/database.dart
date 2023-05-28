@@ -3,18 +3,77 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class OrderItem {
+class ShopItem {
   String id, shopId, userId, name, shopName;
-  // null means not fulfilled
-  String? fulfillerId;
   int count;
   double price;
   DatabaseReference get databaseReference =>
       Database.userReference.child('orders/$shopId/$id');
 
-  OrderItem(this.id, this.shopId, this.userId, this.name, this.shopName,
-      this.count, this.price,
-      {this.fulfillerId});
+  ShopItem(
+    this.id,
+    this.shopId,
+    this.userId,
+    this.name,
+    this.shopName,
+    this.count,
+    this.price,
+  );
+}
+
+class OpenItem extends ShopItem {
+  int timestamp;
+
+  OpenItem(
+    super.id,
+    super.shopId,
+    super.userId,
+    this.timestamp,
+    super.name,
+    super.shopName,
+    super.count,
+    super.price,
+  );
+
+  OpenItem.fromNow(ShopItem shopItem)
+      : timestamp = DateTime.now().millisecondsSinceEpoch,
+        super(
+          shopItem.id,
+          shopItem.shopId,
+          shopItem.userId,
+          shopItem.name,
+          shopItem.shopName,
+          shopItem.count,
+          shopItem.price,
+        );
+}
+
+class FulfilledItem extends OpenItem {
+  String fulfillerId;
+
+  FulfilledItem(
+    super.id,
+    super.shopId,
+    super.userId,
+    this.fulfillerId,
+    super.name,
+    super.shopName,
+    super.count,
+    super.price,
+    super.timestamp,
+  );
+
+  FulfilledItem.fromOpenNow(OpenItem openItem, this.fulfillerId)
+      : super(
+          openItem.id,
+          openItem.shopId,
+          openItem.userId,
+          DateTime.now().millisecondsSinceEpoch,
+          openItem.name,
+          openItem.shopName,
+          openItem.count,
+          openItem.price,
+        );
 }
 
 class Database {
@@ -27,7 +86,7 @@ class Database {
   static DatabaseReference get userReference =>
       Database.realtime.child('users/${Database.groupId}/${Database.userId}');
 
-  static DatabaseReference getOrderItemReference(OrderItem item) {
+  static DatabaseReference getOrderItemReference(ShopItem item) {
     return userReference.child('orders/${item.shopId}/${item.id}');
   }
 }
@@ -96,58 +155,30 @@ class Shop {
   }
 
   static double _openTotal = 0;
-  // userId, shopId, itemId -> count
-  static final _openOrders = <String, Map<String, Map<String, int>>>{};
   // shopId, fulfillerId, itemId -> count
-  static final _fulfilledOrders = <String, Map<String, Map<String, int>>>{};
-  static final _flattenedOpenOrders = <OrderItem>[];
-  static final _flattenedFulfilledOrders = <OrderItem>[];
+  static final _fulfilledOrders2 = <String, Map<String, Map<String, int>>>{};
+  static final _openOrders = <OpenItem>[];
+  static final _fulfilledOrders = <FulfilledItem>[];
 
   static double get openTotal => _openTotal;
-  static Map? get openOrder => _openOrders[_shopId];
-  static Map<String, Map> get openOrders => _openOrders;
-  static Map<String, Map> get fulfilledOrders => _fulfilledOrders;
-  static List<OrderItem> get flattenedOpenOrders => _flattenedOpenOrders;
-  static List<OrderItem> get flattenedFulfilledOrders =>
-      _flattenedFulfilledOrders;
+  static List<OpenItem> get openOrders => _openOrders;
+  static List<OpenItem> get openShopUserOrders => _openOrders
+      .where(
+          (order) => order.shopId == _shopId && order.userId == Database.userId)
+      .toList();
 
-  static final StreamController<List<OrderItem>> _ordersUpdatedController =
+  static List<FulfilledItem> get fulfilledOrders => _fulfilledOrders;
+
+  static final StreamController<List<OpenItem>> _ordersUpdatedController =
       StreamController.broadcast();
-  static StreamSubscription<List<OrderItem>> subscribeToOrderUpdated(
-      void Function(List<OrderItem> orders) onUpdate) {
+  static StreamSubscription<List<OpenItem>> subscribeToOrderUpdated(
+      void Function(List<OpenItem> orders) onUpdate) {
     return _ordersUpdatedController.stream.listen(onUpdate);
   }
 
-  static void pushOpenOrderStream() {
-    _openTotal = 0;
-
-    // don't flatten all orders on every update
-    /*
-    _flattenedOpenOrders.clear();
-
-    // flatten orders
-    _openOrders.forEach((userId, userOrders) {
-      userOrders.forEach((shopId, order) {
-        order.forEach((itemId, count) {
-          var itemInfo = _getItemInfo(itemId);
-          double price = count * (itemInfo['price'] as double);
-          _openTotal += price;
-
-          _flattenedOpenOrders.add(OrderItem(
-            itemId,
-            shopId,
-            Database.userId,
-            itemInfo['name'],
-            _getShopName(shopId),
-            count,
-            price,
-          ));
-        });
-      });
-    });
-
-    _ordersUpdatedController.add(_flattenedOpenOrders);
-    */
+  static ShopItem? getItemById(List<ShopItem> orders, String id) {
+    var matching = orders.where((order) => order.id == id);
+    return matching.isEmpty ? null : matching.first;
   }
 
   static double _currentTotal = 0;
@@ -166,27 +197,18 @@ class Shop {
       return;
     }
 
-    // create empty map
-    if (!_openOrders.containsKey(userId)) {
-      _openOrders[userId] = {};
-    }
-
     // iterate over all shops containing orders
     for (var shop in userOrders.entries) {
-      if (!_openOrders[userId]!.containsKey(shop.key)) {
-        _openOrders[userId]?[shop.key] = {};
-      }
-
       for (var item in shop.value.entries) {
-        _openOrders[userId]?[shop.key]?[item.key] = item.value;
-
         var itemInfo = _getItemInfo(item.key);
-        int count = item.value;
+        int timestamp = item.value['timestamp'];
+        int count = item.value['count'];
         double price = count * (itemInfo['price'] as double);
-        var orderItem = OrderItem(
+        var orderItem = OpenItem(
           item.key,
           shop.key,
           userId,
+          timestamp,
           itemInfo['name'],
           _getShopName(shop.key),
           count,
@@ -194,22 +216,22 @@ class Shop {
         );
 
         // get existing order item with potentially different count
-        var matching = _flattenedOpenOrders.where((matchingItem) {
+        var matching = _openOrders.where((matchingItem) {
           return matchingItem.id == orderItem.id &&
               matchingItem.shopId == orderItem.shopId &&
               matchingItem.userId == orderItem.userId;
         });
 
         if (matching.isNotEmpty) {
-          int index = _flattenedOpenOrders.indexOf(matching.first);
-          _flattenedOpenOrders[index] = orderItem;
+          int index = _openOrders.indexOf(matching.first);
+          _openOrders[index] = orderItem;
         } else {
-          _flattenedOpenOrders.add(orderItem);
+          _openOrders.add(orderItem);
         }
       }
     }
 
-    _ordersUpdatedController.add(_flattenedOpenOrders);
+    _ordersUpdatedController.add(_openOrders);
   }
 
   static void setFulfilledOrders(DataSnapshot snapshot) {
@@ -217,20 +239,20 @@ class Shop {
       return;
     }
 
-    _fulfilledOrders.clear();
+    _fulfilledOrders2.clear();
 
     for (var shop in (snapshot.value as Map).entries) {
-      if (!_fulfilledOrders.containsKey(shop.key)) {
-        _fulfilledOrders[shop.key] = {};
+      if (!_fulfilledOrders2.containsKey(shop.key)) {
+        _fulfilledOrders2[shop.key] = {};
       }
 
       for (var fulfiller in shop.value.entries) {
-        if (!_fulfilledOrders[shop.key]!.containsKey(fulfiller.key)) {
-          _fulfilledOrders[shop.key]?[fulfiller.key] = {};
+        if (!_fulfilledOrders2[shop.key]!.containsKey(fulfiller.key)) {
+          _fulfilledOrders2[shop.key]?[fulfiller.key] = {};
         }
 
         for (var item in fulfiller.value.entries) {
-          _fulfilledOrders[shop.key]?[fulfiller.key]?[item.key] = item.value;
+          _fulfilledOrders2[shop.key]?[fulfiller.key]?[item.key] = item.value;
         }
       }
     }
@@ -266,9 +288,11 @@ class Shop {
       );
       */
       // notify subscribers once all orders are loaded
+      /*
       Future.wait(orderFutures).then((_) {
         pushOpenOrderStream();
       });
+      */
     }
 
     orderUpdateListener(event) {
@@ -315,47 +339,58 @@ class Shop {
     _currentTotalController.add(_currentTotal);
   }
 
-  static Future<void> pushCurrentShopOrder() {
-    var order = _openOrders[_shopId]?[Database.userId] ?? <String, int>{};
+  static Future<void>? pushCurrentOrder() {
+    var orders = <String, Map<String, int>>{};
+    var existingOrders = openShopUserOrders;
 
-    _currentOrder.forEach((key, value) {
-      int count = order[key] ?? 0;
-      order[key] = count + value;
+    // initialize with current
+    _currentOrder.forEach((id, count) {
+      orders[id] = <String, int>{
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'count': count,
+      };
     });
 
-    var future = Database.userReference.child('orders/$_shopId').set(order);
-    _openOrders[_shopId]?[Database.userId] = order;
+    // loop through and add existing
+    for (var order in existingOrders) {
+      orders[order.id] = <String, int>{
+        'timestamp': orders[order.id]?['timestamp'] ?? order.timestamp,
+        'count': order.count + (orders[order.id]?['count'] ?? 0),
+      };
+    }
 
+    var future = Database.userReference.child('orders/$_shopId').set(orders);
+
+    // update local database; optional, will be updated with upstream
+    // _openOrders[_shopId]?[Database.userId] = orders;
+
+    _openTotal = 0;
     _currentTotal = 0;
     _currentOrder.clear();
     _currentTotalController.add(_currentTotal);
-    pushOpenOrderStream();
 
     return future;
   }
 
-  static Future<void> removeItem(OrderItem item) {
-    return item.databaseReference.remove().then((_) {
-      _openOrders[shopId]?.remove(item.id);
-      pushOpenOrderStream();
-    });
+  static Future<void> removeItem(ShopItem item) {
+    // _openOrders[shopId]?.remove(item.id);
+    return item.databaseReference.remove();
   }
 
-  static Future<void>? fulfillItem(OrderItem item, int count) {
-    if (item.fulfillerId == null) {
-      return null;
-    }
-
+  static Future<void>? fulfillItem(OpenItem item, int count) {
     var futures = <Future>[];
 
     // skip fulfilling own order
-    if (item.fulfillerId != Database.userId) {
+    if (item.userId != Database.userId) {
+      var fulfilled = FulfilledItem.fromOpenNow(item, Database.userId);
+      /*
       int fulfilledCount =
-          _fulfilledOrders[_shopId]?[item.fulfillerId]?[item.id] ?? 0;
+          _fulfilledOrders2[_shopId]?[item.fulfillerId]?[item.id] ?? 0;
 
       futures.add(Database.userReference
           .child('fulfilled/$_shopId/${item.fulfillerId}/${item.id}')
           .set(fulfilledCount + count));
+          */
     }
 
     if (item.count == count) {

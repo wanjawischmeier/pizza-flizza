@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database.dart';
 import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -120,7 +119,7 @@ class _OrderBottomBarState extends State<OrderBottomBar>
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 8),
                 child: const ElevatedButton(
-                  onPressed: Shop.pushCurrentShopOrder,
+                  onPressed: Shop.pushCurrentOrder,
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Text(

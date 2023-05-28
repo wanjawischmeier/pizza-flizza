@@ -18,10 +18,10 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
-  late StreamSubscription<List<OrderItem>> _openOrdersSubscription;
-  var _orders = <OrderItem>[];
+  late StreamSubscription<List<ShopItem>> _openOrdersSubscription;
+  var _orders = <ShopItem>[];
 
-  List<OrderItem> filterOrders(List<OrderItem> orders) {
+  List<ShopItem> filterOrders(List<ShopItem> orders) {
     return orders.where((order) {
       return order.userId == Database.userId;
     }).toList();
@@ -35,7 +35,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
         _orders = filterOrders(orders);
       });
     });
-    _orders = filterOrders(Shop.flattenedOpenOrders);
+    _orders = filterOrders(Shop.openOrders);
   }
 
   @override
@@ -119,7 +119,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                         icon: const Icon(Icons.delete),
                         dismissable: true,
                         onDismiss: (id) {
-                          var item = id as OrderItem;
+                          var item = id as ShopItem;
 
                           setState(() {
                             _orders.remove(item);

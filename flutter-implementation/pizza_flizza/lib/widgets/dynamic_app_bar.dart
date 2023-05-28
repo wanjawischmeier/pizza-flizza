@@ -36,9 +36,9 @@ class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
 class _DynamicAppBarState extends State<DynamicAppBar> {
   late bool _showCartBadge;
   int _orderCount = 0;
-  late StreamSubscription<List<OrderItem>> _openOrdersSubscription;
+  late StreamSubscription<List<ShopItem>> _openOrdersSubscription;
 
-  int countUserOrders(List<OrderItem> orders) {
+  int countUserOrders(List<ShopItem> orders) {
     int count = 0;
 
     for (var item in orders) {
@@ -59,7 +59,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
         _orderCount = countUserOrders(orders);
       });
     });
-    _orderCount = countUserOrders(Shop.flattenedOpenOrders);
+    _orderCount = countUserOrders(Shop.openOrders);
   }
 
   @override
