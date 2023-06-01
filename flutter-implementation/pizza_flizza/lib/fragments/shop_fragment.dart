@@ -28,22 +28,17 @@ class _ShopFragmentState extends State<ShopFragment> {
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<List<OpenItem>> _openOrdersSubscription;
   var _orders = <OpenItem>[];
-  final _fulfilled = <String, int>{};
+  final _fulfilled = <FulfilledItem>[];
 
   List<OpenItem> filterOrders(List<OpenItem> orders) {
     var tmp = orders.toList();
     for (var i = 0; i < tmp.length; i++) {
       var item = tmp[i];
 
-      // filter by current shop
-      if (item.shopId != Shop.shopId) {
-        tmp.remove(item);
-        continue;
-      }
-
       // subtract already fulfilled
-      if (_fulfilled.containsKey(item.id)) {
-        int fulfilledCount = _fulfilled[item.id]!;
+      var existing = ShopItem.getById(_fulfilled, item.id);
+      if (existing != null) {
+        int fulfilledCount = existing.count;
 
         if (item.count <= fulfilledCount) {
           tmp.remove(item);
@@ -64,7 +59,7 @@ class _ShopFragmentState extends State<ShopFragment> {
       setState(() {
         _locked = true;
         _fulfilled.clear();
-        _orders = filterOrders(Shop.openOrders);
+        _orders = filterOrders(Shop.openShopOrders);
       });
     });
     _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
@@ -75,8 +70,7 @@ class _ShopFragmentState extends State<ShopFragment> {
         _orders = tmp;
       });
     });
-    _orders =
-        Shop.openOrders.where((item) => item.shopId == Shop.shopId).toList();
+    _orders = Shop.openShopOrders;
 
     if (_orders.isNotEmpty) {
       _foregroundItem = _orders.elementAt(0);
@@ -288,10 +282,12 @@ class _ShopFragmentState extends State<ShopFragment> {
                           var item = _foregroundItem;
                           if (item != null &&
                               direction == AppinioSwiperDirection.right) {
-                            _fulfilled[item.id] = _count;
+                            // ShopItem.getById(_fulfilled, item.id);
+                            // _fulfilled[item.id] = _count;
                             Shop.fulfillItem(item, _count);
                           }
-
+                          print(_foregroundItem?.hashCode.toString() ??
+                              'no hash');
                           _gradient = 1;
                           _count = _backgroundItem?.count ?? 0;
                           _orders.removeAt(0);
