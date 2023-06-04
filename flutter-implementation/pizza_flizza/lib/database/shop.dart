@@ -358,7 +358,6 @@ class Shop {
         count,
         price,
       );
-      items;
     });
 
     // loop through and add existing

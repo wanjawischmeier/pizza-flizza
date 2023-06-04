@@ -4,6 +4,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
 
@@ -38,7 +39,7 @@ class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
 class _DynamicAppBarState extends State<DynamicAppBar> {
   late bool _showCartBadge;
   int _orderCount = 0;
-  late StreamSubscription<List<ShopItem>> _openOrdersSubscription;
+  late StreamSubscription<OrderMap> _ordersSubscription2;
 
   int countUserOrders(List<ShopItem> orders) {
     int count = 0;
@@ -56,18 +57,23 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
   void initState() {
     super.initState();
 
-    _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
-      setState(() {
-        _orderCount = countUserOrders(orders);
+    _ordersSubscription2 = Shop.subscribeToOrdersUpdated2((orders) {
+      _orderCount = 0;
+
+      orders[Database.userId]?.forEach((shopId, order) {
+        order.items.forEach((itemId, item) {
+          _orderCount += item.count;
+        });
       });
+
+      setState(() {});
     });
-    _orderCount = countUserOrders(Shop.openOrders);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _openOrdersSubscription.cancel();
+    _ordersSubscription2.cancel();
   }
 
   @override

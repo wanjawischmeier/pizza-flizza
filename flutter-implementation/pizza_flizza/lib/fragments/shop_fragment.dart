@@ -34,31 +34,7 @@ class _ShopFragmentState extends State<ShopFragment> {
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<List<OpenItem>> _openOrdersSubscription;
   late StreamSubscription<OrderMap> _ordersSubscription2;
-  var _orders = <OpenItem>[];
-  final _fulfilled = <FulfilledItem>[];
   final _ordersShop = <int, OrderItem2>{};
-
-  List<OpenItem> filterOrders(List<OpenItem> orders) {
-    var tmp = orders.toList();
-    for (var i = 0; i < tmp.length; i++) {
-      var item = tmp[i];
-
-      // subtract already fulfilled
-      var existing = ShopItem.getById(_fulfilled, item.id);
-      if (existing != null) {
-        int fulfilledCount = existing.count;
-
-        if (item.count <= fulfilledCount) {
-          tmp.remove(item);
-        } else {
-          item.count -= fulfilledCount;
-          tmp[i] = item;
-        }
-      }
-    }
-
-    return tmp;
-  }
 
   @override
   void initState() {
@@ -82,19 +58,10 @@ class _ShopFragmentState extends State<ShopFragment> {
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       setState(() {
         _locked = true;
-        _fulfilled.clear();
-        _orders = filterOrders(Shop.openShopOrders);
+        _ordersShop.clear();
       });
     });
-    _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
-      var tmp = filterOrders(orders);
 
-      setState(() {
-        // _cardCount += tmp.length - _orders.length;
-        _orders = tmp;
-      });
-    });
-    _orders = Shop.openShopOrders;
     int ordersCount = _ordersShop.length;
 
     if (ordersCount > 0) {
