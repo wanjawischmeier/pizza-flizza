@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/database.dart';
+
+import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
 
 enum AppBarType { name, location }
@@ -82,11 +84,11 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
             dropdownColor: Themes.grayLight,
             // appBarTheme.titleTextStyle is null for some reason :/
             style: Theme.of(context).textTheme.titleLarge,
-            value: Shop.shopId,
+            value: Shop.currentShopId,
             items: widget.items,
             onChanged: (String? value) {
               if (value == null) return;
-              setState(() => Shop.shopId = value);
+              setState(() => Shop.currentShopId = value);
             },
           ),
         );

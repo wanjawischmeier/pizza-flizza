@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/database.dart';
-import 'package:pizza_flizza/pages/login_page.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'pages/home_page.dart';
+
+import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/shop.dart';
+import 'package:pizza_flizza/firebase_options.dart';
+import 'package:pizza_flizza/pages/home_page.dart';
+import 'package:pizza_flizza/pages/login_page.dart';
+import 'package:pizza_flizza/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

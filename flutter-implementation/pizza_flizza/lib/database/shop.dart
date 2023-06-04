@@ -1,192 +1,33 @@
 import 'dart:async';
-import 'dart:core';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-typedef OrderMap = Map<String, Map<String, Order2>>;
-typedef FulfilledMap = Map<String, Map<String, Map<String, FulfilledOrder2>>>;
-typedef HistoryMap = Map<String, Map<String, FulfilledOrder2>>;
-
-class ShopItem2 {
-  String shopId, userId, itemName, shopName;
-  int count;
-  double price;
-
-  ShopItem2(
-    this.shopId,
-    this.userId,
-    this.itemName,
-    this.shopName,
-    this.count,
-    this.price,
-  );
-}
-
-class OrderItem2 extends ShopItem2 {
-  int timestamp;
-
-  OrderItem2(
-    super.shopId,
-    super.userId,
-    this.timestamp,
-    super.itemName,
-    super.shopName,
-    super.count,
-    super.price,
-  );
-}
-
-class FulfilledItem2 extends ShopItem2 {
-  String itemId;
-
-  FulfilledItem2(
-    this.itemId,
-    super.shopId,
-    super.userId,
-    super.itemName,
-    super.shopName,
-    super.count,
-    super.price,
-  );
-}
-
-class Order2 {
-  // itemId
-  Map<String, OrderItem2> items;
-
-  Order2(this.items);
-}
-
-class FulfilledOrder2 {
-  String userId, fulfillerId;
-  int timestamp;
-  double price;
-  List<FulfilledItem2> items;
-
-  FulfilledOrder2(
-      this.userId, this.fulfillerId, this.timestamp, this.price, this.items);
-}
-
-class ShopItem {
-  String id, shopId, userId, name, shopName;
-  int count;
-  double price;
-  DatabaseReference get databaseReference =>
-      Database.userReference.child('orders/$shopId/$id');
-
-  ShopItem(
-    this.id,
-    this.shopId,
-    this.userId,
-    this.name,
-    this.shopName,
-    this.count,
-    this.price,
-  );
-
-  static ShopItem? getById(List<ShopItem> orders, String id) {
-    var matching = orders.where((order) => order.id == id);
-    return matching.isEmpty ? null : matching.first;
-  }
-}
-
-class OpenItem extends ShopItem {
-  int timestamp;
-
-  OpenItem(
-    super.id,
-    super.shopId,
-    super.userId,
-    this.timestamp,
-    super.name,
-    super.shopName,
-    super.count,
-    super.price,
-  );
-
-  OpenItem.fromNow(ShopItem shopItem)
-      : timestamp = DateTime.now().millisecondsSinceEpoch,
-        super(
-          shopItem.id,
-          shopItem.shopId,
-          shopItem.userId,
-          shopItem.name,
-          shopItem.shopName,
-          shopItem.count,
-          shopItem.price,
-        );
-}
-
-class FulfilledItem extends OpenItem {
-  String fulfillerId;
-
-  FulfilledItem(
-    super.id,
-    super.shopId,
-    super.userId,
-    this.fulfillerId,
-    super.name,
-    super.shopName,
-    super.count,
-    super.price,
-    super.timestamp,
-  );
-
-  FulfilledItem.fromOpenNow(OpenItem openItem, this.fulfillerId)
-      : super(
-          openItem.id,
-          openItem.shopId,
-          openItem.userId,
-          DateTime.now().millisecondsSinceEpoch,
-          openItem.name,
-          openItem.shopName,
-          openItem.count,
-          openItem.price,
-        );
-
-  static FulfilledItem? getById(List<FulfilledItem> orders, String id) {
-    var matching = orders.where((order) => order.id == id);
-    return matching.isEmpty ? null : matching.first;
-  }
-}
-
-class Database {
-  static var storage = FirebaseStorage.instance.ref();
-  static var realtime = FirebaseDatabase.instance.ref();
-
-  static late String groupId, userId;
-  static DatabaseReference get groupReference =>
-      Database.realtime.child('users/${Database.groupId}');
-  static DatabaseReference get userReference =>
-      Database.realtime.child('users/${Database.groupId}/${Database.userId}');
-
-  static DatabaseReference getOrderItemReference(ShopItem item) {
-    return userReference.child('orders/${item.shopId}/${item.id}');
-  }
-}
+import 'database.dart';
+import 'item.dart';
+import 'order.dart';
 
 class Shop {
   // shop database
-  static late String _shopId;
-  static String get shopId => _shopId;
-  static set shopId(String newShopId) {
-    if (newShopId == _shopId) {
+  static late String _currentShopId;
+  static String get currentShopId => _currentShopId;
+  static set currentShopId(String newShopId) {
+    if (newShopId == _currentShopId) {
       return;
     }
 
-    _shopId = newShopId;
+    _currentShopId = newShopId;
     _currentOrder.clear();
     _currentTotal = 0;
 
-    _shopChangedController.add(_shopId);
+    _shopChangedController.add(_currentShopId);
   }
 
-  static get shopName => _getShopName(_shopId);
+  static get currentShopName => _getShopName(_currentShopId);
 
   static Map<dynamic, dynamic> shops = {};
   static Map<dynamic, dynamic> get items {
-    return shops[_shopId]['items'];
+    return shops[_currentShopId]['items'];
   }
 
   static String _getShopName(String shopId) {
@@ -211,7 +52,7 @@ class Shop {
       StreamController.broadcast();
   static StreamSubscription<String> subscribeToShopChanged(
       void Function(String shopId) onUpdate) {
-    onUpdate(_shopId);
+    onUpdate(_currentShopId);
     return _shopChangedController.stream.listen(onUpdate);
   }
 
@@ -229,18 +70,20 @@ class Shop {
     return result;
   }
 
-  static double _openTotal = 0;
-  // shopId, fulfillerId, itemId -> count
-  static final _fulfilledOrders2 = <String, Map<String, Map<String, int>>>{};
-  static final _openOrders = <OpenItem>[];
-  static final _fulfilledOrders = <FulfilledItem>[];
-
   // userId, shopId
   static final OrderMap _orders2 = {};
-  // userId, shopId, fulfillerId
+  static OrderMap get orders2 => _orders2;
+  // fulfillerId, shopId, userId
   static final FulfilledMap _fulfilled2 = {};
   // userId, shopId
   static final HistoryMap _history2 = {};
+
+  static final StreamController _ordersPushedController2 =
+      StreamController.broadcast();
+  static StreamSubscription subscribeToOrdersPushed2(
+      void Function(void) onUpdate) {
+    return _ordersPushedController2.stream.listen(onUpdate);
+  }
 
   static final StreamController<OrderMap> _ordersUpdatedController2 =
       StreamController.broadcast();
@@ -250,13 +93,27 @@ class Shop {
     return _ordersUpdatedController2.stream.listen(onUpdate);
   }
 
+  static final StreamController<FulfilledMap> _fulfilledUpdatedController2 =
+      StreamController.broadcast();
+  static StreamSubscription<FulfilledMap> subscribeToFulfilledUpdated2(
+      void Function(FulfilledMap orders) onUpdate) {
+    onUpdate(_fulfilled2);
+    return _fulfilledUpdatedController2.stream.listen(onUpdate);
+  }
+
+  static double _openTotal = 0;
+  // shopId, fulfillerId, itemId -> count
+  static final _fulfilledOrders2 = <String, Map<String, Map<String, int>>>{};
+  static final _openOrders = <OpenItem>[];
+  static final _fulfilledOrders = <FulfilledItem>[];
+
   static double get openTotal => _openTotal;
   static List<OpenItem> get openOrders => _openOrders;
   static List<OpenItem> get openShopOrders =>
-      _openOrders.where((order) => order.shopId == _shopId).toList();
+      _openOrders.where((order) => order.shopId == _currentShopId).toList();
   static List<OpenItem> get openShopUserOrders => _openOrders
-      .where(
-          (order) => order.shopId == _shopId && order.userId == Database.userId)
+      .where((order) =>
+          order.shopId == _currentShopId && order.userId == Database.userId)
       .toList();
   static List<FulfilledItem> get fulfilledOrders => _fulfilledOrders;
 
@@ -278,14 +135,13 @@ class Shop {
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
-  static void setOpenUserOrders2(String userId, Map? userOrders) {
+  static void parseOpenUserOrders2(String userId, Map? userOrders) {
     // skip empty orders
     if (userOrders == null) {
       return;
     }
 
-    // clear?
-    // _orders2.clear();
+    bool modified = false;
 
     // initialize user orders entry
     if (!_orders2.containsKey(userId)) {
@@ -293,18 +149,27 @@ class Shop {
     }
 
     // iterate over all shops containing orders
-    for (var shop in userOrders.entries) {
+    for (var shopEntry in userOrders.entries) {
+      String shopId = shopEntry.key;
+      Map shop = shopEntry.value;
       var items = <String, OrderItem2>{};
 
-      for (var item in shop.value.entries) {
-        var itemInfo = _getItemInfo(item.key);
+      for (var itemEntry in shop.entries) {
+        String itemId = itemEntry.key;
+        Map item = itemEntry.value;
+
+        // get item info
+        var itemInfo = _getItemInfo(itemId);
         String itemName = itemInfo['name'];
-        int timestamp = item.value['timestamp'];
-        int count = item.value['count'];
+        String shopName = _getShopName(shopId);
+        int timestamp = item['timestamp'];
+        int count = item['count'];
         double price = count * (itemInfo['price'] as double);
 
+        // create instance
         var orderItem = OrderItem2(
-          shop.key,
+          itemId,
+          shopId,
           userId,
           timestamp,
           itemName,
@@ -313,13 +178,93 @@ class Shop {
           price,
         );
 
-        items[item.key] = orderItem;
+        // compare to previous item
+        var previousItem = _orders2[userId]?[shopId]?.items[itemId];
+        if (orderItem != previousItem) {
+          modified = true;
+        }
+
+        items[itemId] = orderItem;
       }
 
-      _orders2[userId]?[shop.key] = Order2(items);
+      _orders2[userId]?[shopId] = Order2(items);
     }
 
-    _ordersUpdatedController2.add(_orders2);
+    // if orders changed: notify listeners
+    if (modified) {
+      _ordersUpdatedController2.add(_orders2);
+    }
+  }
+
+  static void parseUserFulfilledOrders2(
+      String fulfillerId, Map? fulfilledOrders) {
+    // skip empty orders
+    if (fulfilledOrders == null) {
+      return;
+    }
+
+    bool modified = false;
+
+    if (!_fulfilled2.containsKey(fulfillerId)) {
+      _fulfilled2[fulfillerId] = {};
+    }
+
+    // iterate over all shops containing orders
+    for (var shopEntry in fulfilledOrders.entries) {
+      String shopId = shopEntry.key;
+      Map fulfilledShop = shopEntry.value;
+
+      if (!(_fulfilled2[fulfillerId]?.containsKey(shopId) ?? false)) {
+        _fulfilled2[fulfillerId]?[shopId] = {};
+      }
+
+      for (var userEntry in fulfilledShop.entries) {
+        String userId = userEntry.key;
+        Map fulfilledItems = userEntry.value;
+        var items = <String, OrderItem2>{};
+
+        for (var itemEntry in fulfilledItems.entries) {
+          String itemId = itemEntry.key;
+          Map item = itemEntry.value;
+
+          // get item info
+          var itemInfo = _getItemInfo(itemId);
+          String itemName = itemInfo['name'];
+          String shopName = _getShopName(shopId);
+          int timestamp = item['timestamp'];
+          int count = item['count'];
+          double price = count * (itemInfo['price'] as double);
+
+          // create instance
+          var orderItem = OrderItem2(
+            itemId,
+            shopId,
+            userId,
+            timestamp,
+            itemName,
+            shopName,
+            count,
+            price,
+          );
+
+          // compare to previous item
+          var previousItem =
+              _fulfilled2[fulfillerId]?[shopId]?[userId]?.items[itemId];
+          if (orderItem != previousItem) {
+            modified = true;
+          }
+
+          items[itemId] = orderItem;
+        }
+
+        _fulfilled2[fulfillerId]?[shopId]?[userId] = Order2(items);
+      }
+    }
+
+    // if orders changed: notify listeners
+    if (modified) {
+      _fulfilledUpdatedController2.add(_fulfilled2);
+    }
   }
 
   static void setOpenUserOrders(String userId, Map? userOrders) {
@@ -391,7 +336,7 @@ class Shop {
   static Future<void> loadAll() async {
     var snapshot = await Database.realtime.child('shops').get();
     shops = snapshot.value as Map;
-    _shopId = shops.keys.first;
+    _currentShopId = shops.keys.first;
 
     var orderFutures = <Future>[];
 
@@ -432,10 +377,14 @@ class Shop {
         return;
       }
 
-      setOpenUserOrders(updatedUserId, data['orders']);
+      // setOpenUserOrders(updatedUserId, data['orders']);
+
+      if (data.containsKey('orders')) {
+        parseOpenUserOrders2(updatedUserId, data['orders']);
+      }
 
       if (data.containsKey('fulfilled')) {
-        setFulfilledOrders(data['fulfilled']);
+        parseUserFulfilledOrders2(updatedUserId, data['fulfilled']);
       }
     }
 
@@ -446,7 +395,7 @@ class Shop {
 
   static bool containsReference(String referencePath) {
     var reference = Database.storage.child(referencePath);
-    return _itemReferences[_shopId]?.contains(reference) ?? false;
+    return _itemReferences[_currentShopId]?.contains(reference) ?? false;
   }
 
   static void setCurrentOrderItemCount(
@@ -471,7 +420,6 @@ class Shop {
 
   static Future<void>? pushCurrentOrder() {
     var orders = <String, Map<String, int>>{};
-    var existingOrders = openShopUserOrders;
 
     // initialize with current
     _currentOrder.forEach((id, count) {
@@ -482,14 +430,19 @@ class Shop {
     });
 
     // loop through and add existing
-    for (var order in existingOrders) {
-      orders[order.id] = <String, int>{
-        'timestamp': orders[order.id]?['timestamp'] ?? order.timestamp,
-        'count': order.count + (orders[order.id]?['count'] ?? 0),
+    for (var itemEntry
+        in (_orders2[Database.userId]?[_currentShopId]?.items ?? {}).entries) {
+      var itemId = itemEntry.key;
+      var item = itemEntry.value;
+
+      orders[itemId] = <String, int>{
+        'timestamp': orders[itemId]?['timestamp'] ?? item.timestamp,
+        'count': item.count + (orders[itemId]?['count'] ?? 0),
       };
     }
 
-    var future = Database.userReference.child('orders/$_shopId').set(orders);
+    var future =
+        Database.userReference.child('orders/$_currentShopId').set(orders);
 
     // update local database; optional, will be updated with upstream
     // _openOrders[_shopId]?[Database.userId] = orders;
@@ -498,6 +451,7 @@ class Shop {
     _currentTotal = 0;
     _currentOrder.clear();
     _currentTotalController.add(_currentTotal);
+    _ordersPushedController2.add(null);
 
     return future;
   }
@@ -507,12 +461,12 @@ class Shop {
     return item.databaseReference.remove();
   }
 
-  static Future<void>? fulfillItem(OpenItem item, int count) {
+  static Future<void>? fulfillItem(OrderItem2 item, int count) {
     var futures = <Future>[];
 
     // skip fulfilling own order
-    if (item.userId != Database.userId) {
-      var fulfilled = FulfilledItem.fromOpenNow(item, Database.userId);
+    if (item.userId != Database.userId || true) {
+      // var fulfilled = FulfilledItem.fromOpenNow(item, Database.userId);
       /*
       int fulfilledCount =
           _fulfilledOrders2[_shopId]?[item.fulfillerId]?[item.id] ?? 0;
@@ -520,13 +474,60 @@ class Shop {
       futures.add(Database.userReference
           .child('fulfilled/$_shopId/${item.fulfillerId}/${item.id}')
           .set(fulfilledCount + count));
-          */
+          
+      var matching = _fulfilled2.entries.where(
+        (entry) =>
+            entry.value[item.shopId]?[Database.userId]?.items
+                .containsKey(item.itemId) ??
+            false,
+      );
+      */
+      int fulfilledCount = _fulfilled2[Database.userId]?[item.shopId]
+                  ?[item.userId]
+              ?.items[item.itemId]
+              ?.count ??
+          0;
+
+      if (!_fulfilled2.containsKey(Database.userId)) {
+        _fulfilled2[Database.userId] = {};
+
+        if (!_fulfilled2[Database.userId]!.containsKey(item.shopId)) {
+          _fulfilled2[Database.userId]![item.shopId] = {};
+        }
+
+        if (!_fulfilled2[Database.userId]![item.shopId]!
+            .containsKey(item.userId)) {
+          _fulfilled2[Database.userId]![item.shopId]![item.userId] = Order2({
+            item.itemId: OrderItem2.copy(item),
+          });
+        }
+      }
+
+      var fulfilledItem =
+          _fulfilled2[Database.userId]![item.shopId]![item.userId]!
+              .items[item.itemId]!;
+      fulfilledItem.count = fulfilledCount + count;
+      // update price!
+      fulfilledItem.price = -1;
+
+      Map map = {
+        'count': fulfilledCount + count,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+
+      var reference = Database.userReference
+          .child('fulfilled/${item.shopId}/${item.userId}/${item.itemId}');
+      futures.add(reference.set(map));
     }
 
-    if (item.count == count) {
+    if (item.count <= count) {
+      _orders2[item.userId]?[item.shopId]?.items.remove(item.itemId);
       futures.add(item.databaseReference.remove());
     } else {
-      futures.add(item.databaseReference.set(item.count - count));
+      item.count -= count;
+      _orders2[item.userId]?[item.shopId]?.items[item.itemId]?.count =
+          item.count;
+      futures.add(item.databaseReference.child('count').set(item.count));
     }
 
     return Future.wait(futures);

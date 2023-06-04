@@ -1,9 +1,10 @@
 import 'package:cached_firestorage/lib.dart';
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/database.dart';
+import 'package:tuple/tuple.dart';
+
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/shopping_cart.dart';
-import 'package:tuple/tuple.dart';
 import 'package:pizza_flizza/fragments/order_fragment.dart';
 import 'package:pizza_flizza/fragments/shop_fragment.dart';
 import 'package:pizza_flizza/fragments/transaction_fragment.dart';

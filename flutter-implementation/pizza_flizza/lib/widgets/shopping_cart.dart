@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/database.dart';
+
+import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/item.dart';
+import 'package:pizza_flizza/database/order.dart';
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/transaction_card.dart';
@@ -18,30 +23,34 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
-  late StreamSubscription<List<ShopItem>> _openOrdersSubscription;
-  var _orders = <ShopItem>[];
-
-  List<ShopItem> filterOrders(List<ShopItem> orders) {
-    return orders.where((order) {
-      return order.userId == Database.userId;
-    }).toList();
-  }
+  late StreamSubscription<OrderMap> _ordersSubscription2;
+  final _ordersUser = <int, OrderItem2>{};
+  double _totalPrice = 0;
 
   @override
   void initState() {
     super.initState();
-    _openOrdersSubscription = Shop.subscribeToOrderUpdated((orders) {
-      setState(() {
-        _orders = filterOrders(orders);
+    _ordersSubscription2 = Shop.subscribeToOrdersUpdated2((orders) {
+      _ordersUser.clear();
+      _totalPrice = 0;
+
+      // loop through orders for all shops
+      orders[Database.userId]?.forEach((shopId, order) {
+        order.items.forEach((itemId, item) {
+          // use hash to account for possible duplicate itemId's across shops
+          _ordersUser[item.hashCode] = item;
+          _totalPrice += item.price;
+        });
       });
+
+      setState(() {});
     });
-    _orders = filterOrders(Shop.openOrders);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _openOrdersSubscription.cancel();
+    _ordersSubscription2.cancel();
   }
 
   @override
@@ -83,7 +92,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                           padding: const EdgeInsets.all(8),
                           child: Center(
                             child: Text(
-                              Helper.formatPrice(Shop.openTotal),
+                              Helper.formatPrice(_totalPrice),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -103,29 +112,38 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   child: ListView.separated(
                     padding:
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                    itemCount: _orders.length,
+                    itemCount: _ordersUser.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 8),
                     itemBuilder: (BuildContext context, int index) {
-                      var item = _orders[index];
+                      var entry = _ordersUser.entries.elementAt(index);
+                      var itemId = entry.key, item = entry.value;
 
                       return TransactionCardWidget(
                         backgroundColor: Themes.grayLight,
                         accentColor: Themes.cream,
-                        id: item,
-                        header: '${item.count}x\t${item.name}',
+                        id: itemId,
+                        header: '${item.count}x\t${item.itemName}',
                         content: item.shopName,
                         trailing: Helper.formatPrice(item.price),
                         icon: const Icon(Icons.delete),
                         dismissable: true,
                         onDismiss: (id) {
-                          var item = id as ShopItem;
+                          var itemId = id as int;
+                          var item = _ordersUser[itemId];
 
                           setState(() {
-                            _orders.remove(item);
+                            // _orders.remove(item);
+                            _ordersUser.remove(itemId);
+
+                            // max to avoid floating point -0.00 rounding error
+                            _totalPrice = max(
+                              0,
+                              _totalPrice - (item?.price ?? 0),
+                            );
                           });
 
-                          Shop.removeItem(item);
+                          // Shop.removeItem(item);
                         },
                       );
                     },

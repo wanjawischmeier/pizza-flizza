@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/database.dart';
+
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
 
 typedef OnCountChanged = void Function(
@@ -26,7 +28,7 @@ class OrderBubbleWidget extends StatefulWidget {
 class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
   int _itemCount = 0;
   late StreamSubscription<String> _shopChangedSubscription;
-  late StreamSubscription<List<ShopItem>> _orderPushedSubscription;
+  late StreamSubscription<void> _orderPushedSubscription;
 
   final TextPainter _addTextPainter = TextPainter(
       text: const TextSpan(text: '+', style: TextStyle(fontSize: 14)),
@@ -47,7 +49,7 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
         _itemCount = 0;
       });
     });
-    _orderPushedSubscription = Shop.subscribeToOrderUpdated((order) {
+    _orderPushedSubscription = Shop.subscribeToOrdersPushed2((_) {
       setState(() {
         _itemCount = 0;
       });

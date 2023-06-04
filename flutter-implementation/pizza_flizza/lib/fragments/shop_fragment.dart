@@ -1,14 +1,20 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:appinio_swiper/appinio_swiper.dart';
-import 'package:cached_firestorage/lib.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_firestorage/lib.dart';
+
+import 'package:slide_to_act/slide_to_act.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
-import 'package:pizza_flizza/database.dart';
+
+import 'package:appinio_swiper/appinio_swiper.dart';
+import 'package:appinio_swiper/appinio_slide_swiper.dart';
+
+import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/item.dart';
+import 'package:pizza_flizza/database/order.dart';
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/shop_card.dart';
-import 'package:appinio_swiper/appinio_slide_swiper.dart';
-import 'package:slide_to_act/slide_to_act.dart';
 
 class ShopFragment extends StatefulWidget {
   const ShopFragment({super.key});
@@ -18,17 +24,19 @@ class ShopFragment extends StatefulWidget {
 }
 
 class _ShopFragmentState extends State<ShopFragment> {
-  OpenItem? _foregroundItem, _backgroundItem;
+  OrderItem2? _foregroundItem, _backgroundItem;
   double _gradient = 1;
   bool _locked = true;
-  double _swiped = 0;
-  late double _cardCount;
+  double _swipedCount = 0;
+  // late double _cardCount;
   late int _count;
 
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<List<OpenItem>> _openOrdersSubscription;
+  late StreamSubscription<OrderMap> _ordersSubscription2;
   var _orders = <OpenItem>[];
   final _fulfilled = <FulfilledItem>[];
+  final _ordersShop = <int, OrderItem2>{};
 
   List<OpenItem> filterOrders(List<OpenItem> orders) {
     var tmp = orders.toList();
@@ -55,6 +63,22 @@ class _ShopFragmentState extends State<ShopFragment> {
   @override
   void initState() {
     super.initState();
+
+    _ordersSubscription2 = Shop.subscribeToOrdersUpdated2((orders) {
+      _ordersShop.clear();
+
+      // loop through orders for all users
+      orders.forEach((userId, userOrders) {
+        // select currentShop
+        userOrders[Shop.currentShopId]?.items.forEach((itemId, item) {
+          // use hash to account for possible duplicate itemId's across shops
+          _ordersShop[item.hashCode] = OrderItem2.copy(item);
+        });
+      });
+
+      setState(() {});
+    });
+
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       setState(() {
         _locked = true;
@@ -66,22 +90,23 @@ class _ShopFragmentState extends State<ShopFragment> {
       var tmp = filterOrders(orders);
 
       setState(() {
-        _cardCount += tmp.length - _orders.length;
+        // _cardCount += tmp.length - _orders.length;
         _orders = tmp;
       });
     });
     _orders = Shop.openShopOrders;
+    int ordersCount = _ordersShop.length;
 
-    if (_orders.isNotEmpty) {
-      _foregroundItem = _orders.elementAt(0);
+    if (ordersCount > 0) {
+      _foregroundItem = _ordersShop.values.elementAt(0);
 
-      if (_orders.length > 1) {
-        _backgroundItem = _orders.elementAt(1);
+      if (ordersCount > 1) {
+        _backgroundItem = _ordersShop.values.elementAt(1);
       }
     }
 
     _count = _foregroundItem?.count ?? 0;
-    _cardCount = _orders.length.toDouble();
+    // _cardCount = _orders.length.toDouble();
   }
 
   @override
@@ -89,6 +114,7 @@ class _ShopFragmentState extends State<ShopFragment> {
     super.dispose();
     _shopChangedSubscription.cancel();
     _openOrdersSubscription.cancel();
+    _ordersSubscription2.cancel();
   }
 
   @override
@@ -128,8 +154,8 @@ class _ShopFragmentState extends State<ShopFragment> {
                                         borderRadius: BorderRadius.circular(16),
                                         child: RemotePicture(
                                           imagePath:
-                                              '/shops/${Shop.shopId}/logo.png',
-                                          mapKey: '${Shop.shopId}_logo',
+                                              '/shops/${Shop.currentShopId}/logo.png',
+                                          mapKey: '${Shop.currentShopId}_logo',
                                         ),
                                       ),
                                     ),
@@ -139,7 +165,7 @@ class _ShopFragmentState extends State<ShopFragment> {
                                         bottom: 16,
                                       ),
                                       child: Text(
-                                        Shop.shopName,
+                                        Shop.currentShopName,
                                         style: const TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
@@ -163,9 +189,8 @@ class _ShopFragmentState extends State<ShopFragment> {
                                     padding: const EdgeInsets.all(8),
                                     child: Column(
                                       children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 8),
+                                        const Padding(
+                                          padding: EdgeInsets.only(bottom: 8),
                                           child: Text('Erfüllte Bestellungen:'),
                                         ),
                                         FAProgressBar(
@@ -212,8 +237,8 @@ class _ShopFragmentState extends State<ShopFragment> {
                   backgroundColor: Themes.grayMid,
                   progressColor: Themes.cream,
                   borderRadius: BorderRadius.circular(99),
-                  maxValue: _cardCount,
-                  currentValue: _swiped,
+                  maxValue: _swipedCount + _ordersShop.length,
+                  currentValue: _swipedCount,
                 ),
                 Expanded(
                   child: Center(
@@ -243,7 +268,7 @@ class _ShopFragmentState extends State<ShopFragment> {
                           } else {
                             return ShopCardWidget(
                               stop: 1 - _gradient,
-                              name: item.name,
+                              name: item.itemName,
                               count: _count,
                             );
                           }
@@ -255,7 +280,7 @@ class _ShopFragmentState extends State<ShopFragment> {
                           } else {
                             return ShopCardWidget(
                               stop: 0,
-                              name: item.name,
+                              name: item.itemName,
                               count: item.count,
                             );
                           }
@@ -286,21 +311,20 @@ class _ShopFragmentState extends State<ShopFragment> {
                             // _fulfilled[item.id] = _count;
                             Shop.fulfillItem(item, _count);
                           }
-                          print(_foregroundItem?.hashCode.toString() ??
-                              'no hash');
+
                           _gradient = 1;
                           _count = _backgroundItem?.count ?? 0;
-                          _orders.removeAt(0);
+                          _ordersShop.remove(_ordersShop.entries.first.key);
 
                           _foregroundItem = _backgroundItem;
-                          if (_orders.length > 1) {
-                            _backgroundItem = _orders.elementAt(1);
+                          if (_ordersShop.length > 1) {
+                            _backgroundItem = _ordersShop.values.elementAt(1);
                           } else {
                             _backgroundItem = null;
                           }
 
                           setState(() {
-                            _swiped++;
+                            _swipedCount++;
                           });
                         },
                       ),

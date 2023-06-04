@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:pizza_flizza/database.dart';
+
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/order_bottom_bar.dart';
 import 'package:pizza_flizza/widgets/order_card.dart';

@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/database.dart';
+
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/theme.dart';
 
