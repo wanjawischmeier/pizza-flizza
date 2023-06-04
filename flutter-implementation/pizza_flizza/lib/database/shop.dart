@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:pizza_flizza/logger.util.dart';
 
 import 'database.dart';
 import 'item.dart';
 import 'order.dart';
 
 class Shop {
+  static final log = AppLogger();
+
   // shop database
   static late String _currentShopId;
   static String get currentShopId => _currentShopId;
@@ -188,6 +191,7 @@ class Shop {
       }
 
       _orders2[userId]?[shopId] = Order2(items);
+      log.logOrderItems(items, userId, shopId, null);
     }
 
     // if orders changed: notify listeners
@@ -258,6 +262,7 @@ class Shop {
         }
 
         _fulfilled2[fulfillerId]?[shopId]?[userId] = Order2(items);
+        log.logOrderItems(items, userId, shopId, fulfillerId);
       }
     }
 
@@ -505,7 +510,8 @@ class Shop {
 
       var fulfilledItem =
           _fulfilled2[Database.userId]![item.shopId]![item.userId]!
-              .items[item.itemId]!;
+                  .items[item.itemId] ??
+              OrderItem2.copy(item);
       fulfilledItem.count = fulfilledCount + count;
       // update price!
       fulfilledItem.price = -1;

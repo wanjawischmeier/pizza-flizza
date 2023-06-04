@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/custom_icons.dart';
+import 'package:pizza_flizza/logger.util.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/google_signin_button.dart';
 
@@ -12,6 +13,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final log = AppLogger();
+
   bool _isLoading = false;
   String _email = '';
   String _password = '';
@@ -131,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: _email, password: _password);
     } catch (error) {
-      print('error');
+      log.e('error');
     }
 
     setState(() {
