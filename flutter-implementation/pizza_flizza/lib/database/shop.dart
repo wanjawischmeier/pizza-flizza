@@ -272,107 +272,16 @@ class Shop {
     }
   }
 
-  static void setOpenUserOrders(String userId, Map? userOrders) {
-    if (userOrders == null) {
-      return;
-    }
-
-    // iterate over all shops containing orders
-    for (var shop in userOrders.entries) {
-      for (var item in shop.value.entries) {
-        var itemInfo = _getItemInfo(item.key);
-        int timestamp = item.value['timestamp'];
-        int count = item.value['count'];
-        double price = count * (itemInfo['price'] as double);
-        var orderItem = OpenItem(
-          item.key,
-          shop.key,
-          userId,
-          timestamp,
-          itemInfo['name'],
-          _getShopName(shop.key),
-          count,
-          price,
-        );
-
-        // get existing order item with potentially different count
-        var matching = _openOrders.where((matchingItem) {
-          return matchingItem.id == orderItem.id &&
-              matchingItem.shopId == orderItem.shopId &&
-              matchingItem.userId == orderItem.userId;
-        });
-
-        if (matching.isNotEmpty) {
-          int index = _openOrders.indexOf(matching.first);
-          _openOrders[index] = orderItem;
-        } else {
-          _openOrders.add(orderItem);
-        }
-      }
-    }
-
-    _ordersUpdatedController.add(_openOrders);
-  }
-
-  static void setFulfilledOrders(DataSnapshot snapshot) {
-    if (snapshot.value == null) {
-      return;
-    }
-
-    _fulfilledOrders2.clear();
-
-    for (var shop in (snapshot.value as Map).entries) {
-      if (!_fulfilledOrders2.containsKey(shop.key)) {
-        _fulfilledOrders2[shop.key] = {};
-      }
-
-      for (var fulfiller in shop.value.entries) {
-        if (!_fulfilledOrders2[shop.key]!.containsKey(fulfiller.key)) {
-          _fulfilledOrders2[shop.key]?[fulfiller.key] = {};
-        }
-
-        for (var item in fulfiller.value.entries) {
-          _fulfilledOrders2[shop.key]?[fulfiller.key]?[item.key] = item.value;
-        }
-      }
-    }
-  }
-
   static Future<void> loadAll() async {
     var snapshot = await Database.realtime.child('shops').get();
     shops = snapshot.value as Map;
     _currentShopId = shops.keys.first;
-
-    var orderFutures = <Future>[];
 
     for (String currentShopId in shops.keys) {
       // list product images for the shop
       var snapshot =
           await Database.storage.child('shops/$currentShopId/items').listAll();
       _itemReferences[currentShopId] = snapshot.items;
-
-      /*
-      // get users open orders for the shop
-      orderFutures.add(
-        Database.groupReference
-            .get()
-            .then((snapshot) => setOpenUserOrders(snapshot.value as Map?)),
-      );
-      */
-      /*
-      orderFutures.add(
-        Database.userReference
-            .child('fulfilled')
-            .get()
-            .then((snapshot) => setFulfilledOrders(snapshot)),
-      );
-      */
-      // notify subscribers once all orders are loaded
-      /*
-      Future.wait(orderFutures).then((_) {
-        pushOpenOrderStream();
-      });
-      */
     }
 
     orderUpdateListener(event) {
@@ -381,8 +290,6 @@ class Shop {
       if (data == null) {
         return;
       }
-
-      // setOpenUserOrders(updatedUserId, data['orders']);
 
       if (data.containsKey('orders')) {
         parseOpenUserOrders2(updatedUserId, data['orders']);
@@ -425,18 +332,37 @@ class Shop {
 
   static Future<void>? pushCurrentOrder() {
     var orders = <String, Map<String, int>>{};
+    var items = _orders2[Database.userId]?[_currentShopId]?.items ?? {};
 
     // initialize with current
-    _currentOrder.forEach((id, count) {
-      orders[id] = <String, int>{
+    _currentOrder.forEach((itemId, count) {
+      orders[itemId] = <String, int>{
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'count': count,
       };
+
+      // get item info
+      var itemInfo = _getItemInfo(itemId);
+      String itemName = itemInfo['name'];
+      String shopName = _getShopName(_currentShopId);
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
+      double price = count * (itemInfo['price'] as double);
+
+      items[itemId] = OrderItem2(
+        itemId,
+        _currentShopId,
+        Database.userId,
+        timestamp,
+        itemName,
+        shopName,
+        count,
+        price,
+      );
+      items;
     });
 
     // loop through and add existing
-    for (var itemEntry
-        in (_orders2[Database.userId]?[_currentShopId]?.items ?? {}).entries) {
+    for (var itemEntry in items.entries) {
       var itemId = itemEntry.key;
       var item = itemEntry.value;
 
@@ -449,14 +375,12 @@ class Shop {
     var future =
         Database.userReference.child('orders/$_currentShopId').set(orders);
 
-    // update local database; optional, will be updated with upstream
-    // _openOrders[_shopId]?[Database.userId] = orders;
-
     _openTotal = 0;
     _currentTotal = 0;
     _currentOrder.clear();
     _currentTotalController.add(_currentTotal);
     _ordersPushedController2.add(null);
+    _ordersUpdatedController2.add(_orders2);
 
     return future;
   }
@@ -471,22 +395,6 @@ class Shop {
 
     // skip fulfilling own order
     if (item.userId != Database.userId || true) {
-      // var fulfilled = FulfilledItem.fromOpenNow(item, Database.userId);
-      /*
-      int fulfilledCount =
-          _fulfilledOrders2[_shopId]?[item.fulfillerId]?[item.id] ?? 0;
-
-      futures.add(Database.userReference
-          .child('fulfilled/$_shopId/${item.fulfillerId}/${item.id}')
-          .set(fulfilledCount + count));
-          
-      var matching = _fulfilled2.entries.where(
-        (entry) =>
-            entry.value[item.shopId]?[Database.userId]?.items
-                .containsKey(item.itemId) ??
-            false,
-      );
-      */
       int fulfilledCount = _fulfilled2[Database.userId]?[item.shopId]
                   ?[item.userId]
               ?.items[item.itemId]
