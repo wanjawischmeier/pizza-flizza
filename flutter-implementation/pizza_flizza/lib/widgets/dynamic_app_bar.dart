@@ -13,7 +13,7 @@ enum AppBarType { name, location }
 typedef OnLocationChanged = void Function(String location);
 typedef OnCartClicked = bool Function();
 
-class DynamicAppBar extends StatefulWidget with PreferredSizeWidget {
+class DynamicAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String name;
   final AppBarType type;
   final List<DropdownMenuItem<String>> items;
