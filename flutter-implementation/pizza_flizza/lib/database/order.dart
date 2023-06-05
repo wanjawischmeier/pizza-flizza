@@ -1,7 +1,12 @@
 import 'item.dart';
 
+/// userId, shopId
 typedef OrderMap = Map<String, Map<String, Order2>>;
+
+/// fulfillerId, shopId, userId
 typedef FulfilledMap = Map<String, Map<String, Map<String, Order2>>>;
+
+/// userId, shopId
 typedef HistoryMap = Map<String, Map<String, FulfilledOrder2>>;
 
 class Order2 {
@@ -22,21 +27,19 @@ class Order2 {
 }
 
 class FulfilledOrder2 {
-  String fulfillerId;
-  int timestamp;
+  String fulfillerId, userId, fulfillerName, userName;
+  String timeFormatted, dateFormatted;
   double price;
   Map<String, OrderItem2> items;
 
   FulfilledOrder2(
     this.fulfillerId,
-    this.timestamp,
+    this.userId,
+    this.fulfillerName,
+    this.userName,
+    this.timeFormatted,
+    this.dateFormatted,
     this.price,
     this.items,
   );
-  /*
-  FulfilledOrder2.fromOpenNow(Order2 order, this.fulfillerId)
-      : timestamp = DateTime.now().millisecondsSinceEpoch,
-        price = order.price,
-        items = order.items;
-  */
 }

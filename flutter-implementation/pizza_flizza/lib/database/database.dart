@@ -91,6 +91,8 @@ class Database {
   static var realtime = FirebaseDatabase.instance.ref();
 
   static late String groupId, userId;
+  static String? userName;
+
   static DatabaseReference get groupReference =>
       Database.realtime.child('users/${Database.groupId}');
   static DatabaseReference get userReference =>
@@ -98,5 +100,18 @@ class Database {
 
   static DatabaseReference getOrderItemReference(ShopItem item) {
     return userReference.child('orders/${item.shopId}/${item.id}');
+  }
+
+  static Future<String> getUserName(String userId) {
+    return Database.realtime
+        .child('users/${Database.groupId}/$userId/name')
+        .get()
+        .then((snapshot) {
+      if (snapshot.value != null) {
+        return snapshot.value as String;
+      } else {
+        return 'Unknown Username';
+      }
+    });
   }
 }

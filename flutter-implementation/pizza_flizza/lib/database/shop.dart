@@ -72,12 +72,9 @@ class Shop {
     return result;
   }
 
-  // userId, shopId
   static final OrderMap _orders2 = {};
   static OrderMap get orders2 => _orders2;
-  // fulfillerId, shopId, userId
   static final FulfilledMap _fulfilled2 = {};
-  // userId, shopId
   static final HistoryMap _history2 = {};
 
   static final StreamController _ordersPushedController2 =

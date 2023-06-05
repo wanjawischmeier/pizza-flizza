@@ -52,6 +52,12 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
         Database.groupId = 'prenski_12';
         Database.userId = user.uid;
 
+        Database.userReference.child('name').get().then((snapshot) {
+          if (snapshot.value != null) {
+            Database.userName = snapshot.value as String;
+          }
+        });
+
         Shop.loadAll().then((value) =>
             _navigatorKey.currentState?.pushReplacementNamed('home'));
       }
