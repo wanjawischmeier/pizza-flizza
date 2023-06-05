@@ -332,21 +332,44 @@ class Shop {
 
   static Future<void>? pushCurrentOrder() {
     var orders = <String, Map<String, int>>{};
-    var items = _orders2[Database.userId]?[_currentShopId]?.items ?? {};
+    var items = <String, OrderItem2>{};
+    var ordersUser = _orders2[Database.userId];
+    if (ordersUser == null) {
+      ordersUser = {_currentShopId: Order2(items)};
+    } else {
+      var ordersShop = ordersUser[_currentShopId];
+      if (ordersShop == null) {
+        ordersShop = Order2(items);
+      } else {
+        items = ordersShop.items;
+      }
+    }
 
-    // initialize with current
-    _currentOrder.forEach((itemId, count) {
+    // initialize with existing
+    for (var itemEntry in items.entries) {
+      var itemId = itemEntry.key;
+      var item = itemEntry.value;
+
       orders[itemId] = <String, int>{
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'count': count,
+        'timestamp': item.timestamp,
+        'count': item.count,
       };
+    }
 
+    // loop through current
+    _currentOrder.forEach((itemId, count) {
       // get item info
       var itemInfo = _getItemInfo(itemId);
       String itemName = itemInfo['name'];
       String shopName = _getShopName(_currentShopId);
       int timestamp = DateTime.now().millisecondsSinceEpoch;
-      double price = count * (itemInfo['price'] as double);
+      int newCount = count + (orders[itemId]?['count'] ?? 0);
+      double price = newCount * (itemInfo['price'] as double);
+
+      orders[itemId] = <String, int>{
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'count': newCount,
+      };
 
       items[itemId] = OrderItem2(
         itemId,
@@ -355,21 +378,10 @@ class Shop {
         timestamp,
         itemName,
         shopName,
-        count,
+        newCount,
         price,
       );
     });
-
-    // loop through and add existing
-    for (var itemEntry in items.entries) {
-      var itemId = itemEntry.key;
-      var item = itemEntry.value;
-
-      orders[itemId] = <String, int>{
-        'timestamp': orders[itemId]?['timestamp'] ?? item.timestamp,
-        'count': item.count + (orders[itemId]?['count'] ?? 0),
-      };
-    }
 
     var future =
         Database.userReference.child('orders/$_currentShopId').set(orders);

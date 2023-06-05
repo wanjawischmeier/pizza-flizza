@@ -9,7 +9,6 @@ import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.da
 import 'package:appinio_swiper/appinio_swiper.dart';
 import 'package:appinio_swiper/appinio_slide_swiper.dart';
 
-import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
 import 'package:pizza_flizza/database/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
@@ -32,7 +31,6 @@ class _ShopFragmentState extends State<ShopFragment> {
   late int _count;
 
   late StreamSubscription<String> _shopChangedSubscription;
-  late StreamSubscription<List<OpenItem>> _openOrdersSubscription;
   late StreamSubscription<OrderMap> _ordersSubscription2;
   final _ordersShop = <int, OrderItem2>{};
 
@@ -52,7 +50,17 @@ class _ShopFragmentState extends State<ShopFragment> {
         });
       });
 
-      setState(() {});
+      if (_foregroundItem == null && _ordersShop.isNotEmpty) {
+        _foregroundItem = _ordersShop.values.first;
+      }
+
+      if (_backgroundItem == null && _ordersShop.length > 1) {
+        _foregroundItem = _ordersShop.values.elementAt(1);
+      }
+
+      setState(() {
+        _count = _foregroundItem?.count ?? 0;
+      });
     });
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
@@ -61,26 +69,12 @@ class _ShopFragmentState extends State<ShopFragment> {
         _ordersShop.clear();
       });
     });
-
-    int ordersCount = _ordersShop.length;
-
-    if (ordersCount > 0) {
-      _foregroundItem = _ordersShop.values.elementAt(0);
-
-      if (ordersCount > 1) {
-        _backgroundItem = _ordersShop.values.elementAt(1);
-      }
-    }
-
-    _count = _foregroundItem?.count ?? 0;
-    // _cardCount = _orders.length.toDouble();
   }
 
   @override
   void dispose() {
     super.dispose();
     _shopChangedSubscription.cancel();
-    _openOrdersSubscription.cancel();
     _ordersSubscription2.cancel();
   }
 
