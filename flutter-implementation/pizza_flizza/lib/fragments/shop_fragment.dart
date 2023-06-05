@@ -55,7 +55,7 @@ class _ShopFragmentState extends State<ShopFragment> {
       }
 
       if (_backgroundItem == null && _ordersShop.length > 1) {
-        _foregroundItem = _ordersShop.values.elementAt(1);
+        _backgroundItem = _ordersShop.values.elementAt(1);
       }
 
       setState(() {
@@ -66,7 +66,6 @@ class _ShopFragmentState extends State<ShopFragment> {
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       setState(() {
         _locked = true;
-        _ordersShop.clear();
       });
     });
   }

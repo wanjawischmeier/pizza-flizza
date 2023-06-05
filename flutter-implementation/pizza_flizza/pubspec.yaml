@@ -45,18 +45,21 @@ dependencies:
       url: https://github.com/wanjawischmeier/flutter_packages.git
       ref: slide_cards
       path: packages/appinio_swiper/
+  slide_to_act:
+    git:
+      url: https://github.com/wanjawischmeier/flutter-slide-to-act.git
+  cached_firestorage:
+    git:
+      url: https://github.com/wanjawischmeier/cached_firestorage.git
+
   tuple: ^2.0.1
   badges: ^3.1.1
   intl: ^0.17.0
   sticky_headers: ^0.3.0+2
   sticky_grid_view: ^1.0.3
   flutter_sticky_header: ^0.6.5
-  slide_to_act: ^2.0.1
   firebase_storage: ^11.1.1
   cached_network_image: ^3.2.3
-  cached_firestorage:
-    git:
-      url: https://github.com/wanjawischmeier/cached_firestorage.git
   google_sign_in: ^6.1.0
   flutter_animation_progress_bar: ^2.3.1
   equatable: ^2.0.5
