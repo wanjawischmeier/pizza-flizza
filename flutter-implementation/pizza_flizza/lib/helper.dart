@@ -6,4 +6,9 @@ class Helper {
       locale: 'de_DE', // Localizations.localeOf(context).scriptCode,
     ).format(price);
   }
+
+  static Map<int, T> sortByHighestKey<T>(Map<int, T> map) {
+    return Map.fromEntries(
+        map.entries.toList()..sort((e1, e2) => e2.key.compareTo(e1.key)));
+  }
 }

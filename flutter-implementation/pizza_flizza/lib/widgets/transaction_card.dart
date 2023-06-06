@@ -9,7 +9,7 @@ class TransactionCardWidget extends StatelessWidget {
   final Color accentColor;
   final Object id;
   final String header, content, trailing;
-  final Icon icon;
+  final Icon? icon;
   final bool dismissable;
   final OnDismiss? onDismiss;
 
@@ -21,7 +21,7 @@ class TransactionCardWidget extends StatelessWidget {
     required this.header,
     required this.content,
     required this.trailing,
-    required this.icon,
+    this.icon,
     this.dismissable = false,
     this.onDismiss,
   });

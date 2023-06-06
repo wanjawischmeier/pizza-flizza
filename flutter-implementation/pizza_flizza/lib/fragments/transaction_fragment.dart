@@ -20,8 +20,8 @@ class TransactionFragment extends StatefulWidget {
 class _TransactionFragmentState extends State<TransactionFragment> {
   late StreamSubscription<FulfilledMap> _fulfilledSubscription;
   late StreamSubscription<HistoryMap> _historySubscription;
-  final _fulfilledRelevant = <int, FulfilledOrder>{};
-  final _historyUser = <int, FulfilledOrder>{};
+  var _fulfilledRelevant = <int, FulfilledOrder>{};
+  var _historyUser = <int, HistoryOrder>{};
 
   Future<void> filterOrder(
       String fulfillerId, String userId, Order order) async {
@@ -79,6 +79,65 @@ class _TransactionFragmentState extends State<TransactionFragment> {
     }
   }
 
+  TransactionCardWidget renderFulfilledOrderAt(int index) {
+    var orderEntry = _fulfilledRelevant.entries.elementAt(index);
+    var timestamp = orderEntry.key, order = orderEntry.value;
+    bool dismissable;
+    Color color;
+    String credit;
+    IconData? iconData;
+
+    if (order.fulfillerId == Database.userId) {
+      // order fulfilled by user
+      dismissable = true;
+      color = Themes.cream;
+      credit = order.userName;
+      iconData = Icons.check;
+    } else {
+      // order placed by user
+      color = Themes.grayLight;
+      dismissable = false;
+      credit = order.fulfillerName;
+    }
+
+    return TransactionCardWidget(
+      backgroundColor: Themes.grayMid,
+      accentColor: color,
+      id: timestamp,
+      header:
+          'Bought for $credit\n${order.timeFormatted} on ${order.dateFormatted}',
+      content: order.itemsFormatted,
+      trailing: Helper.formatPrice(order.price),
+      icon: Icon(iconData),
+      dismissable: dismissable,
+      onDismiss: (orderId) {
+        var order = _fulfilledRelevant[orderId];
+        if (order != null) {
+          setState(() {
+            _fulfilledRelevant.remove(orderId);
+          });
+
+          Shop.archiveFulfilledOrder(order);
+        }
+      },
+    );
+  }
+
+  TransactionCardWidget renderHistoryOrderAt(int index) {
+    var orderEntry = _historyUser.entries.elementAt(index);
+    var timestamp = orderEntry.key, order = orderEntry.value;
+
+    return TransactionCardWidget(
+      backgroundColor: Themes.grayMid,
+      accentColor: Themes.grayMid,
+      id: timestamp,
+      header: '${order.timeFormatted} on ${order.dateFormatted}',
+      content: order.itemsFormatted,
+      trailing: Helper.formatPrice(order.price),
+      dismissable: false,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -96,7 +155,21 @@ class _TransactionFragmentState extends State<TransactionFragment> {
 
       // await potential usernames being gathered
       await Future.wait(futures);
-      setState(() {});
+      setState(() {
+        _fulfilledRelevant = Helper.sortByHighestKey(_fulfilledRelevant);
+      });
+    });
+
+    _historySubscription = Shop.subscribeToHistoryUpdated((orders) {
+      orders[Database.userId]?.forEach((shopId, ordersShop) {
+        ordersShop.forEach((timestamp, order) {
+          _historyUser[timestamp] = order;
+        });
+      });
+
+      setState(() {
+        _historyUser = Helper.sortByHighestKey(_historyUser);
+      });
     });
   }
 
@@ -111,51 +184,15 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      itemCount: _fulfilledRelevant.length,
+      itemCount: _fulfilledRelevant.length + _historyUser.length,
       padding: const EdgeInsets.all(8),
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (BuildContext context, int index) {
-        var orderEntry = _fulfilledRelevant.entries.elementAt(index);
-        var timestamp = orderEntry.key, order = orderEntry.value;
-        bool dismissable;
-        Color color;
-        String credit;
-        IconData? iconData;
-
-        if (order.fulfillerId == Database.userId) {
-          // order fulfilled by user
-          dismissable = true;
-          color = Themes.cream;
-          credit = order.userName;
-          iconData = Icons.check;
+        if (index < _fulfilledRelevant.length) {
+          return renderFulfilledOrderAt(index);
         } else {
-          // order placed by user
-          color = Themes.grayLight;
-          dismissable = false;
-          credit = order.fulfillerName;
+          return renderHistoryOrderAt(index - _fulfilledRelevant.length);
         }
-
-        return TransactionCardWidget(
-          backgroundColor: Themes.grayMid,
-          accentColor: color,
-          id: timestamp,
-          header:
-              'Bought for $credit\n${order.timeFormatted} on ${order.dateFormatted}',
-          content: order.itemsFormatted,
-          trailing: Helper.formatPrice(order.price),
-          icon: Icon(iconData),
-          dismissable: dismissable,
-          onDismiss: (orderId) {
-            var order = _fulfilledRelevant[orderId];
-            if (order != null) {
-              setState(() {
-                _fulfilledRelevant.remove(orderId);
-              });
-
-              Shop.archiveFulfilledOrder(order);
-            }
-          },
-        );
       },
     );
   }

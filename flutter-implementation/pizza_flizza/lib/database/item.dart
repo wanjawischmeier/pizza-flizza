@@ -59,3 +59,15 @@ class OrderItem extends ShopItem with EquatableMixin {
           order.price,
         );
 }
+
+class HistoryItem {
+  String itemName;
+  int count;
+  double price;
+
+  HistoryItem(
+    this.itemName,
+    this.count,
+    this.price,
+  );
+}

@@ -74,13 +74,53 @@ class FulfilledOrder extends Order {
 }
 
 class HistoryOrder {
-  /// itemId -> count
-  Map<String, int> items;
+  String shopId, timeFormatted, dateFormatted;
 
-  HistoryOrder(this.items);
+  /// itemId
+  Map<String, HistoryItem> items;
+
+  HistoryOrder(
+    this.shopId,
+    this.timeFormatted,
+    this.dateFormatted,
+    this.items,
+  );
 
   HistoryOrder.fromFulfilledOrder(FulfilledOrder order)
-      : items = order.items.map(
-          (itemId, item) => MapEntry(itemId, item.count),
+      : shopId = order.shopId,
+        timeFormatted = order.timeFormatted,
+        dateFormatted = order.dateFormatted,
+        items = order.items.map(
+          (itemId, item) => MapEntry(
+              itemId,
+              HistoryItem(
+                item.itemName,
+                item.count,
+                item.price,
+              )),
         );
+
+  // TODO: remove this mess in favor of inheritance
+  double get price {
+    double price = 0;
+
+    for (var item in items.values) {
+      price += item.price;
+    }
+
+    return price;
+  }
+
+  String get itemsFormatted {
+    String result = '';
+    if (items.isEmpty) {
+      return result;
+    }
+
+    items.forEach((itemId, item) {
+      result += '- ${item.count}x\t${item.itemName}\n';
+    });
+
+    return result.substring(0, result.length - 1);
+  }
 }

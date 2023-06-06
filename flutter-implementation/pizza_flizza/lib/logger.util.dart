@@ -26,10 +26,10 @@ class AppLogger extends Logger {
   }
 
   void logHistoryOrderItems(
-      Map<String, int> items, String userId, String shopId) {
+      Map<String, HistoryItem> items, String userId, String shopId) {
     String fulfilledString = 'parsed history from $userId at $shopId:\n';
-    items.forEach((itemId, count) {
-      fulfilledString += '$itemId: $count\n';
+    items.forEach((itemId, item) {
+      fulfilledString += '$itemId: ${item.count}\n';
     });
     i(fulfilledString.substring(0, fulfilledString.length - 1));
   }

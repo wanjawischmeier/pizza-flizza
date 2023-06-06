@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:pizza_flizza/logger.util.dart';
 
 import 'database.dart';
@@ -277,23 +278,39 @@ class Shop {
 
       for (var ordersShop in shop.entries) {
         int timestamp = int.parse(ordersShop.key);
+        DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
         Map order = ordersShop.value;
-        var items = <String, int>{};
+        var items = <String, HistoryItem>{};
 
         for (var itemEntry in order.entries) {
           String itemId = itemEntry.key;
           int count = itemEntry.value;
 
+          // get item info
+          var itemInfo = _getItemInfo(itemId);
+          String itemName = itemInfo['name'];
+          double price = count * (itemInfo['price'] as double);
+
           // compare to previous item
           var previousCount =
-              _history[userId]?[shopId]?[timestamp]?.items[itemId];
+              _history[userId]?[shopId]?[timestamp]?.items[itemId]?.count;
           if (count != previousCount) {
             modified = true;
           }
-          items[itemId] = count;
+
+          items[itemId] = HistoryItem(
+            itemName,
+            count,
+            price,
+          );
         }
 
-        _history[userId]?[shopId]?[timestamp] = HistoryOrder(items);
+        _history[userId]?[shopId]?[timestamp] = HistoryOrder(
+          shopId,
+          DateFormat.Hm().format(date),
+          DateFormat('dd.MM.yy').format(date),
+          items,
+        );
         log.logHistoryOrderItems(items, userId, shopId);
       }
     }
