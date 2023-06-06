@@ -24,13 +24,13 @@ class ShoppingCart extends StatefulWidget {
 
 class _ShoppingCartState extends State<ShoppingCart> {
   late StreamSubscription<OrderMap> _ordersSubscription2;
-  final _ordersUser = <int, OrderItem2>{};
+  final _ordersUser = <int, OrderItem>{};
   double _totalPrice = 0;
 
   @override
   void initState() {
     super.initState();
-    _ordersSubscription2 = Shop.subscribeToOrdersUpdated2((orders) {
+    _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
       _ordersUser.clear();
       _totalPrice = 0;
 

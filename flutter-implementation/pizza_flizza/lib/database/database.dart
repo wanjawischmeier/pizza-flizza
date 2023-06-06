@@ -16,7 +16,7 @@ class Database {
   static DatabaseReference get userReference =>
       Database.realtime.child('users/${Database.groupId}/${Database.userId}');
 
-  static DatabaseReference getOrderItemReference(ShopItem2 item) {
+  static DatabaseReference getOrderItemReference(ShopItem item) {
     return userReference.child('orders/${item.shopId}/${item.itemId}');
   }
 

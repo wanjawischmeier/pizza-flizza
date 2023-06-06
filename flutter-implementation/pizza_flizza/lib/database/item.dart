@@ -3,12 +3,12 @@ import 'package:firebase_database/firebase_database.dart';
 
 import 'database.dart';
 
-class ShopItem2 {
+class ShopItem {
   String itemId, shopId, userId, itemName, shopName;
   int count;
   double price;
 
-  ShopItem2(
+  ShopItem(
     this.itemId,
     this.shopId,
     this.userId,
@@ -19,7 +19,7 @@ class ShopItem2 {
   );
 }
 
-class OrderItem2 extends ShopItem2 with EquatableMixin {
+class OrderItem extends ShopItem with EquatableMixin {
   int timestamp;
 
   DatabaseReference get databaseReference =>
@@ -36,7 +36,7 @@ class OrderItem2 extends ShopItem2 with EquatableMixin {
         price,
       ];
 
-  OrderItem2(
+  OrderItem(
     super.itemId,
     super.shopId,
     super.userId,
@@ -47,7 +47,7 @@ class OrderItem2 extends ShopItem2 with EquatableMixin {
     super.price,
   );
 
-  OrderItem2.copy(OrderItem2 order)
+  OrderItem.copy(OrderItem order)
       : timestamp = order.timestamp,
         super(
           order.itemId,

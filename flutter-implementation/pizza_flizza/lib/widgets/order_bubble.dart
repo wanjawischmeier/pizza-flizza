@@ -49,7 +49,7 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
         _itemCount = 0;
       });
     });
-    _orderPushedSubscription = Shop.subscribeToOrdersPushed2((_) {
+    _orderPushedSubscription = Shop.subscribeToOrdersPushed((_) {
       setState(() {
         _itemCount = 0;
       });

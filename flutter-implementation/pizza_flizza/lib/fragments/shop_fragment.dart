@@ -23,7 +23,7 @@ class ShopFragment extends StatefulWidget {
 }
 
 class _ShopFragmentState extends State<ShopFragment> {
-  OrderItem2? _foregroundItem, _backgroundItem;
+  OrderItem? _foregroundItem, _backgroundItem;
   double _gradient = 1;
   bool _locked = true;
   double _swipedCount = 0;
@@ -32,13 +32,13 @@ class _ShopFragmentState extends State<ShopFragment> {
 
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<OrderMap> _ordersSubscription2;
-  final _ordersShop = <int, OrderItem2>{};
+  final _ordersShop = <int, OrderItem>{};
 
   @override
   void initState() {
     super.initState();
 
-    _ordersSubscription2 = Shop.subscribeToOrdersUpdated2((orders) {
+    _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
       _ordersShop.clear();
 
       // loop through orders for all users
@@ -46,7 +46,7 @@ class _ShopFragmentState extends State<ShopFragment> {
         // select currentShop
         userOrders[Shop.currentShopId]?.items.forEach((itemId, item) {
           // use hash to account for possible duplicate itemId's across shops
-          _ordersShop[item.hashCode] = OrderItem2.copy(item);
+          _ordersShop[item.hashCode] = OrderItem.copy(item);
         });
       });
 

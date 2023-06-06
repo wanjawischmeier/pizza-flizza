@@ -13,8 +13,8 @@ class AppLogger extends Logger {
           ),
         );
 
-  void logOrderItems(Map<String, OrderItem2> items, String userId,
-      String shopId, String? fulfillerId) {
+  void logOrderItems(Map<String, OrderItem> items, String userId, String shopId,
+      String? fulfillerId) {
     String fulfiller =
         (fulfillerId == null) ? '' : 'fulfilled by $fulfillerId ';
     String fulfilledString =

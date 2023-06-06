@@ -72,40 +72,40 @@ class Shop {
     return result.substring(0, max(0, result.length - 1));
   }
 
-  static final OrderMap _orders2 = {};
-  static OrderMap get orders2 => _orders2;
-  static final FulfilledMap _fulfilled2 = {};
-  static final HistoryMap _history2 = {};
+  static final OrderMap _orders = {};
+  static OrderMap get orders => _orders;
+  static final FulfilledMap _fulfilled = {};
+  static final HistoryMap _history = {};
 
-  static final StreamController _ordersPushedController2 =
+  static final StreamController _ordersPushedController =
       StreamController.broadcast();
-  static StreamSubscription subscribeToOrdersPushed2(
+  static StreamSubscription subscribeToOrdersPushed(
       void Function(void) onUpdate) {
-    return _ordersPushedController2.stream.listen(onUpdate);
+    return _ordersPushedController.stream.listen(onUpdate);
   }
 
-  static final StreamController<OrderMap> _ordersUpdatedController2 =
+  static final StreamController<OrderMap> _ordersUpdatedController =
       StreamController.broadcast();
-  static StreamSubscription<OrderMap> subscribeToOrdersUpdated2(
+  static StreamSubscription<OrderMap> subscribeToOrdersUpdated(
       void Function(OrderMap orders) onUpdate) {
-    onUpdate(_orders2);
-    return _ordersUpdatedController2.stream.listen(onUpdate);
+    onUpdate(_orders);
+    return _ordersUpdatedController.stream.listen(onUpdate);
   }
 
-  static final StreamController<FulfilledMap> _fulfilledUpdatedController2 =
+  static final StreamController<FulfilledMap> _fulfilledUpdatedController =
       StreamController.broadcast();
-  static StreamSubscription<FulfilledMap> subscribeToFulfilledUpdated2(
+  static StreamSubscription<FulfilledMap> subscribeToFulfilledUpdated(
       void Function(FulfilledMap orders) onUpdate) {
-    onUpdate(_fulfilled2);
-    return _fulfilledUpdatedController2.stream.listen(onUpdate);
+    onUpdate(_fulfilled);
+    return _fulfilledUpdatedController.stream.listen(onUpdate);
   }
 
-  static final StreamController<HistoryMap> _historyUpdatedController2 =
+  static final StreamController<HistoryMap> _historyUpdatedController =
       StreamController.broadcast();
-  static StreamSubscription<HistoryMap> subscribeToHistoryUpdated2(
+  static StreamSubscription<HistoryMap> subscribeToHistoryUpdated(
       void Function(HistoryMap orders) onUpdate) {
-    onUpdate(_history2);
-    return _historyUpdatedController2.stream.listen(onUpdate);
+    onUpdate(_history);
+    return _historyUpdatedController.stream.listen(onUpdate);
   }
 
   static double _currentTotal = 0;
@@ -119,7 +119,7 @@ class Shop {
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
-  static void parseOpenUserOrders2(String userId, Map? userOrders) {
+  static void parseOpenUserOrders(String userId, Map? userOrders) {
     // skip empty orders
     if (userOrders == null) {
       return;
@@ -128,15 +128,15 @@ class Shop {
     bool modified = false;
 
     // initialize user orders entry
-    if (!_orders2.containsKey(userId)) {
-      _orders2[userId] = {};
+    if (!_orders.containsKey(userId)) {
+      _orders[userId] = {};
     }
 
     // iterate over all shops containing orders
     for (var shopEntry in userOrders.entries) {
       String shopId = shopEntry.key;
       Map shop = shopEntry.value;
-      var items = <String, OrderItem2>{};
+      var items = <String, OrderItem>{};
 
       for (var itemEntry in shop.entries) {
         String itemId = itemEntry.key;
@@ -151,7 +151,7 @@ class Shop {
         double price = count * (itemInfo['price'] as double);
 
         // create instance
-        var orderItem = OrderItem2(
+        var orderItem = OrderItem(
           itemId,
           shopId,
           userId,
@@ -163,7 +163,7 @@ class Shop {
         );
 
         // compare to previous item
-        var previousItem = _orders2[userId]?[shopId]?.items[itemId];
+        var previousItem = _orders[userId]?[shopId]?.items[itemId];
         if (orderItem != previousItem) {
           modified = true;
         }
@@ -171,17 +171,17 @@ class Shop {
         items[itemId] = orderItem;
       }
 
-      _orders2[userId]?[shopId] = Order2(shopId, items);
+      _orders[userId]?[shopId] = Order(shopId, items);
       log.logOrderItems(items, userId, shopId, null);
     }
 
     // if orders changed: notify listeners
     if (modified) {
-      _ordersUpdatedController2.add(_orders2);
+      _ordersUpdatedController.add(_orders);
     }
   }
 
-  static void parseUserFulfilledOrders2(
+  static void parseUserFulfilledOrders(
       String fulfillerId, Map? fulfilledOrders) {
     // skip empty orders
     if (fulfilledOrders == null) {
@@ -190,8 +190,8 @@ class Shop {
 
     bool modified = false;
 
-    if (!_fulfilled2.containsKey(fulfillerId)) {
-      _fulfilled2[fulfillerId] = {};
+    if (!_fulfilled.containsKey(fulfillerId)) {
+      _fulfilled[fulfillerId] = {};
     }
 
     // iterate over all shops containing orders
@@ -199,14 +199,14 @@ class Shop {
       String shopId = shopEntry.key;
       Map fulfilledShop = shopEntry.value;
 
-      if (!(_fulfilled2[fulfillerId]?.containsKey(shopId) ?? false)) {
-        _fulfilled2[fulfillerId]?[shopId] = {};
+      if (!(_fulfilled[fulfillerId]?.containsKey(shopId) ?? false)) {
+        _fulfilled[fulfillerId]?[shopId] = {};
       }
 
       for (var userEntry in fulfilledShop.entries) {
         String userId = userEntry.key;
         Map fulfilledItems = userEntry.value;
-        var items = <String, OrderItem2>{};
+        var items = <String, OrderItem>{};
 
         for (var itemEntry in fulfilledItems.entries) {
           String itemId = itemEntry.key;
@@ -221,7 +221,7 @@ class Shop {
           double price = count * (itemInfo['price'] as double);
 
           // create instance
-          var orderItem = OrderItem2(
+          var orderItem = OrderItem(
             itemId,
             shopId,
             userId,
@@ -234,7 +234,7 @@ class Shop {
 
           // compare to previous item
           var previousItem =
-              _fulfilled2[fulfillerId]?[shopId]?[userId]?.items[itemId];
+              _fulfilled[fulfillerId]?[shopId]?[userId]?.items[itemId];
           if (orderItem != previousItem) {
             modified = true;
           }
@@ -242,18 +242,18 @@ class Shop {
           items[itemId] = orderItem;
         }
 
-        _fulfilled2[fulfillerId]?[shopId]?[userId] = Order2(shopId, items);
+        _fulfilled[fulfillerId]?[shopId]?[userId] = Order(shopId, items);
         log.logOrderItems(items, userId, shopId, fulfillerId);
       }
     }
 
     // if orders changed: notify listeners
     if (modified) {
-      _fulfilledUpdatedController2.add(_fulfilled2);
+      _fulfilledUpdatedController.add(_fulfilled);
     }
   }
 
-  static void parseHistoryUserOrders2(String userId, Map? historyOrders) {
+  static void parseHistoryUserOrders(String userId, Map? historyOrders) {
     // skip empty orders
     if (historyOrders == null) {
       return;
@@ -262,8 +262,8 @@ class Shop {
     bool modified = false;
 
     // initialize user orders entry
-    if (!_history2.containsKey(userId)) {
-      _history2[userId] = {};
+    if (!_history.containsKey(userId)) {
+      _history[userId] = {};
     }
 
     // iterate over all shops containing a history
@@ -271,8 +271,8 @@ class Shop {
       String shopId = shopEntry.key;
       Map shop = shopEntry.value;
 
-      if (!(_history2[userId]?.containsKey(shopId) ?? false)) {
-        _history2[userId]?[shopId] = {};
+      if (!(_history[userId]?.containsKey(shopId) ?? false)) {
+        _history[userId]?[shopId] = {};
       }
 
       for (var ordersShop in shop.entries) {
@@ -286,21 +286,21 @@ class Shop {
 
           // compare to previous item
           var previousCount =
-              _history2[userId]?[shopId]?[timestamp]?.items[itemId];
+              _history[userId]?[shopId]?[timestamp]?.items[itemId];
           if (count != previousCount) {
             modified = true;
           }
           items[itemId] = count;
         }
 
-        _history2[userId]?[shopId]?[timestamp] = HistoryOrder2(items);
+        _history[userId]?[shopId]?[timestamp] = HistoryOrder(items);
         log.logHistoryOrderItems(items, userId, shopId);
       }
     }
 
     // if orders changed: notify listeners
     if (modified) {
-      _historyUpdatedController2.add(_history2);
+      _historyUpdatedController.add(_history);
     }
   }
 
@@ -326,15 +326,15 @@ class Shop {
       // TODO: for key in data, then switch
 
       if (data.containsKey('orders')) {
-        parseOpenUserOrders2(updatedUserId, data['orders']);
+        parseOpenUserOrders(updatedUserId, data['orders']);
       }
 
       if (data.containsKey('fulfilled')) {
-        parseUserFulfilledOrders2(updatedUserId, data['fulfilled']);
+        parseUserFulfilledOrders(updatedUserId, data['fulfilled']);
       }
 
       if (data.containsKey('history')) {
-        parseHistoryUserOrders2(updatedUserId, data['history']);
+        parseHistoryUserOrders(updatedUserId, data['history']);
       }
     }
 
@@ -370,14 +370,14 @@ class Shop {
 
   static Future<void>? pushCurrentOrder() {
     var orders = <String, Map<String, int>>{};
-    var items = <String, OrderItem2>{};
-    var ordersUser = _orders2[Database.userId];
+    var items = <String, OrderItem>{};
+    var ordersUser = _orders[Database.userId];
     if (ordersUser == null) {
-      ordersUser = {_currentShopId: Order2(_currentShopId, items)};
+      ordersUser = {_currentShopId: Order(_currentShopId, items)};
     } else {
       var ordersShop = ordersUser[_currentShopId];
       if (ordersShop == null) {
-        ordersShop = Order2(_currentShopId, items);
+        ordersShop = Order(_currentShopId, items);
       } else {
         items = ordersShop.items;
       }
@@ -409,7 +409,7 @@ class Shop {
         'count': newCount,
       };
 
-      items[itemId] = OrderItem2(
+      items[itemId] = OrderItem(
         itemId,
         _currentShopId,
         Database.userId,
@@ -427,27 +427,27 @@ class Shop {
     _currentTotal = 0;
     _currentOrder.clear();
     _currentTotalController.add(_currentTotal);
-    _ordersPushedController2.add(null);
-    _ordersUpdatedController2.add(_orders2);
+    _ordersPushedController.add(null);
+    _ordersUpdatedController.add(_orders);
 
     return future;
   }
 
-  static Future<void> removeOrderItem(OrderItem2 item) {
-    _orders2[item.userId]?[item.shopId]?.items.remove(item.itemId);
-    _ordersUpdatedController2.add(_orders2);
+  static Future<void> removeOrderItem(OrderItem item) {
+    _orders[item.userId]?[item.shopId]?.items.remove(item.itemId);
+    _ordersUpdatedController.add(_orders);
     return item.databaseReference.remove();
   }
 
-  static Future<void> archiveFulfilledOrder(FulfilledOrder2 order) {
+  static Future<void> archiveFulfilledOrder(FulfilledOrder order) {
     // remove from fulfilled
-    _fulfilled2[order.fulfillerId]?[order.shopId]?.remove(order.userId);
+    _fulfilled[order.fulfillerId]?[order.shopId]?.remove(order.userId);
     // clean map propagating up the tree
-    if (_fulfilled2[order.fulfillerId]?[order.shopId]?.isEmpty ?? false) {
-      _fulfilled2[order.fulfillerId]?.remove(order.shopId);
+    if (_fulfilled[order.fulfillerId]?[order.shopId]?.isEmpty ?? false) {
+      _fulfilled[order.fulfillerId]?.remove(order.shopId);
 
-      if (_fulfilled2[order.fulfillerId]?.isEmpty ?? false) {
-        _fulfilled2.clear();
+      if (_fulfilled[order.fulfillerId]?.isEmpty ?? false) {
+        _fulfilled.clear();
       }
     }
     var fulfilledFuture = order.databaseReference.remove();
@@ -459,8 +459,8 @@ class Shop {
         latestChange = item.timestamp;
       }
     }
-    var historyOrder = HistoryOrder2.fromFulfilledOrder(order);
-    var historyUser = _history2[order.userId];
+    var historyOrder = HistoryOrder.fromFulfilledOrder(order);
+    var historyUser = _history[order.userId];
     if (historyUser == null) {
       historyUser = {
         order.shopId: {latestChange: historyOrder}
@@ -478,45 +478,45 @@ class Shop {
         .child('history/${order.shopId}/$latestChange')
         .set(order.itemsParsed);
 
-    _fulfilledUpdatedController2.add(_fulfilled2);
-    _historyUpdatedController2.add(_history2);
+    _fulfilledUpdatedController.add(_fulfilled);
+    _historyUpdatedController.add(_history);
     return Future.wait([fulfilledFuture, historyFuture]);
   }
 
-  static Future<void>? fulfillItem(OrderItem2 item, int count) {
+  static Future<void>? fulfillItem(OrderItem item, int count) {
     var futures = <Future>[];
 
     // update fulfilled, skip fulfilling own order
     // TODO: remove bypass
     if (item.userId != Database.userId || true) {
-      int fulfilledCount = _fulfilled2[Database.userId]?[item.shopId]
+      int fulfilledCount = _fulfilled[Database.userId]?[item.shopId]
                   ?[item.userId]
               ?.items[item.itemId]
               ?.count ??
           0;
 
-      if (!_fulfilled2.containsKey(Database.userId)) {
-        _fulfilled2[Database.userId] = {};
+      if (!_fulfilled.containsKey(Database.userId)) {
+        _fulfilled[Database.userId] = {};
 
-        if (!_fulfilled2[Database.userId]!.containsKey(item.shopId)) {
-          _fulfilled2[Database.userId]![item.shopId] = {};
+        if (!_fulfilled[Database.userId]!.containsKey(item.shopId)) {
+          _fulfilled[Database.userId]![item.shopId] = {};
         }
 
-        if (!_fulfilled2[Database.userId]![item.shopId]!
+        if (!_fulfilled[Database.userId]![item.shopId]!
             .containsKey(item.userId)) {
-          _fulfilled2[Database.userId]![item.shopId]![item.userId] = Order2(
+          _fulfilled[Database.userId]![item.shopId]![item.userId] = Order(
             item.shopId,
             {
-              item.itemId: OrderItem2.copy(item),
+              item.itemId: OrderItem.copy(item),
             },
           );
         }
       }
 
       var fulfilledItem =
-          _fulfilled2[Database.userId]![item.shopId]![item.userId]!
+          _fulfilled[Database.userId]![item.shopId]![item.userId]!
                   .items[item.itemId] ??
-              OrderItem2.copy(item);
+              OrderItem.copy(item);
       fulfilledItem.count = fulfilledCount + count;
       // update price!
       fulfilledItem.price = -1;
@@ -533,17 +533,17 @@ class Shop {
 
     // update orders
     if (item.count <= count) {
-      _orders2[item.userId]?[item.shopId]?.items.remove(item.itemId);
+      _orders[item.userId]?[item.shopId]?.items.remove(item.itemId);
       futures.add(item.databaseReference.remove());
     } else {
       item.count -= count;
-      _orders2[item.userId]?[item.shopId]?.items[item.itemId]?.count =
+      _orders[item.userId]?[item.shopId]?.items[item.itemId]?.count =
           item.count;
       futures.add(item.databaseReference.child('count').set(item.count));
     }
 
-    _ordersUpdatedController2.add(_orders2);
-    _fulfilledUpdatedController2.add(_fulfilled2);
+    _ordersUpdatedController.add(_orders);
+    _fulfilledUpdatedController.add(_fulfilled);
     return Future.wait(futures);
   }
 }

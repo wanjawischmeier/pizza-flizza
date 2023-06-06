@@ -4,18 +4,18 @@ import 'package:pizza_flizza/database/database.dart';
 import 'item.dart';
 
 /// userId, shopId
-typedef OrderMap = Map<String, Map<String, Order2>>;
+typedef OrderMap = Map<String, Map<String, Order>>;
 
 /// fulfillerId, shopId, userId
-typedef FulfilledMap = Map<String, Map<String, Map<String, Order2>>>;
+typedef FulfilledMap = Map<String, Map<String, Map<String, Order>>>;
 
 /// userId, shopId, timestamp
-typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder2>>>;
+typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder>>>;
 
-class Order2 {
+class Order {
   String shopId;
   // itemId
-  Map<String, OrderItem2> items;
+  Map<String, OrderItem> items;
 
   double get price {
     double price = 0;
@@ -27,7 +27,7 @@ class Order2 {
     return price;
   }
 
-  Order2(this.shopId, this.items);
+  Order(this.shopId, this.items);
 
   String get itemsFormatted {
     String result = '';
@@ -43,11 +43,11 @@ class Order2 {
   }
 }
 
-class FulfilledOrder2 extends Order2 {
+class FulfilledOrder extends Order {
   String fulfillerId, userId, fulfillerName, userName;
   String timeFormatted, dateFormatted;
 
-  FulfilledOrder2(
+  FulfilledOrder(
     this.fulfillerId,
     this.userId,
     super.shopId,
@@ -73,13 +73,13 @@ class FulfilledOrder2 extends Order2 {
   }
 }
 
-class HistoryOrder2 {
+class HistoryOrder {
   /// itemId -> count
   Map<String, int> items;
 
-  HistoryOrder2(this.items);
+  HistoryOrder(this.items);
 
-  HistoryOrder2.fromFulfilledOrder(FulfilledOrder2 order)
+  HistoryOrder.fromFulfilledOrder(FulfilledOrder order)
       : items = order.items.map(
           (itemId, item) => MapEntry(itemId, item.count),
         );

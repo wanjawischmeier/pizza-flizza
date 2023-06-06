@@ -42,7 +42,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
   int _orderCount = 0;
   late StreamSubscription<OrderMap> _ordersSubscription2;
 
-  int countUserOrders(List<ShopItem2> orders) {
+  int countUserOrders(List<ShopItem> orders) {
     int count = 0;
 
     for (var item in orders) {
@@ -58,7 +58,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
   void initState() {
     super.initState();
 
-    _ordersSubscription2 = Shop.subscribeToOrdersUpdated2((orders) {
+    _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
       _orderCount = 0;
 
       orders[Database.userId]?.forEach((shopId, order) {

@@ -20,11 +20,11 @@ class TransactionFragment extends StatefulWidget {
 class _TransactionFragmentState extends State<TransactionFragment> {
   late StreamSubscription<FulfilledMap> _fulfilledSubscription;
   late StreamSubscription<HistoryMap> _historySubscription;
-  final _fulfilledRelevant = <int, FulfilledOrder2>{};
-  final _historyUser = <int, FulfilledOrder2>{};
+  final _fulfilledRelevant = <int, FulfilledOrder>{};
+  final _historyUser = <int, FulfilledOrder>{};
 
   Future<void> filterOrder(
-      String fulfillerId, String userId, Order2 order) async {
+      String fulfillerId, String userId, Order order) async {
     // order is relevant if fulfilled or ordered by user
     if (fulfillerId == Database.userId || userId == Database.userId) {
       int latestChange = 0;
@@ -65,7 +65,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
 
       return future.then((value) {
         // use hash to account for possible duplicate itemId's
-        _fulfilledRelevant[order.hashCode] = FulfilledOrder2(
+        _fulfilledRelevant[order.hashCode] = FulfilledOrder(
           fulfillerId,
           userId,
           order.shopId,
@@ -83,7 +83,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   void initState() {
     super.initState();
 
-    _fulfilledSubscription = Shop.subscribeToFulfilledUpdated2((orders) async {
+    _fulfilledSubscription = Shop.subscribeToFulfilledUpdated((orders) async {
       var futures = <Future>[];
 
       orders.forEach((fulfillerId, ordersFulfiller) {
