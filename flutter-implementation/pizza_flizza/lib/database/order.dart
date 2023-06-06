@@ -9,8 +9,8 @@ typedef OrderMap = Map<String, Map<String, Order2>>;
 /// fulfillerId, shopId, userId
 typedef FulfilledMap = Map<String, Map<String, Map<String, Order2>>>;
 
-/// userId, shopId
-typedef HistoryMap = Map<String, Map<String, FulfilledOrder2>>;
+/// userId, shopId, timestamp
+typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder2>>>;
 
 class Order2 {
   String shopId;
@@ -60,4 +60,27 @@ class FulfilledOrder2 extends Order2 {
 
   DatabaseReference get databaseReference =>
       Database.userReference.child('fulfilled/$shopId/$userId');
+
+  /// itemId, count
+  Map<String, int> get itemsParsed {
+    var parsed = <String, int>{};
+
+    items.forEach((itemId, item) {
+      parsed[itemId] = item.count;
+    });
+
+    return parsed;
+  }
+}
+
+class HistoryOrder2 {
+  /// itemId -> count
+  Map<String, int> items;
+
+  HistoryOrder2(this.items);
+
+  HistoryOrder2.fromFulfilledOrder(FulfilledOrder2 order)
+      : items = order.items.map(
+          (itemId, item) => MapEntry(itemId, item.count),
+        );
 }

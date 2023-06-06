@@ -59,7 +59,6 @@ class Shop {
     return _shopChangedController.stream.listen(onUpdate);
   }
 
-  // local
   // shopId, itemId -> count
   static final Map<String, int> _currentOrder = {};
   static Map<String, int> get currentOrder => _currentOrder;
@@ -101,25 +100,12 @@ class Shop {
     return _fulfilledUpdatedController2.stream.listen(onUpdate);
   }
 
-  static double _openTotal = 0;
-  static final _openOrders = <OpenItem>[];
-  static final _fulfilledOrders = <FulfilledItem>[];
-
-  static double get openTotal => _openTotal;
-  static List<OpenItem> get openOrders => _openOrders;
-  static List<OpenItem> get openShopOrders =>
-      _openOrders.where((order) => order.shopId == _currentShopId).toList();
-  static List<OpenItem> get openShopUserOrders => _openOrders
-      .where((order) =>
-          order.shopId == _currentShopId && order.userId == Database.userId)
-      .toList();
-  static List<FulfilledItem> get fulfilledOrders => _fulfilledOrders;
-
-  static final StreamController<List<OpenItem>> _ordersUpdatedController =
+  static final StreamController<HistoryMap> _historyUpdatedController2 =
       StreamController.broadcast();
-  static StreamSubscription<List<OpenItem>> subscribeToOrderUpdated(
-      void Function(List<OpenItem> orders) onUpdate) {
-    return _ordersUpdatedController.stream.listen(onUpdate);
+  static StreamSubscription<HistoryMap> subscribeToHistoryUpdated2(
+      void Function(HistoryMap orders) onUpdate) {
+    onUpdate(_history2);
+    return _historyUpdatedController2.stream.listen(onUpdate);
   }
 
   static double _currentTotal = 0;
@@ -267,6 +253,57 @@ class Shop {
     }
   }
 
+  static void parseHistoryUserOrders2(String userId, Map? historyOrders) {
+    // skip empty orders
+    if (historyOrders == null) {
+      return;
+    }
+
+    bool modified = false;
+
+    // initialize user orders entry
+    if (!_history2.containsKey(userId)) {
+      _history2[userId] = {};
+    }
+
+    // iterate over all shops containing a history
+    for (var shopEntry in historyOrders.entries) {
+      String shopId = shopEntry.key;
+      Map shop = shopEntry.value;
+
+      if (!(_history2[userId]?.containsKey(shopId) ?? false)) {
+        _history2[userId]?[shopId] = {};
+      }
+
+      for (var ordersShop in shop.entries) {
+        int timestamp = int.parse(ordersShop.key);
+        Map order = ordersShop.value;
+        var items = <String, int>{};
+
+        for (var itemEntry in order.entries) {
+          String itemId = itemEntry.key;
+          int count = itemEntry.value;
+
+          // compare to previous item
+          var previousCount =
+              _history2[userId]?[shopId]?[timestamp]?.items[itemId];
+          if (count != previousCount) {
+            modified = true;
+          }
+          items[itemId] = count;
+        }
+
+        _history2[userId]?[shopId]?[timestamp] = HistoryOrder2(items);
+        log.logHistoryOrderItems(items, userId, shopId);
+      }
+    }
+
+    // if orders changed: notify listeners
+    if (modified) {
+      _historyUpdatedController2.add(_history2);
+    }
+  }
+
   static Future<void> loadAll() async {
     var snapshot = await Database.realtime.child('shops').get();
     shops = snapshot.value as Map;
@@ -286,12 +323,18 @@ class Shop {
         return;
       }
 
+      // TODO: for key in data, then switch
+
       if (data.containsKey('orders')) {
         parseOpenUserOrders2(updatedUserId, data['orders']);
       }
 
       if (data.containsKey('fulfilled')) {
         parseUserFulfilledOrders2(updatedUserId, data['fulfilled']);
+      }
+
+      if (data.containsKey('history')) {
+        parseHistoryUserOrders2(updatedUserId, data['history']);
       }
     }
 
@@ -381,7 +424,6 @@ class Shop {
     var future =
         Database.userReference.child('orders/$_currentShopId').set(orders);
 
-    _openTotal = 0;
     _currentTotal = 0;
     _currentOrder.clear();
     _currentTotalController.add(_currentTotal);
@@ -397,7 +439,8 @@ class Shop {
     return item.databaseReference.remove();
   }
 
-  static Future<void> removeFulfilledOrder(FulfilledOrder2 order) {
+  static Future<void> archiveFulfilledOrder(FulfilledOrder2 order) {
+    // remove from fulfilled
     _fulfilled2[order.fulfillerId]?[order.shopId]?.remove(order.userId);
     // clean map propagating up the tree
     if (_fulfilled2[order.fulfillerId]?[order.shopId]?.isEmpty ?? false) {
@@ -407,15 +450,44 @@ class Shop {
         _fulfilled2.clear();
       }
     }
+    var fulfilledFuture = order.databaseReference.remove();
+
+    // add to history
+    int latestChange = 0;
+    for (var item in order.items.values) {
+      if (item.timestamp > latestChange) {
+        latestChange = item.timestamp;
+      }
+    }
+    var historyOrder = HistoryOrder2.fromFulfilledOrder(order);
+    var historyUser = _history2[order.userId];
+    if (historyUser == null) {
+      historyUser = {
+        order.shopId: {latestChange: historyOrder}
+      };
+    } else {
+      var historyShop = historyUser[order.shopId];
+
+      if (historyShop == null) {
+        historyShop = {latestChange: historyOrder};
+      } else {
+        historyShop[latestChange] = historyOrder;
+      }
+    }
+    var historyFuture = Database.userReference
+        .child('history/${order.shopId}/$latestChange')
+        .set(order.itemsParsed);
 
     _fulfilledUpdatedController2.add(_fulfilled2);
-    return order.databaseReference.remove();
+    _historyUpdatedController2.add(_history2);
+    return Future.wait([fulfilledFuture, historyFuture]);
   }
 
   static Future<void>? fulfillItem(OrderItem2 item, int count) {
     var futures = <Future>[];
 
-    // skip fulfilling own order
+    // update fulfilled, skip fulfilling own order
+    // TODO: remove bypass
     if (item.userId != Database.userId || true) {
       int fulfilledCount = _fulfilled2[Database.userId]?[item.shopId]
                   ?[item.userId]
@@ -459,6 +531,7 @@ class Shop {
       futures.add(reference.set(map));
     }
 
+    // update orders
     if (item.count <= count) {
       _orders2[item.userId]?[item.shopId]?.items.remove(item.itemId);
       futures.add(item.databaseReference.remove());

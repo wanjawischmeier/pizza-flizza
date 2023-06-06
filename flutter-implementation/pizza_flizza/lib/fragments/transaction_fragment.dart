@@ -18,8 +18,10 @@ class TransactionFragment extends StatefulWidget {
 }
 
 class _TransactionFragmentState extends State<TransactionFragment> {
-  late StreamSubscription<FulfilledMap> _fulfilledSubscription2;
+  late StreamSubscription<FulfilledMap> _fulfilledSubscription;
+  late StreamSubscription<HistoryMap> _historySubscription;
   final _fulfilledRelevant = <int, FulfilledOrder2>{};
+  final _historyUser = <int, FulfilledOrder2>{};
 
   Future<void> filterOrder(
       String fulfillerId, String userId, Order2 order) async {
@@ -81,7 +83,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   void initState() {
     super.initState();
 
-    _fulfilledSubscription2 = Shop.subscribeToFulfilledUpdated2((orders) async {
+    _fulfilledSubscription = Shop.subscribeToFulfilledUpdated2((orders) async {
       var futures = <Future>[];
 
       orders.forEach((fulfillerId, ordersFulfiller) {
@@ -102,7 +104,8 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   void dispose() {
     super.dispose();
 
-    _fulfilledSubscription2.cancel();
+    _fulfilledSubscription.cancel();
+    _historySubscription.cancel();
   }
 
   @override
@@ -149,7 +152,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
                 _fulfilledRelevant.remove(orderId);
               });
 
-              Shop.removeFulfilledOrder(order);
+              Shop.archiveFulfilledOrder(order);
             }
           },
         );

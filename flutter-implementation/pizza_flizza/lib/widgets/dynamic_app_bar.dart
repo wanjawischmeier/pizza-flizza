@@ -4,6 +4,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/item.dart';
 import 'package:pizza_flizza/database/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -41,7 +42,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
   int _orderCount = 0;
   late StreamSubscription<OrderMap> _ordersSubscription2;
 
-  int countUserOrders(List<ShopItem> orders) {
+  int countUserOrders(List<ShopItem2> orders) {
     int count = 0;
 
     for (var item in orders) {
