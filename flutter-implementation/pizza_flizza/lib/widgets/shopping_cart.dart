@@ -131,22 +131,41 @@ class _ShoppingCartState extends State<ShoppingCart> {
                         onDismiss: (id) {
                           var itemId = id as int;
                           var item = _ordersUser[itemId];
+                          if (item == null) {
+                            return;
+                          }
 
                           setState(() {
-                            // _orders.remove(item);
                             _ordersUser.remove(itemId);
+                            if (_ordersUser.isEmpty) {
+                              widget.onRemoveOverlay();
+                            }
 
                             // max to avoid floating point -0.00 rounding error
-                            _totalPrice = max(
-                              0,
-                              _totalPrice - (item?.price ?? 0),
-                            );
+                            _totalPrice = max(0, _totalPrice - item.price);
                           });
 
-                          // Shop.removeItem(item);
+                          Shop.removeOrderItem(item);
                         },
                       );
                     },
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Themes.cream,
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: widget.onRemoveOverlay,
+                child: const Text(
+                  'Close',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
                   ),
                 ),
               ),

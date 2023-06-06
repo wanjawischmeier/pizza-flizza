@@ -21,18 +21,16 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   late StreamSubscription<FulfilledMap> _fulfilledSubscription2;
   final _fulfilledRelevant = <int, FulfilledOrder2>{};
 
-  Future<void> filterOrder(fulfillerId, userId, order) async {
+  Future<void> filterOrder(
+      String fulfillerId, String userId, Order2 order) async {
     // order is relevant if fulfilled or ordered by user
     if (fulfillerId == Database.userId || userId == Database.userId) {
       int latestChange = 0;
-      double totalPrice = 0;
 
       order.items.forEach((itemId, item) {
         if (item.timestamp > latestChange) {
           latestChange = item.timestamp;
         }
-
-        totalPrice += item.price;
       });
       var date = DateTime.fromMillisecondsSinceEpoch(latestChange);
 
@@ -68,11 +66,11 @@ class _TransactionFragmentState extends State<TransactionFragment> {
         _fulfilledRelevant[order.hashCode] = FulfilledOrder2(
           fulfillerId,
           userId,
+          order.shopId,
           fulfillerName,
           userName,
           DateFormat.Hm().format(date),
           DateFormat('dd.MM.yy').format(date),
-          totalPrice,
           order.items,
         );
       });
@@ -139,16 +137,20 @@ class _TransactionFragmentState extends State<TransactionFragment> {
           accentColor: color,
           id: timestamp,
           header:
-              'Bought for $credit at ${order.timeFormatted} on ${order.dateFormatted}',
-          content:
-              '1x adadwwdad\n2x sadads\n3x asfasdsdawda\n4x adwdfa\n5x awdwa',
+              'Bought for $credit\n${order.timeFormatted} on ${order.dateFormatted}',
+          content: order.itemsFormatted,
           trailing: Helper.formatPrice(order.price),
           icon: Icon(iconData),
           dismissable: dismissable,
           onDismiss: (orderId) {
-            setState(() {
-              _fulfilledRelevant.remove(orderId);
-            });
+            var order = _fulfilledRelevant[orderId];
+            if (order != null) {
+              setState(() {
+                _fulfilledRelevant.remove(orderId);
+              });
+
+              Shop.removeFulfilledOrder(order);
+            }
           },
         );
       },

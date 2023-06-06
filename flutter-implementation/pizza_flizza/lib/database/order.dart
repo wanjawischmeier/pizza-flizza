@@ -1,3 +1,6 @@
+import 'package:firebase_database/firebase_database.dart';
+import 'package:pizza_flizza/database/database.dart';
+
 import 'item.dart';
 
 /// userId, shopId
@@ -10,6 +13,7 @@ typedef FulfilledMap = Map<String, Map<String, Map<String, Order2>>>;
 typedef HistoryMap = Map<String, Map<String, FulfilledOrder2>>;
 
 class Order2 {
+  String shopId;
   // itemId
   Map<String, OrderItem2> items;
 
@@ -23,23 +27,37 @@ class Order2 {
     return price;
   }
 
-  Order2(this.items);
+  Order2(this.shopId, this.items);
+
+  String get itemsFormatted {
+    String result = '';
+    if (items.isEmpty) {
+      return result;
+    }
+
+    items.forEach((itemId, item) {
+      result += '- ${item.count}x\t${item.itemName}\n';
+    });
+
+    return result.substring(0, result.length - 1);
+  }
 }
 
-class FulfilledOrder2 {
+class FulfilledOrder2 extends Order2 {
   String fulfillerId, userId, fulfillerName, userName;
   String timeFormatted, dateFormatted;
-  double price;
-  Map<String, OrderItem2> items;
 
   FulfilledOrder2(
     this.fulfillerId,
     this.userId,
+    super.shopId,
     this.fulfillerName,
     this.userName,
     this.timeFormatted,
     this.dateFormatted,
-    this.price,
-    this.items,
+    super.items,
   );
+
+  DatabaseReference get databaseReference =>
+      Database.userReference.child('fulfilled/$shopId/$userId');
 }

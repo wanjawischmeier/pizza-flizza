@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pizza_flizza/logger.util.dart';
@@ -69,7 +70,7 @@ class Shop {
       result += '- ${item.value}x\t${_getItemInfo(item.key)['name']}\n';
     }
 
-    return result;
+    return result.substring(0, max(0, result.length - 1));
   }
 
   static final OrderMap _orders2 = {};
@@ -101,8 +102,6 @@ class Shop {
   }
 
   static double _openTotal = 0;
-  // shopId, fulfillerId, itemId -> count
-  static final _fulfilledOrders2 = <String, Map<String, Map<String, int>>>{};
   static final _openOrders = <OpenItem>[];
   static final _fulfilledOrders = <FulfilledItem>[];
 
@@ -186,7 +185,7 @@ class Shop {
         items[itemId] = orderItem;
       }
 
-      _orders2[userId]?[shopId] = Order2(items);
+      _orders2[userId]?[shopId] = Order2(shopId, items);
       log.logOrderItems(items, userId, shopId, null);
     }
 
@@ -257,7 +256,7 @@ class Shop {
           items[itemId] = orderItem;
         }
 
-        _fulfilled2[fulfillerId]?[shopId]?[userId] = Order2(items);
+        _fulfilled2[fulfillerId]?[shopId]?[userId] = Order2(shopId, items);
         log.logOrderItems(items, userId, shopId, fulfillerId);
       }
     }
@@ -331,11 +330,11 @@ class Shop {
     var items = <String, OrderItem2>{};
     var ordersUser = _orders2[Database.userId];
     if (ordersUser == null) {
-      ordersUser = {_currentShopId: Order2(items)};
+      ordersUser = {_currentShopId: Order2(_currentShopId, items)};
     } else {
       var ordersShop = ordersUser[_currentShopId];
       if (ordersShop == null) {
-        ordersShop = Order2(items);
+        ordersShop = Order2(_currentShopId, items);
       } else {
         items = ordersShop.items;
       }
@@ -392,9 +391,25 @@ class Shop {
     return future;
   }
 
-  static Future<void> removeItem(ShopItem item) {
-    // _openOrders[shopId]?.remove(item.id);
+  static Future<void> removeOrderItem(OrderItem2 item) {
+    _orders2[item.userId]?[item.shopId]?.items.remove(item.itemId);
+    _ordersUpdatedController2.add(_orders2);
     return item.databaseReference.remove();
+  }
+
+  static Future<void> removeFulfilledOrder(FulfilledOrder2 order) {
+    _fulfilled2[order.fulfillerId]?[order.shopId]?.remove(order.userId);
+    // clean map propagating up the tree
+    if (_fulfilled2[order.fulfillerId]?[order.shopId]?.isEmpty ?? false) {
+      _fulfilled2[order.fulfillerId]?.remove(order.shopId);
+
+      if (_fulfilled2[order.fulfillerId]?.isEmpty ?? false) {
+        _fulfilled2.clear();
+      }
+    }
+
+    _fulfilledUpdatedController2.add(_fulfilled2);
+    return order.databaseReference.remove();
   }
 
   static Future<void>? fulfillItem(OrderItem2 item, int count) {
@@ -417,9 +432,12 @@ class Shop {
 
         if (!_fulfilled2[Database.userId]![item.shopId]!
             .containsKey(item.userId)) {
-          _fulfilled2[Database.userId]![item.shopId]![item.userId] = Order2({
-            item.itemId: OrderItem2.copy(item),
-          });
+          _fulfilled2[Database.userId]![item.shopId]![item.userId] = Order2(
+            item.shopId,
+            {
+              item.itemId: OrderItem2.copy(item),
+            },
+          );
         }
       }
 
@@ -451,6 +469,8 @@ class Shop {
       futures.add(item.databaseReference.child('count').set(item.count));
     }
 
+    _ordersUpdatedController2.add(_orders2);
+    _fulfilledUpdatedController2.add(_fulfilled2);
     return Future.wait(futures);
   }
 }

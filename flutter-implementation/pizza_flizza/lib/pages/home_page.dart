@@ -17,8 +17,9 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  OverlayEntry? overlayEntry;
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  static const Duration _cartAnimationDuration = Duration.zero;
+  OverlayEntry? _overlayEntry;
   int _selectedIndex = 0;
   late List<BottomNavigationBarItem> _bottomNavigationBarItems;
 
@@ -73,10 +74,9 @@ class _HomePageState extends State<HomePage> {
 
   void createShoppingCartOverlay() {
     removeShoppingCartOverlay();
-    assert(overlayEntry == null);
 
     // based on: https://stackoverflow.com/a/75487808/13215204
-    overlayEntry = OverlayEntry(
+    _overlayEntry = OverlayEntry(
       builder: (context) => SizedBox(
         child: Stack(
           children: [
@@ -102,12 +102,18 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    Overlay.of(context).insert(overlayEntry!);
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   void removeShoppingCartOverlay() {
-    overlayEntry?.remove();
-    overlayEntry = null;
+    if (_overlayEntry == null) {
+      return;
+    }
+
+    Future.delayed(_cartAnimationDuration, () {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    });
   }
 
   @override
