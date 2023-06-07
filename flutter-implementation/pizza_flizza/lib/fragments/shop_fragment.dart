@@ -15,6 +15,8 @@ import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
 import 'package:pizza_flizza/widgets/shop_card.dart';
 
+enum ShopState { locked, unlocked, noOrders }
+
 class ShopFragment extends StatefulWidget {
   const ShopFragment({super.key});
 
@@ -22,13 +24,29 @@ class ShopFragment extends StatefulWidget {
   State<ShopFragment> createState() => _ShopFragmentState();
 }
 
-class _ShopFragmentState extends State<ShopFragment> {
+class _ShopFragmentState extends State<ShopFragment>
+    with TickerProviderStateMixin {
   OrderItem? _foregroundItem, _backgroundItem;
   double _gradient = 1;
-  bool _locked = true;
   double _swipedCount = 0;
-  // late double _cardCount;
+  ShopState _state = ShopState.locked;
   late int _count;
+  late AnimationController _controller;
+  static const Duration _animationDurationIn = Duration(milliseconds: 300);
+  static const Duration _animationDurationOut = Duration(milliseconds: 150);
+  late final Animation<Offset> _slideAnimation = Tween<Offset>(
+    begin: Offset.zero,
+    end: const Offset(0, -2),
+  ).animate(CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInCirc,
+  ));
+  late final Animation<double> _opacityAnimation = ReverseAnimation(
+    CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCirc,
+    ),
+  );
 
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<OrderMap> _ordersSubscription2;
@@ -37,6 +55,12 @@ class _ShopFragmentState extends State<ShopFragment> {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: _animationDurationIn,
+      reverseDuration: _animationDurationOut,
+      value: 1,
+    );
 
     _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
       _ordersShop.clear();
@@ -62,14 +86,16 @@ class _ShopFragmentState extends State<ShopFragment> {
         _count = _foregroundItem?.count ?? 0;
 
         if (_ordersShop.isEmpty) {
-          _locked = true;
+          _state = ShopState.noOrders;
+          _controller.forward();
         }
       });
     });
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       setState(() {
-        _locked = true;
+        _state = ShopState.locked;
+        _controller.forward();
       });
     });
   }
@@ -90,83 +116,101 @@ class _ShopFragmentState extends State<ShopFragment> {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              FAProgressBar(
-                backgroundColor: Themes.grayMid,
-                progressColor: Themes.cream,
-                borderRadius: BorderRadius.circular(99),
-                maxValue: _swipedCount + _ordersShop.length,
-                currentValue: _swipedCount,
+              SlideTransition(
+                position: _slideAnimation,
+                child: FAProgressBar(
+                  backgroundColor: Themes.grayMid,
+                  progressColor: Themes.cream,
+                  borderRadius: BorderRadius.circular(99),
+                  maxValue: _swipedCount + _ordersShop.length,
+                  currentValue: _swipedCount,
+                ),
               ),
               Expanded(
                 child: Center(
                   child: AspectRatio(
                     aspectRatio: 0.7,
-                    child: AppinioSlideSwiper(
-                      threshold: 100,
-                      duration: const Duration(milliseconds: 150),
-                      absoluteAngle: true,
-                      isDisabled: _foregroundItem == null,
-                      foregroundCardBuilder: (context) {
-                        return ShopCardWidget(
-                          stop: 1 - _gradient,
-                          name: _foregroundItem?.itemName ?? 'Unknown Item',
-                          count: _count,
-                        );
-                      },
-                      backgroundCardBuilder: (context) {
-                        var item = _backgroundItem;
-                        if (item == null) {
-                          return null;
-                        } else {
+                    child: FadeTransition(
+                      opacity: _opacityAnimation,
+                      child: AppinioSlideSwiper(
+                        threshold: 100,
+                        duration: const Duration(milliseconds: 150),
+                        absoluteAngle: true,
+                        isDisabled: _foregroundItem == null,
+                        foregroundCardBuilder: (context) {
+                          var item = _foregroundItem;
+                          if (item == null) {
+                            return null;
+                          }
+
+                          return ShopCardWidget(
+                            stop: 1 - _gradient,
+                            name: item.itemName,
+                            count: _count,
+                          );
+                        },
+                        backgroundCardBuilder: (context) {
+                          var item = _backgroundItem;
+                          if (item == null) {
+                            return null;
+                          }
+
                           return ShopCardWidget(
                             stop: 0,
                             name: item.itemName,
                             count: item.count,
                           );
-                        }
-                      },
-                      // only slide if the count is higher than 1
-                      onStartSlide: () => (_foregroundItem?.count ?? 0) > 1,
-                      onSlide: (gradient) {
-                        // snap to range
-                        int count = _foregroundItem?.count ?? 0;
-                        int newCount =
-                            max(1, min(count, (gradient * count).round()));
-                        _gradient = newCount / count;
+                        },
+                        // only slide if the count is higher than 1
+                        onStartSlide: () => (_foregroundItem?.count ?? 0) > 1,
+                        onSlide: (gradient) {
+                          // snap to range
+                          int count = _foregroundItem?.count ?? 0;
+                          int newCount =
+                              max(1, min(count, (gradient * count).round()));
+                          _gradient = newCount / count;
 
-                        if (newCount == _count) {
-                          return false;
-                        } else {
-                          setState(() {
-                            _count = newCount;
-                          });
-                          return true;
-                        }
-                      },
-                      onSwipe: (direction) {
-                        var item = _foregroundItem;
-                        if (item != null &&
-                            direction == AppinioSwiperDirection.right) {
-                          // ShopItem.getById(_fulfilled, item.id);
-                          // _fulfilled[item.id] = _count;
-                          Shop.fulfillItem(item, _count);
-                        }
+                          if (newCount == _count) {
+                            return false;
+                          } else {
+                            setState(() {
+                              _count = newCount;
+                            });
+                            return true;
+                          }
+                        },
+                        onSwipe: (direction) {
+                          var item = _foregroundItem;
+                          if (item != null &&
+                              direction == AppinioSwiperDirection.right) {
+                            // ShopItem.getById(_fulfilled, item.id);
+                            // _fulfilled[item.id] = _count;
+                            Shop.fulfillItem(item, _count);
+                          }
 
-                        _gradient = 1;
-                        _count = _backgroundItem?.count ?? 0;
-                        _ordersShop.remove(_ordersShop.entries.first.key);
+                          _gradient = 1;
+                          _count = _backgroundItem?.count ?? 0;
+                          _ordersShop.remove(_ordersShop.entries.first.key);
 
-                        _foregroundItem = _backgroundItem;
-                        if (_ordersShop.length > 1) {
-                          _backgroundItem = _ordersShop.values.elementAt(1);
-                        } else {
-                          _backgroundItem = null;
-                        }
+                          _foregroundItem = _backgroundItem;
+                          if (_ordersShop.length > 1) {
+                            _backgroundItem = _ordersShop.values.elementAt(1);
+                          } else {
+                            _backgroundItem = null;
+                          }
 
-                        setState(() {
-                          _swipedCount++;
-                        });
-                      },
+                          if (_ordersShop.isEmpty) {
+                            _state = ShopState.noOrders;
+                            _controller.forward();
+                            return false;
+                          } else {
+                            setState(() {
+                              _swipedCount++;
+                            });
+                            return true;
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -178,113 +222,124 @@ class _ShopFragmentState extends State<ShopFragment> {
               translation: const Offset(0, 0.1),
               child: AspectRatio(
                 aspectRatio: 0.8,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Themes.grayMid,
-                    borderRadius: BorderRadius.circular(35),
+                child: ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: _controller,
+                    curve: const ElasticOutCurve(1),
+                    reverseCurve: Curves.easeOut,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              FractionalTranslation(
-                                translation: const Offset(0, -0.35),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Themes.grayDark,
-                                        borderRadius: BorderRadius.circular(32),
-                                        border: Border.all(
-                                            color: Themes.grayDark, width: 16),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: RemotePicture(
-                                          imagePath:
-                                              '/shops/${Shop.currentShopId}/logo.png',
-                                          mapKey: '${Shop.currentShopId}_logo',
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 8,
-                                        bottom: 16,
-                                      ),
-                                      child: Text(
-                                        Shop.currentShopName,
-                                        style: const TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    /*
-                                      const Text(
-                                          'Große Burgstraße 55, 23552 Lübeck'),
-                                      const Text(
-                                          'Heute geöffnet von 07:00 - 22:00 Uhr'),
-                                      */
-                                    const Text('More information coming soon'),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Column(
-                                      children: [
-                                        const Padding(
-                                          padding: EdgeInsets.only(bottom: 8),
-                                          child: Text('Erfüllte Bestellungen:'),
-                                        ),
-                                        FAProgressBar(
-                                          backgroundColor: Themes.grayLight,
-                                          progressColor: Themes.cream,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Themes.grayMid,
+                      borderRadius: BorderRadius.circular(35),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                FractionalTranslation(
+                                  translation: const Offset(0, -0.35),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Themes.grayDark,
                                           borderRadius:
-                                              BorderRadius.circular(99),
-                                          maxValue: 10,
-                                          currentValue: 4,
-                                          displayText: ' / 10',
-                                          displayTextStyle: const TextStyle(
+                                              BorderRadius.circular(32),
+                                          border: Border.all(
+                                              color: Themes.grayDark,
+                                              width: 16),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          child: RemotePicture(
+                                            imagePath:
+                                                '/shops/${Shop.currentShopId}/logo.png',
+                                            mapKey:
+                                                '${Shop.currentShopId}_logo',
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 8,
+                                          bottom: 16,
+                                        ),
+                                        child: Text(
+                                          Shop.currentShopName,
+                                          style: const TextStyle(
+                                            fontSize: 22,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                      ],
+                                      ),
+                                      /*
+                                        const Text(
+                                            'Große Burgstraße 55, 23552 Lübeck'),
+                                        const Text(
+                                            'Heute geöffnet von 07:00 - 22:00 Uhr'),
+                                        */
+                                      const Text(
+                                          'More information coming soon'),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: Column(
+                                        children: [
+                                          const Padding(
+                                            padding: EdgeInsets.only(bottom: 8),
+                                            child:
+                                                Text('Erfüllte Bestellungen:'),
+                                          ),
+                                          FAProgressBar(
+                                            backgroundColor: Themes.grayLight,
+                                            progressColor: Themes.cream,
+                                            borderRadius:
+                                                BorderRadius.circular(99),
+                                            maxValue: 10,
+                                            currentValue: 4,
+                                            displayText: ' / 10',
+                                            displayTextStyle: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      SlideAction(
-                        sliderRotate: false,
-                        enabled: _ordersShop.isNotEmpty,
-                        textColor: Colors.white,
-                        innerColor: _ordersShop.isEmpty
-                            ? Themes.grayLight
-                            : Colors.white,
-                        outerColor: Themes.grayLight,
-                        animationDuration: const Duration(milliseconds: 100),
-                        text: _ordersShop.isEmpty
-                            ? 'No open orders'
-                            : 'Slide to shop',
-                        onSubmit: () {
-                          setState(() {
-                            _locked = false;
-                          });
-                        },
-                      ),
-                    ],
+                        SlideAction(
+                          sliderRotate: false,
+                          enabled: _state == ShopState.locked,
+                          textColor: Colors.white,
+                          innerColor: _state == ShopState.noOrders
+                              ? Themes.grayLight
+                              : Colors.white,
+                          outerColor: Themes.grayLight,
+                          animationDuration: const Duration(milliseconds: 100),
+                          text: _state == ShopState.noOrders
+                              ? 'No open orders'
+                              : 'Slide to shop',
+                          onSubmit: () {
+                            return _controller.reverse();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
