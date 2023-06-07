@@ -85,19 +85,21 @@ class _TransactionFragmentState extends State<TransactionFragment> {
     var timestamp = orderEntry.key, order = orderEntry.value;
     bool dismissable;
     Color color;
-    String credit;
+    String preposition, credit;
     IconData? iconData;
 
     if (order.fulfillerId == Database.userId) {
       // order fulfilled by user
       dismissable = true;
       color = Themes.cream;
+      preposition = 'for';
       credit = order.userName;
       iconData = Icons.check;
     } else {
       // order placed by user
       color = Themes.grayLight;
       dismissable = false;
+      preposition = 'by';
       credit = order.fulfillerName;
     }
 
@@ -106,7 +108,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       accentColor: color,
       id: timestamp,
       header:
-          'Bought for $credit\n${order.timeFormatted} on ${order.dateFormatted}',
+          'Bought $preposition $credit\n${order.timeFormatted} on ${order.dateFormatted}',
       content: order.itemsFormatted,
       trailing: Helper.formatPrice(order.price),
       icon: Icon(iconData),
