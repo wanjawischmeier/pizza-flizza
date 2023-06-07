@@ -54,8 +54,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
 
   @override
   void dispose() {
-    super.dispose();
     _ordersSubscription2.cancel();
+    super.dispose();
   }
 
   @override

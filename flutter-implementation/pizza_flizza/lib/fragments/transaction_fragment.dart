@@ -187,10 +187,9 @@ class _TransactionFragmentState extends State<TransactionFragment> {
 
   @override
   void dispose() {
-    super.dispose();
-
     _fulfilledSubscription.cancel();
     _historySubscription.cancel();
+    super.dispose();
   }
 
   @override

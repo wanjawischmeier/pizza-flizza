@@ -73,8 +73,8 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
 
   @override
   void dispose() {
-    super.dispose();
     _ordersSubscription2.cancel();
+    super.dispose();
   }
 
   @override

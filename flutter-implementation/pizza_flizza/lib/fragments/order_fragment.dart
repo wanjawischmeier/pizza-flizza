@@ -29,8 +29,8 @@ class _OrderFragmentState extends State<OrderFragment> {
 
   @override
   void dispose() {
-    super.dispose();
     _shopChangedSubscription.cancel();
+    super.dispose();
   }
 
   @override

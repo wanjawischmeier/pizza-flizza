@@ -60,6 +60,10 @@ class _ShopFragmentState extends State<ShopFragment> {
 
       setState(() {
         _count = _foregroundItem?.count ?? 0;
+
+        if (_ordersShop.isEmpty) {
+          _locked = true;
+        }
       });
     });
 
@@ -72,18 +76,105 @@ class _ShopFragmentState extends State<ShopFragment> {
 
   @override
   void dispose() {
-    super.dispose();
-
     _shopChangedSubscription.cancel();
     _ordersSubscription2.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
-      child: _locked
-          ? FractionalTranslation(
+      child: Stack(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              FAProgressBar(
+                backgroundColor: Themes.grayMid,
+                progressColor: Themes.cream,
+                borderRadius: BorderRadius.circular(99),
+                maxValue: _swipedCount + _ordersShop.length,
+                currentValue: _swipedCount,
+              ),
+              Expanded(
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 0.7,
+                    child: AppinioSlideSwiper(
+                      threshold: 100,
+                      duration: const Duration(milliseconds: 150),
+                      absoluteAngle: true,
+                      isDisabled: _foregroundItem == null,
+                      foregroundCardBuilder: (context) {
+                        return ShopCardWidget(
+                          stop: 1 - _gradient,
+                          name: _foregroundItem?.itemName ?? 'Unknown Item',
+                          count: _count,
+                        );
+                      },
+                      backgroundCardBuilder: (context) {
+                        var item = _backgroundItem;
+                        if (item == null) {
+                          return null;
+                        } else {
+                          return ShopCardWidget(
+                            stop: 0,
+                            name: item.itemName,
+                            count: item.count,
+                          );
+                        }
+                      },
+                      // only slide if the count is higher than 1
+                      onStartSlide: () => (_foregroundItem?.count ?? 0) > 1,
+                      onSlide: (gradient) {
+                        // snap to range
+                        int count = _foregroundItem?.count ?? 0;
+                        int newCount =
+                            max(1, min(count, (gradient * count).round()));
+                        _gradient = newCount / count;
+
+                        if (newCount == _count) {
+                          return false;
+                        } else {
+                          setState(() {
+                            _count = newCount;
+                          });
+                          return true;
+                        }
+                      },
+                      onSwipe: (direction) {
+                        var item = _foregroundItem;
+                        if (item != null &&
+                            direction == AppinioSwiperDirection.right) {
+                          // ShopItem.getById(_fulfilled, item.id);
+                          // _fulfilled[item.id] = _count;
+                          Shop.fulfillItem(item, _count);
+                        }
+
+                        _gradient = 1;
+                        _count = _backgroundItem?.count ?? 0;
+                        _ordersShop.remove(_ordersShop.entries.first.key);
+
+                        _foregroundItem = _backgroundItem;
+                        if (_ordersShop.length > 1) {
+                          _backgroundItem = _ordersShop.values.elementAt(1);
+                        } else {
+                          _backgroundItem = null;
+                        }
+
+                        setState(() {
+                          _swipedCount++;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Center(
+            child: FractionalTranslation(
               translation: const Offset(0, 0.1),
               child: AspectRatio(
                 aspectRatio: 0.8,
@@ -134,11 +225,11 @@ class _ShopFragmentState extends State<ShopFragment> {
                                       ),
                                     ),
                                     /*
-                                    const Text(
-                                        'Große Burgstraße 55, 23552 Lübeck'),
-                                    const Text(
-                                        'Heute geöffnet von 07:00 - 22:00 Uhr'),
-                                    */
+                                      const Text(
+                                          'Große Burgstraße 55, 23552 Lübeck'),
+                                      const Text(
+                                          'Heute geöffnet von 07:00 - 22:00 Uhr'),
+                                      */
                                     const Text('More information coming soon'),
                                   ],
                                 ),
@@ -177,9 +268,16 @@ class _ShopFragmentState extends State<ShopFragment> {
                       ),
                       SlideAction(
                         sliderRotate: false,
+                        enabled: _ordersShop.isNotEmpty,
+                        textColor: Colors.white,
+                        innerColor: _ordersShop.isEmpty
+                            ? Themes.grayLight
+                            : Colors.white,
                         outerColor: Themes.grayLight,
                         animationDuration: const Duration(milliseconds: 100),
-                        text: 'Slide to shop',
+                        text: _ordersShop.isEmpty
+                            ? 'No open orders'
+                            : 'Slide to shop',
                         onSubmit: () {
                           setState(() {
                             _locked = false;
@@ -190,110 +288,10 @@ class _ShopFragmentState extends State<ShopFragment> {
                   ),
                 ),
               ),
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                FAProgressBar(
-                  backgroundColor: Themes.grayMid,
-                  progressColor: Themes.cream,
-                  borderRadius: BorderRadius.circular(99),
-                  maxValue: _swipedCount + _ordersShop.length,
-                  currentValue: _swipedCount,
-                ),
-                Expanded(
-                  child: Center(
-                    child: AspectRatio(
-                      aspectRatio: 0.7,
-                      child: AppinioSlideSwiper(
-                        threshold: 100,
-                        duration: const Duration(milliseconds: 150),
-                        absoluteAngle: true,
-                        isDisabled: _foregroundItem == null,
-                        foregroundCardBuilder: (context) {
-                          var item = _foregroundItem;
-                          if (item == null) {
-                            return Center(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Themes.grayMid,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.all(16),
-                                child: const Text(
-                                  'No Cards',
-                                  style: TextStyle(fontSize: 24),
-                                ),
-                              ),
-                            );
-                          } else {
-                            return ShopCardWidget(
-                              stop: 1 - _gradient,
-                              name: item.itemName,
-                              count: _count,
-                            );
-                          }
-                        },
-                        backgroundCardBuilder: (context) {
-                          var item = _backgroundItem;
-                          if (item == null) {
-                            return null;
-                          } else {
-                            return ShopCardWidget(
-                              stop: 0,
-                              name: item.itemName,
-                              count: item.count,
-                            );
-                          }
-                        },
-                        // only slide if the count is higher than 1
-                        onStartSlide: () => (_foregroundItem?.count ?? 0) > 1,
-                        onSlide: (gradient) {
-                          // snap to range
-                          int count = _foregroundItem?.count ?? 0;
-                          int newCount =
-                              max(1, min(count, (gradient * count).round()));
-                          _gradient = newCount / count;
-
-                          if (newCount == _count) {
-                            return false;
-                          } else {
-                            setState(() {
-                              _count = newCount;
-                            });
-                            return true;
-                          }
-                        },
-                        onSwipe: (direction) {
-                          var item = _foregroundItem;
-                          if (item != null &&
-                              direction == AppinioSwiperDirection.right) {
-                            // ShopItem.getById(_fulfilled, item.id);
-                            // _fulfilled[item.id] = _count;
-                            Shop.fulfillItem(item, _count);
-                          }
-
-                          _gradient = 1;
-                          _count = _backgroundItem?.count ?? 0;
-                          _ordersShop.remove(_ordersShop.entries.first.key);
-
-                          _foregroundItem = _backgroundItem;
-                          if (_ordersShop.length > 1) {
-                            _backgroundItem = _ordersShop.values.elementAt(1);
-                          } else {
-                            _backgroundItem = null;
-                          }
-
-                          setState(() {
-                            _swipedCount++;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
+          ),
+        ],
+      ),
     );
   }
 }

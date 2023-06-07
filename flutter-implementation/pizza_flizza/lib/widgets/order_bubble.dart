@@ -58,9 +58,9 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
 
   @override
   void dispose() {
-    super.dispose();
     _shopChangedSubscription.cancel();
     _orderPushedSubscription.cancel();
+    super.dispose();
   }
 
   @override

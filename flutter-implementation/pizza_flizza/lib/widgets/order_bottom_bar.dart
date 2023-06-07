@@ -56,10 +56,10 @@ class _OrderBottomBarState extends State<OrderBottomBar>
 
   @override
   void dispose() {
-    super.dispose();
     _shopChangedSubscription.cancel();
     _currentTotalSubscription.cancel();
     _animationController.dispose();
+    super.dispose();
   }
 
   @override
