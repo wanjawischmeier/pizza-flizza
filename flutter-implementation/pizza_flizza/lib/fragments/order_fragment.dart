@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:pizza_flizza/database/item.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -79,17 +80,18 @@ class _OrderFragmentState extends State<OrderFragment> {
                   ),
                   itemCount: categoryItems.length,
                   itemBuilder: (context, index) {
-                    var item = categoryItems.entries.elementAt(index);
-                    String name = item.value['name'];
-                    double price = item.value['price'];
+                    var itemEntry = categoryItems.entries.elementAt(index);
+                    String itemId = itemEntry.key;
+                    ShopItemInfo info =
+                        ShopItemInfo(Shop.currentShopId, itemId);
 
                     return Padding(
                       padding: const EdgeInsets.all(4),
                       child: OrderCardWidget(
                         categoryId: category.key,
-                        itemId: item.key,
-                        name: name,
-                        price: price,
+                        itemId: itemEntry.key,
+                        name: info.itemName,
+                        price: info.price,
                         onCountChanged: Shop.setCurrentOrderItemCount,
                       ),
                     );

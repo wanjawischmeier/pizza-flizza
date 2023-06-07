@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/logger.util.dart';
 
 import 'database.dart';
@@ -38,18 +39,25 @@ class Shop {
     return shops[shopId]?['name'] ?? 'Unknown Shop';
   }
 
-  static dynamic _getItemInfo(String itemId) {
-    for (var shop in shops.values) {
-      for (var category in shop['items'].values) {
-        for (var item in category.entries) {
-          if (item.key == itemId) {
-            return item.value;
-          }
+  static Map getItemInfo(String shopId, String itemId) {
+    for (var categoryEntry in shops[shopId]['items'].entries) {
+      String categoryId = categoryEntry.key;
+      var category = categoryEntry.value;
+
+      for (var itemEntry in category.entries) {
+        if (itemEntry.key == itemId) {
+          itemEntry.value['category'] = categoryId;
+          return itemEntry.value;
         }
       }
     }
 
-    return 'Unknown Item';
+    return {
+      'name': 'Unknown Item Name',
+      'category': 'unknown_category_id',
+      'price': '0',
+      'bought': '0',
+    };
   }
 
   static final StreamController<String> _shopChangedController =
@@ -67,7 +75,8 @@ class Shop {
     String result = '';
 
     for (var item in _currentOrder.entries) {
-      result += '- ${item.value}x\t${_getItemInfo(item.key)['name']}\n';
+      result +=
+          '- ${item.value}x\t${getItemInfo(_currentShopId, item.key)['name']}\n';
     }
 
     return result.substring(0, max(0, result.length - 1));
@@ -144,7 +153,7 @@ class Shop {
         Map item = itemEntry.value;
 
         // get item info
-        var itemInfo = _getItemInfo(itemId);
+        var itemInfo = getItemInfo(shopId, itemId);
         String itemName = itemInfo['name'];
         String shopName = _getShopName(shopId);
         int timestamp = item['timestamp'];
@@ -214,7 +223,7 @@ class Shop {
           Map item = itemEntry.value;
 
           // get item info
-          var itemInfo = _getItemInfo(itemId);
+          var itemInfo = getItemInfo(shopId, itemId);
           String itemName = itemInfo['name'];
           String shopName = _getShopName(shopId);
           int timestamp = item['timestamp'];
@@ -287,7 +296,7 @@ class Shop {
           int count = itemEntry.value;
 
           // get item info
-          var itemInfo = _getItemInfo(itemId);
+          var itemInfo = getItemInfo(shopId, itemId);
           String itemName = itemInfo['name'];
           double price = count * (itemInfo['price'] as double);
 
@@ -331,6 +340,33 @@ class Shop {
       var snapshot =
           await Database.storage.child('shops/$currentShopId/items').listAll();
       _itemReferences[currentShopId] = snapshot.items;
+
+      for (var categoryEntry in shops[currentShopId]['items'].entries) {
+        var sorted =
+            Helper.sortByComparator(categoryEntry.value, (item0, item1) {
+          int bought0, bought1;
+
+          if (item0.key == '0_name') {
+            bought0 = 0;
+          } else {
+            bought0 = (item0.value as Map)['bought'];
+          }
+
+          if (item1.key == '0_name') {
+            bought1 = 0;
+          } else {
+            bought1 = (item1.value as Map)['bought'];
+          }
+
+          if (bought0 == bought1) {
+            return 0;
+          } else {
+            return bought0 < bought1 ? 1 : -1;
+          }
+        });
+
+        shops[currentShopId]['items'][categoryEntry.key] = sorted;
+      }
     }
 
     orderUpdateListener(event) {
@@ -340,19 +376,18 @@ class Shop {
         return;
       }
 
-      // TODO: for key in data, then switch
-
-      if (data.containsKey('orders')) {
-        parseOpenUserOrders(updatedUserId, data['orders']);
-      }
-
-      if (data.containsKey('fulfilled')) {
-        parseUserFulfilledOrders(updatedUserId, data['fulfilled']);
-      }
-
-      if (data.containsKey('history')) {
-        parseHistoryUserOrders(updatedUserId, data['history']);
-      }
+      data.forEach((key, value) {
+        switch (key) {
+          case 'orders':
+            parseOpenUserOrders(updatedUserId, data['orders']);
+            break;
+          case 'fulfilled':
+            parseUserFulfilledOrders(updatedUserId, data['fulfilled']);
+            break;
+          case 'history':
+            parseHistoryUserOrders(updatedUserId, data['history']);
+        }
+      });
     }
 
     var users = Database.realtime.child('users/${Database.groupId}');
@@ -414,7 +449,7 @@ class Shop {
     // loop through current
     _currentOrder.forEach((itemId, count) {
       // get item info
-      var itemInfo = _getItemInfo(itemId);
+      var itemInfo = getItemInfo(_currentShopId, itemId);
       String itemName = itemInfo['name'];
       String shopName = _getShopName(_currentShopId);
       int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -556,8 +591,16 @@ class Shop {
       item.count -= count;
       _orders[item.userId]?[item.shopId]?.items[item.itemId]?.count =
           item.count;
-      futures.add(item.databaseReference.child('count').set(item.count));
+      futures.add(
+        item.databaseReference.child('count').set(item.count),
+      );
     }
+
+    // update shop stats
+    item.shopInfo.bought += count;
+    futures.add(
+      item.shopReference.child('bought').set(item.shopInfo.bought),
+    );
 
     _ordersUpdatedController.add(_orders);
     _fulfilledUpdatedController.add(_fulfilled);

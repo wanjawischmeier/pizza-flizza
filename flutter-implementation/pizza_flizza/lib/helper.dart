@@ -11,4 +11,11 @@ class Helper {
     return Map.fromEntries(
         map.entries.toList()..sort((e1, e2) => e2.key.compareTo(e1.key)));
   }
+
+  static Map<K, V> sortByComparator<K, V>(
+    Map<K, V> map,
+    int Function(MapEntry<K, V>, MapEntry<K, V>) comparator,
+  ) {
+    return Map.fromEntries(map.entries.toList()..sort(comparator));
+  }
 }

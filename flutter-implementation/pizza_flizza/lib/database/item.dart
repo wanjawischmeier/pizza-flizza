@@ -1,12 +1,28 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:pizza_flizza/database/shop.dart';
 
 import 'database.dart';
+
+class ShopItemInfo {
+  final Map _info;
+
+  int get bought => _info['bought'];
+  double get price => _info['price'];
+  String get itemName => _info['name'];
+  String get categoryId => _info['category'];
+
+  set bought(int value) => _info['bought'] = value;
+
+  ShopItemInfo(String shopId, String itemId)
+      : _info = Shop.getItemInfo(shopId, itemId);
+}
 
 class ShopItem {
   String itemId, shopId, userId, itemName, shopName;
   int count;
   double price;
+  ShopItemInfo shopInfo;
 
   ShopItem(
     this.itemId,
@@ -16,7 +32,7 @@ class ShopItem {
     this.shopName,
     this.count,
     this.price,
-  );
+  ) : shopInfo = ShopItemInfo(shopId, itemId);
 }
 
 class OrderItem extends ShopItem with EquatableMixin {
@@ -24,6 +40,9 @@ class OrderItem extends ShopItem with EquatableMixin {
 
   DatabaseReference get databaseReference =>
       Database.userReference.child('orders/$shopId/$itemId');
+
+  DatabaseReference get shopReference => Database.realtime
+      .child('shops/$shopId/items/${shopInfo.categoryId}/$itemId');
 
   @override
   List<Object?> get props => [
