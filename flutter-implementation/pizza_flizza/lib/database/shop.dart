@@ -653,4 +653,8 @@ class Shop {
     _fulfilledUpdatedController.add(_fulfilled);
     return Future.wait(futures);
   }
+
+  static Future<void> clearUserHistory() {
+    return Database.userReference.child('history').remove();
+  }
 }

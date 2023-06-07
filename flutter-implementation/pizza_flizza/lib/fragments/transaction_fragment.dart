@@ -196,15 +196,54 @@ class _TransactionFragmentState extends State<TransactionFragment> {
 
   @override
   Widget build(BuildContext context) {
+    if (_fulfilledRelevant.isEmpty && _historyUser.isEmpty) {
+      return Center(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Themes.grayMid,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: const Text(
+            'No Transactions',
+            style: TextStyle(fontSize: 24),
+          ),
+        ),
+      );
+    }
+
     return ListView.separated(
-      itemCount: _fulfilledRelevant.length + _historyUser.length,
+      itemCount: _fulfilledRelevant.length + _historyUser.length + 1,
       padding: const EdgeInsets.all(8),
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (BuildContext context, int index) {
         if (index < _fulfilledRelevant.length) {
           return renderFulfilledOrderAt(index);
-        } else {
+        } else if (index < _fulfilledRelevant.length + _historyUser.length) {
           return renderHistoryOrderAt(index - _fulfilledRelevant.length);
+        } else if (_historyUser.isNotEmpty) {
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Themes.grayMid,
+            ),
+            onPressed: () {
+              _historyUser.clear();
+              Shop.clearUserHistory();
+            },
+            child: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Clear History',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          );
+        } else {
+          return null;
         }
       },
     );
