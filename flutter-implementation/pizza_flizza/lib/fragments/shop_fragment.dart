@@ -53,6 +53,7 @@ class _ShopFragmentState extends State<ShopFragment>
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<OrderMap> _ordersSubscription2;
   final _ordersShop = <int, OrderItem>{};
+  final _fulfilled = <String>[];
 
   void filterOrders(OrderMap orders, {bool lock = false}) {
     _ordersShop.clear();
@@ -61,8 +62,10 @@ class _ShopFragmentState extends State<ShopFragment>
     orders.forEach((userId, userOrders) {
       // select currentShop
       userOrders[Shop.currentShopId]?.items.forEach((itemId, item) {
-        // use hash to account for possible duplicate itemId's across shops
-        _ordersShop[item.hashCode] = OrderItem.copy(item);
+        if (!_fulfilled.contains(itemId)) {
+          // use hash to account for possible duplicate itemId's across shops
+          _ordersShop[item.hashCode] = OrderItem.copy(item);
+        }
       });
     });
 
@@ -102,6 +105,7 @@ class _ShopFragmentState extends State<ShopFragment>
     });
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
+      _fulfilled.clear();
       filterOrders(Shop.orders, lock: true);
     });
   }
@@ -196,7 +200,12 @@ class _ShopFragmentState extends State<ShopFragment>
 
                           _gradient = 1;
                           _count = _backgroundItem?.count ?? 0;
-                          _ordersShop.remove(_ordersShop.entries.first.key);
+
+                          var firstOrderEntry = _ordersShop.entries.first;
+                          int orderHash = firstOrderEntry.key;
+                          var orderItem = firstOrderEntry.value;
+                          _ordersShop.remove(orderHash);
+                          _fulfilled.add(orderItem.itemId);
 
                           _foregroundItem = _backgroundItem;
                           if (_ordersShop.length > 1) {
