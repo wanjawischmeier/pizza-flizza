@@ -22,6 +22,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   late StreamSubscription<HistoryMap> _historySubscription;
   var _fulfilledRelevant = <int, FulfilledOrder>{};
   var _historyUser = <int, HistoryOrder>{};
+  final _futures = <Future>[];
 
   Future<void> filterOrder(
       String fulfillerId, String userId, Order order) async {
@@ -143,24 +144,33 @@ class _TransactionFragmentState extends State<TransactionFragment> {
     super.initState();
 
     _fulfilledSubscription = Shop.subscribeToFulfilledUpdated((orders) async {
-      var futures = <Future>[];
+      // already gathering info on state, discard update
+      if (_futures.isNotEmpty) {
+        return;
+      }
+
+      _fulfilledRelevant.clear();
 
       orders.forEach((fulfillerId, ordersFulfiller) {
         ordersFulfiller.forEach((shopId, ordersShop) {
           ordersShop.forEach((userId, order) {
-            futures.add(filterOrder(fulfillerId, userId, order));
+            _futures.add(filterOrder(fulfillerId, userId, order));
           });
         });
       });
 
       // await potential usernames being gathered
-      await Future.wait(futures);
+      await Future.wait(_futures);
+      _futures.clear();
+
       setState(() {
         _fulfilledRelevant = Helper.sortByHighestKey(_fulfilledRelevant);
       });
     });
 
     _historySubscription = Shop.subscribeToHistoryUpdated((orders) {
+      _historyUser.clear();
+
       orders[Database.userId]?.forEach((shopId, ordersShop) {
         ordersShop.forEach((timestamp, order) {
           _historyUser[timestamp] = order;

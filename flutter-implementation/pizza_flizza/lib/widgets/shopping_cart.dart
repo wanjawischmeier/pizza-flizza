@@ -34,16 +34,21 @@ class _ShoppingCartState extends State<ShoppingCart> {
       _ordersUser.clear();
       _totalPrice = 0;
 
-      // loop through orders for all shops
-      orders[Database.userId]?.forEach((shopId, order) {
-        order.items.forEach((itemId, item) {
-          // use hash to account for possible duplicate itemId's across shops
-          _ordersUser[item.hashCode] = item;
-          _totalPrice += item.price;
+      var ordersUserRaw = orders[Database.userId];
+      if (ordersUserRaw == null) {
+        widget.onRemoveOverlay();
+      } else {
+        // loop through orders for all shops
+        ordersUserRaw.forEach((shopId, order) {
+          order.items.forEach((itemId, item) {
+            // use hash to account for possible duplicate itemId's across shops
+            _ordersUser[item.hashCode] = item;
+            _totalPrice += item.price;
+          });
         });
-      });
 
-      setState(() {});
+        setState(() {});
+      }
     });
   }
 

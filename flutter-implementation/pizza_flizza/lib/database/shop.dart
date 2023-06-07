@@ -130,15 +130,22 @@ class Shop {
   static final Map<String, List<Reference>> _itemReferences = {};
 
   static void parseOpenUserOrders(String userId, Map? userOrders) {
-    // skip empty orders
+    // clear map in case of empty orders
     if (userOrders == null) {
+      if (_orders.containsKey(userId)) {
+        _orders.remove(userId);
+        _ordersUpdatedController.add(_orders);
+      }
+
       return;
     }
 
     bool modified = false;
 
     // initialize user orders entry
-    if (!_orders.containsKey(userId)) {
+    if (_orders.containsKey(userId)) {
+      _orders[userId]!.clear();
+    } else {
       _orders[userId] = {};
     }
 
@@ -193,14 +200,21 @@ class Shop {
 
   static void parseUserFulfilledOrders(
       String fulfillerId, Map? fulfilledOrders) {
-    // skip empty orders
+    // clear map in case of empty orders
     if (fulfilledOrders == null) {
+      if (_fulfilled.containsKey(fulfillerId)) {
+        _fulfilled.remove(fulfillerId);
+        _fulfilledUpdatedController.add(_fulfilled);
+      }
+
       return;
     }
 
     bool modified = false;
 
-    if (!_fulfilled.containsKey(fulfillerId)) {
+    if (_fulfilled.containsKey(fulfillerId)) {
+      _fulfilled[fulfillerId]?.clear();
+    } else {
       _fulfilled[fulfillerId] = {};
     }
 
@@ -264,15 +278,21 @@ class Shop {
   }
 
   static void parseHistoryUserOrders(String userId, Map? historyOrders) {
-    // skip empty orders
+    // clear map in case of empty orders
     if (historyOrders == null) {
+      if (_history.containsKey(userId)) {
+        _history.remove(userId);
+        _historyUpdatedController.add(_history);
+      }
+
       return;
     }
 
     bool modified = false;
 
-    // initialize user orders entry
-    if (!_history.containsKey(userId)) {
+    if (_history.containsKey(userId)) {
+      _history[userId]!.clear();
+    } else {
       _history[userId] = {};
     }
 
@@ -376,23 +396,15 @@ class Shop {
         return;
       }
 
-      data.forEach((key, value) {
-        switch (key) {
-          case 'orders':
-            parseOpenUserOrders(updatedUserId, data['orders']);
-            break;
-          case 'fulfilled':
-            parseUserFulfilledOrders(updatedUserId, data['fulfilled']);
-            break;
-          case 'history':
-            parseHistoryUserOrders(updatedUserId, data['history']);
-        }
-      });
+      parseOpenUserOrders(updatedUserId, data['orders']);
+      parseUserFulfilledOrders(updatedUserId, data['fulfilled']);
+      parseHistoryUserOrders(updatedUserId, data['history']);
     }
 
     var users = Database.realtime.child('users/${Database.groupId}');
     users.onChildAdded.listen(orderUpdateListener);
     users.onChildChanged.listen(orderUpdateListener);
+    users.onChildRemoved.listen(orderUpdateListener);
   }
 
   static bool containsReference(String referencePath) {
