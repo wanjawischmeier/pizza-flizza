@@ -28,7 +28,7 @@ class Shop {
     _shopChangedController.add(_currentShopId);
   }
 
-  static get currentShopName => _getShopName(_currentShopId);
+  static String get currentShopName => _getShopName(_currentShopId);
 
   static Map<dynamic, dynamic> shops = {};
   static Map<dynamic, dynamic> get items {
@@ -152,6 +152,7 @@ class Shop {
     // iterate over all shops containing orders
     for (var shopEntry in userOrders.entries) {
       String shopId = shopEntry.key;
+      String shopName = _getShopName(shopId);
       Map shop = shopEntry.value;
       var items = <String, OrderItem>{};
 
@@ -162,7 +163,6 @@ class Shop {
         // get item info
         var itemInfo = getItemInfo(shopId, itemId);
         String itemName = itemInfo['name'];
-        String shopName = _getShopName(shopId);
         int timestamp = item['timestamp'];
         int count = item['count'];
         double price = count * (itemInfo['price'] as double);
@@ -188,7 +188,11 @@ class Shop {
         items[itemId] = orderItem;
       }
 
-      _orders[userId]?[shopId] = Order(shopId, items);
+      _orders[userId]?[shopId] = Order(
+        shopId,
+        shopName,
+        items,
+      );
       log.logOrderItems(items, userId, shopId, null);
     }
 
@@ -221,6 +225,7 @@ class Shop {
     // iterate over all shops containing orders
     for (var shopEntry in fulfilledOrders.entries) {
       String shopId = shopEntry.key;
+      String shopName = _getShopName(shopId);
       Map fulfilledShop = shopEntry.value;
 
       if (!(_fulfilled[fulfillerId]?.containsKey(shopId) ?? false)) {
@@ -239,7 +244,6 @@ class Shop {
           // get item info
           var itemInfo = getItemInfo(shopId, itemId);
           String itemName = itemInfo['name'];
-          String shopName = _getShopName(shopId);
           int timestamp = item['timestamp'];
           int count = item['count'];
           double price = count * (itemInfo['price'] as double);
@@ -266,7 +270,11 @@ class Shop {
           items[itemId] = orderItem;
         }
 
-        _fulfilled[fulfillerId]?[shopId]?[userId] = Order(shopId, items);
+        _fulfilled[fulfillerId]?[shopId]?[userId] = Order(
+          shopId,
+          shopName,
+          items,
+        );
         log.logOrderItems(items, userId, shopId, fulfillerId);
       }
     }
@@ -299,6 +307,7 @@ class Shop {
     // iterate over all shops containing a history
     for (var shopEntry in historyOrders.entries) {
       String shopId = shopEntry.key;
+      String shopName = _getShopName(shopId);
       Map shop = shopEntry.value;
 
       if (!(_history[userId]?.containsKey(shopId) ?? false)) {
@@ -336,6 +345,7 @@ class Shop {
 
         _history[userId]?[shopId]?[timestamp] = HistoryOrder(
           shopId,
+          shopName,
           DateFormat.Hm().format(date),
           DateFormat('dd.MM.yy').format(date),
           items,
@@ -357,8 +367,10 @@ class Shop {
 
     for (String currentShopId in shops.keys) {
       // list product images for the shop
-      var snapshot =
-          await Database.storage.child('shops/$currentShopId/items').listAll();
+      var snapshot = await Database.storage
+          .child(
+              'images/${Database.imageResolution}/shops/$currentShopId/items')
+          .listAll();
       _itemReferences[currentShopId] = snapshot.items;
 
       for (var categoryEntry in shops[currentShopId]['items'].entries) {
@@ -437,11 +449,17 @@ class Shop {
     var items = <String, OrderItem>{};
     var ordersUser = _orders[Database.userId];
     if (ordersUser == null) {
-      ordersUser = {_currentShopId: Order(_currentShopId, items)};
+      ordersUser = {
+        _currentShopId: Order(
+          _currentShopId,
+          currentShopName,
+          items,
+        ),
+      };
     } else {
       var ordersShop = ordersUser[_currentShopId];
       if (ordersShop == null) {
-        ordersShop = Order(_currentShopId, items);
+        ordersShop = Order(_currentShopId, currentShopName, items);
       } else {
         items = ordersShop.items;
       }
@@ -558,23 +576,40 @@ class Shop {
               ?.items[item.itemId]
               ?.count ??
           0;
+      String shopName = _getShopName(item.shopId);
 
-      if (!_fulfilled.containsKey(Database.userId)) {
-        _fulfilled[Database.userId] = {};
-
-        if (!_fulfilled[Database.userId]!.containsKey(item.shopId)) {
-          _fulfilled[Database.userId]![item.shopId] = {};
+      if (_fulfilled.containsKey(Database.userId)) {
+        if (_fulfilled[Database.userId]!.containsKey(item.shopId)) {
+          if (_fulfilled[Database.userId]![item.shopId]!
+              .containsKey(item.userId)) {
+            _fulfilled[Database.userId]![item.shopId]![item.userId]!
+                .items[item.itemId] = OrderItem.copy(item);
+          } else {
+            _fulfilled[Database.userId]![item.shopId]![item.userId] = Order(
+              item.shopId,
+              shopName,
+              {item.itemId: OrderItem.copy(item)},
+            );
+          }
+        } else {
+          _fulfilled[Database.userId]![item.shopId] = {
+            item.userId: Order(
+              item.shopId,
+              shopName,
+              {item.itemId: OrderItem.copy(item)},
+            ),
+          };
         }
-
-        if (!_fulfilled[Database.userId]![item.shopId]!
-            .containsKey(item.userId)) {
-          _fulfilled[Database.userId]![item.shopId]![item.userId] = Order(
-            item.shopId,
-            {
-              item.itemId: OrderItem.copy(item),
-            },
-          );
-        }
+      } else {
+        _fulfilled[Database.userId] = {
+          item.shopId: {
+            item.userId: Order(
+              item.shopId,
+              shopName,
+              {item.itemId: OrderItem.copy(item)},
+            ),
+          }
+        };
       }
 
       var fulfilledItem =

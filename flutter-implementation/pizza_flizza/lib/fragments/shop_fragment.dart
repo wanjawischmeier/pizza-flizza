@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_firestorage/lib.dart';
+import 'package:pizza_flizza/database/database.dart';
 
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
@@ -259,9 +261,9 @@ class _ShopFragmentState extends State<ShopFragment>
                                               BorderRadius.circular(16),
                                           child: RemotePicture(
                                             imagePath:
-                                                '/shops/${Shop.currentShopId}/logo.png',
+                                                '/images/${Database.imageResolution}/shops/${Shop.currentShopId}/logo_large.png',
                                             mapKey:
-                                                '${Shop.currentShopId}_logo',
+                                                '${Shop.currentShopId}_logo_large_${Database.imageResolution}',
                                           ),
                                         ),
                                       ),
@@ -284,8 +286,7 @@ class _ShopFragmentState extends State<ShopFragment>
                                         const Text(
                                             'Heute geöffnet von 07:00 - 22:00 Uhr'),
                                         */
-                                      const Text(
-                                          'More information coming soon'),
+                                      const Text('msg').tr(),
                                     ],
                                   ),
                                 ),

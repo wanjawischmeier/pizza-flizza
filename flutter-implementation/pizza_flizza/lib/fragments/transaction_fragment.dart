@@ -70,6 +70,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
           fulfillerId,
           userId,
           order.shopId,
+          order.shopName,
           fulfillerName,
           userName,
           DateFormat.Hm().format(date),
@@ -108,7 +109,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       accentColor: color,
       id: timestamp,
       header:
-          'Bought $preposition $credit\n${order.timeFormatted} on ${order.dateFormatted}',
+          'Bought $preposition $credit\n${order.timeFormatted} on ${order.dateFormatted}\nat ${order.shopName}',
       content: order.itemsFormatted,
       trailing: Helper.formatPrice(order.price),
       icon: Icon(iconData),
@@ -134,7 +135,8 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       backgroundColor: Themes.grayMid,
       accentColor: Themes.grayMid,
       id: timestamp,
-      header: '${order.timeFormatted} on ${order.dateFormatted}',
+      header:
+          '${order.timeFormatted} on ${order.dateFormatted}\nat ${order.shopName}',
       content: order.itemsFormatted,
       trailing: Helper.formatPrice(order.price),
       dismissable: false,

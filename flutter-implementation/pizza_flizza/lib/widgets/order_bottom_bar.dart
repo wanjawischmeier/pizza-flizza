@@ -36,11 +36,17 @@ class _OrderBottomBarState extends State<OrderBottomBar>
     });
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       setState(() {
-        _currentTotal = 0;
+        // a bit hacky but oh well
+        _currentTotal = -1;
         _visible = false;
       });
     });
     _currentTotalSubscription = Shop.subscribeToCurrentTotal((total) {
+      if (_currentTotal == -1) {
+        _currentTotal = 0;
+        return;
+      }
+
       setState(() {
         _currentTotal = total;
       });

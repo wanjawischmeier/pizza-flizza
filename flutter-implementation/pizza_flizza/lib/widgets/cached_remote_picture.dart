@@ -1,5 +1,6 @@
 import 'package:cached_firestorage/lib.dart';
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database/database.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/theme.dart';
@@ -14,7 +15,8 @@ class RemoteItemImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String path = 'shops/${Shop.currentShopId}/items/$itemId.png';
+    String path =
+        '/images/${Database.imageResolution}/shops/${Shop.currentShopId}/items/$itemId.png';
     if (Shop.containsReference(path)) {
       return RemotePicture(imagePath: path, mapKey: path);
     } else {

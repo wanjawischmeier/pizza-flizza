@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
@@ -13,6 +14,7 @@ import 'package:pizza_flizza/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -26,7 +28,16 @@ void main() async {
   }
 
   Logger.level = Level.debug;
-  runApp(const PizzaFlizzaApp());
+  runApp(
+    EasyLocalization(
+        supportedLocales: const [
+          Locale('en'),
+          Locale('de'),
+        ],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en'),
+        child: const PizzaFlizzaApp()),
+  );
 }
 
 class PizzaFlizzaApp extends StatefulWidget {
@@ -73,9 +84,12 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'PizzaFlizza',
       theme: Themes.darkTheme,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       navigatorKey: _navigatorKey,
       initialRoute:
           FirebaseAuth.instance.currentUser == null ? 'login' : 'home',

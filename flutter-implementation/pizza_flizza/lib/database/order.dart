@@ -13,7 +13,7 @@ typedef FulfilledMap = Map<String, Map<String, Map<String, Order>>>;
 typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder>>>;
 
 class Order {
-  String shopId;
+  String shopId, shopName;
   // itemId
   Map<String, OrderItem> items;
 
@@ -27,7 +27,11 @@ class Order {
     return price;
   }
 
-  Order(this.shopId, this.items);
+  Order(
+    this.shopId,
+    this.shopName,
+    this.items,
+  );
 
   String get itemsFormatted {
     String result = '';
@@ -51,6 +55,7 @@ class FulfilledOrder extends Order {
     this.fulfillerId,
     this.userId,
     super.shopId,
+    super.shopName,
     this.fulfillerName,
     this.userName,
     this.timeFormatted,
@@ -74,13 +79,14 @@ class FulfilledOrder extends Order {
 }
 
 class HistoryOrder {
-  String shopId, timeFormatted, dateFormatted;
+  String shopId, shopName, timeFormatted, dateFormatted;
 
   /// itemId
   Map<String, HistoryItem> items;
 
   HistoryOrder(
     this.shopId,
+    this.shopName,
     this.timeFormatted,
     this.dateFormatted,
     this.items,
@@ -88,6 +94,7 @@ class HistoryOrder {
 
   HistoryOrder.fromFulfilledOrder(FulfilledOrder order)
       : shopId = order.shopId,
+        shopName = order.shopName,
         timeFormatted = order.timeFormatted,
         dateFormatted = order.dateFormatted,
         items = order.items.map(

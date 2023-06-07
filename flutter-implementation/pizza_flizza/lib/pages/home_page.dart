@@ -1,5 +1,6 @@
 import 'package:cached_firestorage/lib.dart';
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database/database.dart';
 import 'package:tuple/tuple.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
@@ -65,8 +66,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: AspectRatio(
                 aspectRatio: 1,
                 child: RemotePicture(
-                  imagePath: '/shops/$shopId/logo.png',
-                  mapKey: '${shopId}_logo',
+                  imagePath:
+                      '/images/${Database.imageResolution}/shops/$shopId/logo_small.png',
+                  mapKey: '${shopId}_logo_small_${Database.imageResolution}',
                   useAvatarView: true,
                   avatarViewRadius: 8,
                 ),
