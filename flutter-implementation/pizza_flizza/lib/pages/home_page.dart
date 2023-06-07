@@ -18,7 +18,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  static const Duration _cartAnimationDuration = Duration.zero;
+  static const Duration _cartAnimationDurationIn = Duration(milliseconds: 300);
+  static const Duration _cartAnimationDurationOut = Duration(milliseconds: 150);
+  late AnimationController _controller;
+  late final Animation<double> _opacityAnimation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCirc,
+  );
+
   OverlayEntry? _overlayEntry;
   int _selectedIndex = 0;
   late List<BottomNavigationBarItem> _bottomNavigationBarItems;
@@ -80,19 +87,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       builder: (context) => SizedBox(
         child: Stack(
           children: [
-            ModalBarrier(
-              color: Themes.grayDark.withOpacity(0.5),
-              onDismiss: () {
-                removeShoppingCartOverlay();
-              },
+            FadeTransition(
+              opacity: _opacityAnimation,
+              child: ModalBarrier(
+                color: Themes.grayDark.withOpacity(0.5),
+                onDismiss: () {
+                  removeShoppingCartOverlay();
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 40),
               child: Center(
                 child: AspectRatio(
                   aspectRatio: 0.6,
-                  child: ShoppingCart(
-                    onRemoveOverlay: removeShoppingCartOverlay,
+                  child: ScaleTransition(
+                    scale: CurvedAnimation(
+                      parent: _controller,
+                      curve: const ElasticOutCurve(1),
+                      reverseCurve: Curves.easeOut,
+                    ),
+                    child: ShoppingCart(
+                      onRemoveOverlay: removeShoppingCartOverlay,
+                    ),
                   ),
                 ),
               ),
@@ -103,6 +120,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
 
     Overlay.of(context).insert(_overlayEntry!);
+    _controller.forward();
   }
 
   void removeShoppingCartOverlay() {
@@ -110,7 +128,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       return;
     }
 
-    Future.delayed(_cartAnimationDuration, () {
+    _controller.reverse();
+
+    Future.delayed(_cartAnimationDurationOut, () {
       _overlayEntry?.remove();
       _overlayEntry = null;
     });
@@ -119,6 +139,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: _cartAnimationDurationIn,
+      reverseDuration: _cartAnimationDurationOut,
+    );
 
     _bottomNavigationBarItems = List<BottomNavigationBarItem>.generate(
       _widgetOptions.length,
