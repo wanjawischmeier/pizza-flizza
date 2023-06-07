@@ -54,6 +54,39 @@ class _ShopFragmentState extends State<ShopFragment>
   late StreamSubscription<OrderMap> _ordersSubscription2;
   final _ordersShop = <int, OrderItem>{};
 
+  void filterOrders(OrderMap orders, {bool lock = false}) {
+    _ordersShop.clear();
+
+    // loop through orders for all users
+    orders.forEach((userId, userOrders) {
+      // select currentShop
+      userOrders[Shop.currentShopId]?.items.forEach((itemId, item) {
+        // use hash to account for possible duplicate itemId's across shops
+        _ordersShop[item.hashCode] = OrderItem.copy(item);
+      });
+    });
+
+    if (_foregroundItem == null && _ordersShop.isNotEmpty) {
+      _foregroundItem = _ordersShop.values.first;
+    }
+
+    if (_backgroundItem == null && _ordersShop.length > 1) {
+      _backgroundItem = _ordersShop.values.elementAt(1);
+    }
+
+    setState(() {
+      _count = _foregroundItem?.count ?? 0;
+
+      if (_ordersShop.isEmpty) {
+        _state = ShopState.noOrders;
+        _controller.forward();
+      } else if (lock) {
+        _state = ShopState.locked;
+        _controller.forward();
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -65,40 +98,11 @@ class _ShopFragmentState extends State<ShopFragment>
     );
 
     _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
-      _ordersShop.clear();
-
-      // loop through orders for all users
-      orders.forEach((userId, userOrders) {
-        // select currentShop
-        userOrders[Shop.currentShopId]?.items.forEach((itemId, item) {
-          // use hash to account for possible duplicate itemId's across shops
-          _ordersShop[item.hashCode] = OrderItem.copy(item);
-        });
-      });
-
-      if (_foregroundItem == null && _ordersShop.isNotEmpty) {
-        _foregroundItem = _ordersShop.values.first;
-      }
-
-      if (_backgroundItem == null && _ordersShop.length > 1) {
-        _backgroundItem = _ordersShop.values.elementAt(1);
-      }
-
-      setState(() {
-        _count = _foregroundItem?.count ?? 0;
-
-        if (_ordersShop.isEmpty) {
-          _state = ShopState.noOrders;
-          _controller.forward();
-        }
-      });
+      filterOrders(orders);
     });
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
-      setState(() {
-        _state = ShopState.locked;
-        _controller.forward();
-      });
+      filterOrders(Shop.orders, lock: true);
     });
   }
 

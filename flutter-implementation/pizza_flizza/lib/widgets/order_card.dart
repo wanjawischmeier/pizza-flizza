@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/helper.dart';
 import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/cached_remote_picture.dart';
+import 'package:pizza_flizza/widgets/remote_item_image.dart';
 import 'package:pizza_flizza/widgets/order_bubble.dart';
 
 class OrderCardWidget extends StatefulWidget {
