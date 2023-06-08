@@ -14,8 +14,8 @@ import 'package:appinio_swiper/appinio_slide_swiper.dart';
 import 'package:pizza_flizza/database/item.dart';
 import 'package:pizza_flizza/database/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/shop_card.dart';
+import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/home_page/shop_fragment/widgets/shop_card.dart';
 
 enum ShopState { locked, unlocked, noOrders }
 
@@ -193,8 +193,6 @@ class _ShopFragmentState extends State<ShopFragment>
                           var item = _foregroundItem;
                           if (item != null &&
                               direction == AppinioSwiperDirection.right) {
-                            // ShopItem.getById(_fulfilled, item.id);
-                            // _fulfilled[item.id] = _count;
                             Shop.fulfillItem(item, _count);
                           }
 
@@ -215,7 +213,13 @@ class _ShopFragmentState extends State<ShopFragment>
                           }
 
                           if (_ordersShop.isEmpty) {
-                            _state = ShopState.noOrders;
+                            if (_fulfilled.isEmpty) {
+                              _state = ShopState.noOrders;
+                            } else {
+                              _state = ShopState.locked;
+                              _fulfilled.clear();
+                            }
+
                             _controller.forward();
                             return false;
                           } else {

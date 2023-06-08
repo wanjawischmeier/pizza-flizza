@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/other/theme.dart';
 
 // copied from: https://gist.github.com/sbis04/21e6ca27f2336a15cb6c5f704415ecd9
 class GoogleSignInButton extends StatefulWidget {

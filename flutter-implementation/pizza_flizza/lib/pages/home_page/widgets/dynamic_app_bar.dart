@@ -7,19 +7,19 @@ import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
 import 'package:pizza_flizza/database/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/other/theme.dart';
 
 enum AppBarType { name, location }
 
 typedef OnLocationChanged = void Function(String location);
-typedef OnCartClicked = bool Function();
+typedef OnActionClicked = bool Function();
 
 class DynamicAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String name;
   final AppBarType type;
   final List<DropdownMenuItem<String>> items;
   final OnLocationChanged? onLocationChanged;
-  final OnCartClicked? onCartClicked;
+  final OnActionClicked? onProfileClicked, onCartClicked;
 
   const DynamicAppBar({
     super.key,
@@ -27,6 +27,7 @@ class DynamicAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.type,
     required this.items,
     this.onLocationChanged,
+    this.onProfileClicked,
     this.onCartClicked,
   });
 
@@ -87,9 +88,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
         child = DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             focusColor: Themes.grayMid,
-            // iconEnabledColor: Themes.grayLight,
             dropdownColor: Themes.grayLight,
-            // appBarTheme.titleTextStyle is null for some reason :/
             style: Theme.of(context).textTheme.titleLarge,
             value: Shop.currentShopId,
             items: widget.items,
@@ -108,6 +107,10 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
     return AppBar(
       title: child,
       actions: <Widget>[
+        IconButton(
+          icon: const Icon(Icons.account_box),
+          onPressed: widget.onProfileClicked,
+        ),
         badges.Badge(
           position: badges.BadgePosition.topEnd(top: 4, end: 4),
           badgeAnimation: const badges.BadgeAnimation.slide(),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:pizza_flizza/helper.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/remote_item_image.dart';
-import 'package:pizza_flizza/widgets/order_bubble.dart';
+import 'package:pizza_flizza/other/helper.dart';
+import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/home_page/widgets/remote_item_image.dart';
+import 'package:pizza_flizza/pages/home_page/order_fragment/widgets/order_bubble.dart';
 
 class OrderCardWidget extends StatefulWidget {
   final String categoryId, itemId, name;

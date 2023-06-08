@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/custom_icons.dart';
-import 'package:pizza_flizza/logger.util.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/google_signin_button.dart';
+import 'package:pizza_flizza/other/custom_icons.dart';
+import 'package:pizza_flizza/other/logger.util.dart';
+import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/login_page/widgets/google_signin_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

@@ -6,9 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/helper.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/transaction_card.dart';
+import 'package:pizza_flizza/other/helper.dart';
+import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/home_page/transaction_fragment/widgets/transaction_card.dart';
 
 class TransactionFragment extends StatefulWidget {
   const TransactionFragment({super.key});
@@ -225,6 +225,9 @@ class _TransactionFragmentState extends State<TransactionFragment> {
           return ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Themes.grayMid,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () {
               _historyUser.clear();

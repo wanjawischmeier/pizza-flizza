@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/helper.dart';
-import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/other/helper.dart';
+import 'package:pizza_flizza/other/theme.dart';
 
 class OrderBottomBar extends StatefulWidget {
   const OrderBottomBar({super.key});

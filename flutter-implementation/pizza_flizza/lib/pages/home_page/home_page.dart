@@ -4,12 +4,12 @@ import 'package:pizza_flizza/database/database.dart';
 import 'package:tuple/tuple.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/shopping_cart.dart';
-import 'package:pizza_flizza/fragments/order_fragment.dart';
-import 'package:pizza_flizza/fragments/shop_fragment.dart';
-import 'package:pizza_flizza/fragments/transaction_fragment.dart';
-import 'package:pizza_flizza/widgets/dynamic_app_bar.dart';
+import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/home_page/widgets/shopping_cart.dart';
+import 'package:pizza_flizza/pages/home_page/order_fragment/order_fragment.dart';
+import 'package:pizza_flizza/pages/home_page/shop_fragment/shop_fragment.dart';
+import 'package:pizza_flizza/pages/home_page/transaction_fragment/transaction_fragment.dart';
+import 'package:pizza_flizza/pages/home_page/widgets/dynamic_app_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -81,8 +81,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   });
 
-  void createShoppingCartOverlay() {
-    removeShoppingCartOverlay();
+  bool createOverlay(Widget overlay) {
+    removeOverlay();
 
     // based on: https://stackoverflow.com/a/75487808/13215204
     _overlayEntry = OverlayEntry(
@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: ModalBarrier(
                 color: Themes.grayDark.withOpacity(0.5),
                 onDismiss: () {
-                  removeShoppingCartOverlay();
+                  removeOverlay();
                 },
               ),
             ),
@@ -109,9 +109,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       curve: const ElasticOutCurve(1),
                       reverseCurve: Curves.easeOut,
                     ),
-                    child: ShoppingCart(
-                      onRemoveOverlay: removeShoppingCartOverlay,
-                    ),
+                    child: overlay,
                   ),
                 ),
               ),
@@ -123,9 +121,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     Overlay.of(context).insert(_overlayEntry!);
     _controller.forward();
+    return true;
   }
 
-  void removeShoppingCartOverlay() {
+  void removeOverlay() {
     if (_overlayEntry == null) {
       return;
     }
@@ -169,15 +168,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         name: name,
         type: type,
         items: shops,
+        onProfileClicked: () {
+          return createOverlay(
+            Text('yee'),
+          );
+        },
         onCartClicked: () {
-          /*
-          if (FirebaseAuth.instance.currentUser != null) {
-            FirebaseAuth.instance.signOut();
-          }
-          */
-
-          createShoppingCartOverlay();
-          return true;
+          return createOverlay(
+            ShoppingCart(
+              onRemoveOverlay: removeOverlay,
+            ),
+          );
         },
       ),
       body: Center(

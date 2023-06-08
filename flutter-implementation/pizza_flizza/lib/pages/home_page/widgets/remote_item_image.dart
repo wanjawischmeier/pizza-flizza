@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pizza_flizza/database/database.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/other/theme.dart';
 
 class RemoteItemImage extends StatelessWidget {
   final String itemId;

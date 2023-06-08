@@ -7,10 +7,10 @@ import 'package:logger/logger.dart';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/firebase_options.dart';
-import 'package:pizza_flizza/pages/home_page.dart';
-import 'package:pizza_flizza/pages/login_page.dart';
-import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/other/firebase_options.dart';
+import 'package:pizza_flizza/pages/home_page/home_page.dart';
+import 'package:pizza_flizza/pages/login_page/login_page.dart';
+import 'package:pizza_flizza/other/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

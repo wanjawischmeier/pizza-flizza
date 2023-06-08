@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/theme.dart';
+import 'package:pizza_flizza/other/theme.dart';
 
 typedef OnCountChanged = void Function(
     String categoryId, String idemId, int count);

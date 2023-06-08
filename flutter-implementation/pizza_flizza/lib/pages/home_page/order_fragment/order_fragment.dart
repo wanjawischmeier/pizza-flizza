@@ -5,9 +5,9 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:pizza_flizza/database/item.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/order_bottom_bar.dart';
-import 'package:pizza_flizza/widgets/order_card.dart';
+import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/home_page/order_fragment/widgets/order_bottom_bar.dart';
+import 'package:pizza_flizza/pages/home_page/order_fragment/widgets/order_card.dart';
 
 class OrderFragment extends StatefulWidget {
   const OrderFragment({super.key});

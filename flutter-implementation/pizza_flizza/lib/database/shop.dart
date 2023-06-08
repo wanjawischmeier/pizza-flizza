@@ -3,8 +3,8 @@ import 'dart:math';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
-import 'package:pizza_flizza/helper.dart';
-import 'package:pizza_flizza/logger.util.dart';
+import 'package:pizza_flizza/other/helper.dart';
+import 'package:pizza_flizza/other/logger.util.dart';
 
 import 'database.dart';
 import 'item.dart';
