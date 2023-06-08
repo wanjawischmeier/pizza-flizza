@@ -215,12 +215,14 @@ class _ShopFragmentState extends State<ShopFragment>
                           if (_ordersShop.isEmpty) {
                             if (_fulfilled.isEmpty) {
                               _state = ShopState.noOrders;
+                              _controller.forward();
                             } else {
                               _state = ShopState.locked;
                               _fulfilled.clear();
+                              // some unfulfilled: restore original orders
+                              filterOrders(Shop.orders, lock: true);
                             }
 
-                            _controller.forward();
                             return false;
                           } else {
                             setState(() {

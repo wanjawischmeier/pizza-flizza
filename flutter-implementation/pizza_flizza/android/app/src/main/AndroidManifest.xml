@@ -3,7 +3,8 @@
    <application
         android:label="PizzaFlizza"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/pizza_icon"
+        android:roundIcon="@mipmap/pizza_icon_round">
         <activity
             android:name=".MainActivity"
             android:exported="true"
