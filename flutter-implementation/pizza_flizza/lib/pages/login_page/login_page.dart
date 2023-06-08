@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/other/custom_icons.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 import 'package:pizza_flizza/other/theme.dart';
@@ -15,8 +16,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final log = AppLogger();
 
+  static const String _groupId = 'prenski_12';
   bool _isLoading = false;
   String _email = '';
+  String _userName = '';
   String _password = '';
 
   @override
@@ -68,6 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: 'Email',
                       hintText: 'Enter valid email id as abc@gmail.com'),
                   textInputAction: TextInputAction.next,
+                  enabled: false,
                   onChanged: (value) => _email = value,
                 ),
               ),
@@ -81,8 +85,9 @@ class _LoginPageState extends State<LoginPage> {
                       labelText: 'Password',
                       hintText: 'Enter secure password'),
                   textInputAction: TextInputAction.done,
+                  enabled: false,
                   onChanged: (value) => _password = value,
-                  onSubmitted: (value) => _signIn(),
+                  onSubmitted: (value) => _signInWithEmail(),
                 ),
               ),
               TextButton(
@@ -100,8 +105,15 @@ class _LoginPageState extends State<LoginPage> {
                 decoration: BoxDecoration(
                     color: _isLoading ? Colors.lightBlueAccent : Colors.blue,
                     borderRadius: BorderRadius.circular(20)),
-                child: TextButton(
-                  onPressed: _signIn,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Themes.grayLight,
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {}, //_signInWithEmail,
                   child: _isLoading
                       ? const SizedBox(
                           height: 25,
@@ -118,14 +130,18 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ]),
-            const GoogleSignInButton(),
+            GoogleSignInButton(
+              onGoogleSignInComplete: (displayName, user) {
+                _initializeDatabaseIfNeeded(_groupId, user.uid, displayName);
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _signIn() async {
+  void _signInWithEmail() async {
     setState(() {
       _isLoading = true;
     });
@@ -140,5 +156,42 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> _createAccountWithEmail() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      var credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: _email, password: _password);
+      User? user = credential.user;
+      if (user == null) {
+        await FirebaseAuth.instance.signOut();
+        return;
+      }
+
+      _initializeDatabaseIfNeeded(_groupId, user.uid, _userName);
+    } catch (error) {
+      log.e('error');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _initializeDatabaseIfNeeded(
+      String groupId, String userId, String userName) async {
+    var userReference = Database.realtime.child('users/$groupId/$userId');
+
+    var snapshot = (await userReference.once()).snapshot;
+    if (snapshot.value == null) {
+      Database.userName = userName;
+      await userReference.set({
+        'name': userName,
+      });
+    }
   }
 }

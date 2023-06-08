@@ -49,35 +49,63 @@ class PizzaFlizzaApp extends StatefulWidget {
 
 class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
   final _navigatorKey = GlobalKey<NavigatorState>();
-  late StreamSubscription<User?> _sub;
+  late StreamSubscription<User?> _authStateChangedSubscription;
+
+  void _initializeUser() {
+    // based on: https://dev.to/snowcodes/flutter-firebase-authentication-dynamic-routing-by-authstatechanges-9k0
+    authStateChangedInitialized(User? user) async {
+      if (user == null) {
+        Database.userEmail = null;
+        _deinitializeUser();
+      } else if (Database.userEmail == null) {
+        Database.groupId = 'prenski_12';
+        Database.userId = user.uid;
+        Database.userEmail = user.email;
+
+        // user.providerData.firstOrNull?.displayName
+        if (user.providerData.isNotEmpty) {
+          Database.providerId = user.providerData.first.providerId;
+        }
+
+        var snapshot = await Database.userReference.child('name').get();
+        if (snapshot.value != null) {
+          Database.userName = snapshot.value as String;
+        }
+
+        await Shop.loadAll();
+        _navigatorKey.currentState?.pushReplacementNamed('home');
+      }
+    }
+
+    _authStateChangedSubscription = FirebaseAuth.instance
+        .authStateChanges()
+        .listen(authStateChangedInitialized);
+  }
+
+  Future<void> _deinitializeUser() async {
+    authStateChangedDeinitialized(User? user) {
+      if (user != null) {
+        _initializeUser();
+      }
+    }
+
+    await Shop.cancelSubscriptions();
+    await _authStateChangedSubscription.cancel();
+    _authStateChangedSubscription = FirebaseAuth.instance
+        .authStateChanges()
+        .listen(authStateChangedDeinitialized);
+    _navigatorKey.currentState?.pushReplacementNamed('login');
+  }
 
   @override
   void initState() {
     super.initState();
-
-    // based on: https://dev.to/snowcodes/flutter-firebase-authentication-dynamic-routing-by-authstatechanges-9k0
-    _sub = FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (user == null) {
-        _navigatorKey.currentState?.pushReplacementNamed('login');
-      } else {
-        Database.groupId = 'prenski_12';
-        Database.userId = user.uid;
-
-        Database.userReference.child('name').get().then((snapshot) {
-          if (snapshot.value != null) {
-            Database.userName = snapshot.value as String;
-          }
-        });
-
-        Shop.loadAll().then((value) =>
-            _navigatorKey.currentState?.pushReplacementNamed('home'));
-      }
-    });
+    _initializeUser();
   }
 
   @override
   void dispose() {
-    _sub.cancel();
+    _authStateChangedSubscription.cancel();
     super.dispose();
   }
 

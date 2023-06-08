@@ -10,7 +10,7 @@ class Database {
 
   static const String imageResolution = '256px';
   static late String groupId, userId;
-  static String? userName;
+  static String? userName, userEmail, providerId;
 
   static DatabaseReference get groupReference =>
       Database.realtime.child('users/${Database.groupId}');

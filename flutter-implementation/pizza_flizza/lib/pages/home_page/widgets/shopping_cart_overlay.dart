@@ -7,22 +7,22 @@ import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
 import 'package:pizza_flizza/database/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
-import 'package:pizza_flizza/helper.dart';
-import 'package:pizza_flizza/theme.dart';
-import 'package:pizza_flizza/widgets/transaction_card.dart';
+import 'package:pizza_flizza/other/helper.dart';
+import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/home_page/transaction_fragment/widgets/transaction_card.dart';
 
 typedef OnRemoveOverlay = void Function();
 
-class ShoppingCart extends StatefulWidget {
+class ShoppingCartOverlay extends StatefulWidget {
   final OnRemoveOverlay onRemoveOverlay;
 
-  const ShoppingCart({super.key, required this.onRemoveOverlay});
+  const ShoppingCartOverlay({super.key, required this.onRemoveOverlay});
 
   @override
-  State<ShoppingCart> createState() => _ShoppingCartState();
+  State<ShoppingCartOverlay> createState() => _ShoppingCartOverlayState();
 }
 
-class _ShoppingCartState extends State<ShoppingCart> {
+class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
   late StreamSubscription<OrderMap> _ordersSubscription2;
   final _ordersUser = <int, OrderItem>{};
   double _totalPrice = 0;
@@ -157,20 +157,23 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   ),
                 ),
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Themes.cream,
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Themes.cream,
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                ),
-                onPressed: widget.onRemoveOverlay,
-                child: const Text(
-                  'Close',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
+                  onPressed: widget.onRemoveOverlay,
+                  child: const Text(
+                    'Close',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

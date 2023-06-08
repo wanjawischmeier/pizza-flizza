@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pizza_flizza/other/theme.dart';
 
-// copied from: https://gist.github.com/sbis04/21e6ca27f2336a15cb6c5f704415ecd9
+typedef OnGoogleSignInComplete = void Function(String displayName, User user);
+
+// based on: https://gist.github.com/sbis04/21e6ca27f2336a15cb6c5f704415ecd9
 class GoogleSignInButton extends StatefulWidget {
-  const GoogleSignInButton({super.key});
+  final OnGoogleSignInComplete? onGoogleSignInComplete;
+
+  const GoogleSignInButton({
+    super.key,
+    this.onGoogleSignInComplete,
+  });
 
   @override
   State<GoogleSignInButton> createState() => _GoogleSignInButtonState();
@@ -32,7 +39,38 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             _isSigningIn = true;
           });
 
-          signInWithGoogle();
+          // trigger the authentication flow
+          final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+          // sign in process was aborted by user
+          if (googleUser == null) {
+            return;
+          }
+
+          // obtain the auth details from the request
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication;
+
+          // create a new credential
+          final authCredential = GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+
+          // once signed in, get the UserCredential
+          var credential =
+              await FirebaseAuth.instance.signInWithCredential(authCredential);
+
+          User? user = credential.user;
+          if (user == null) {
+            await FirebaseAuth.instance.signOut();
+            return;
+          }
+
+          widget.onGoogleSignInComplete?.call(
+            googleUser.displayName ?? 'Undefined Username',
+            user,
+          );
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
@@ -65,23 +103,5 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         ),
       ),
     );
-  }
-
-  Future<UserCredential> signInWithGoogle() async {
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 }

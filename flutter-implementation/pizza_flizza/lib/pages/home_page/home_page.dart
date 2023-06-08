@@ -1,11 +1,12 @@
 import 'package:cached_firestorage/lib.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/pages/home_page/widgets/profile_overlay.dart';
 import 'package:tuple/tuple.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
-import 'package:pizza_flizza/pages/home_page/widgets/shopping_cart.dart';
+import 'package:pizza_flizza/pages/home_page/widgets/shopping_cart_overlay.dart';
 import 'package:pizza_flizza/pages/home_page/order_fragment/order_fragment.dart';
 import 'package:pizza_flizza/pages/home_page/shop_fragment/shop_fragment.dart';
 import 'package:pizza_flizza/pages/home_page/transaction_fragment/transaction_fragment.dart';
@@ -170,12 +171,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         items: shops,
         onProfileClicked: () {
           return createOverlay(
-            Text('yee'),
+            ProfileOverlay(
+              onRemoveOverlay: removeOverlay,
+            ),
           );
         },
         onCartClicked: () {
           return createOverlay(
-            ShoppingCart(
+            ShoppingCartOverlay(
               onRemoveOverlay: removeOverlay,
             ),
           );

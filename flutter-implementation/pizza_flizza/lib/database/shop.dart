@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/other/helper.dart';
@@ -126,6 +127,10 @@ class Shop {
     onUpdate(_currentTotal);
     return _currentTotalController.stream.listen(onUpdate);
   }
+
+  static StreamSubscription<DatabaseEvent>? _userDataAddedSubscription,
+      _userDataChangedSubscription,
+      _userDataRemovedSubscription;
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
@@ -414,9 +419,21 @@ class Shop {
     }
 
     var users = Database.realtime.child('users/${Database.groupId}');
-    users.onChildAdded.listen(orderUpdateListener);
-    users.onChildChanged.listen(orderUpdateListener);
-    users.onChildRemoved.listen(orderUpdateListener);
+    _userDataAddedSubscription = users.onChildAdded.listen(orderUpdateListener);
+    _userDataChangedSubscription =
+        users.onChildChanged.listen(orderUpdateListener);
+    _userDataRemovedSubscription =
+        users.onChildRemoved.listen(orderUpdateListener);
+  }
+
+  static Future<void> cancelSubscriptions() async {
+    await _userDataAddedSubscription?.cancel();
+    await _userDataChangedSubscription?.cancel();
+    await _userDataRemovedSubscription?.cancel();
+
+    _userDataAddedSubscription = null;
+    _userDataChangedSubscription = null;
+    _userDataRemovedSubscription = null;
   }
 
   static bool containsReference(String referencePath) {
