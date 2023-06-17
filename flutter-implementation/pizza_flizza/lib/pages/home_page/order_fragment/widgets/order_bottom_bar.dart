@@ -125,9 +125,14 @@ class _OrderBottomBarState extends State<OrderBottomBar>
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 8),
-                child: const ElevatedButton(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   onPressed: Shop.pushCurrentOrder,
-                  child: Padding(
+                  child: const Padding(
                     padding: EdgeInsets.all(16),
                     child: Text(
                       'Order',

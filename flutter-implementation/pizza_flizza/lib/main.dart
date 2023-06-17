@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/firebase_options.dart';
 import 'package:pizza_flizza/pages/home_page/home_page.dart';
@@ -21,9 +22,6 @@ void main() async {
 
   String? uid = FirebaseAuth.instance.currentUser?.uid;
   if (uid != null) {
-    Database.groupId = 'prenski_12';
-    Database.userId = uid;
-
     await Shop.loadAll();
   }
 
@@ -58,7 +56,16 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
         Database.userEmail = null;
         _deinitializeUser();
       } else if (Database.userEmail == null) {
-        Database.groupId = 'prenski_12';
+        FirebaseAuth.instance.signOut();
+        // find group associated with user
+        var snapshot =
+            await Database.realtime.child('user_lookup/${user.uid}').get();
+        String? groupId = snapshot.value as String?;
+        if (groupId == null) {
+          throw Exception('Invalid account');
+        } else {
+          Database.groupId = groupId;
+        }
         Database.userId = user.uid;
         Database.userEmail = user.email;
 
@@ -67,12 +74,12 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
           Database.providerId = user.providerData.first.providerId;
         }
 
-        var snapshot = await Database.userReference.child('name').get();
-        if (snapshot.value != null) {
-          Database.userName = snapshot.value as String;
+        var userSnapshot = await Database.userReference.child('name').get();
+        if (userSnapshot.value != null) {
+          Database.userName = userSnapshot.value as String;
         }
 
-        await Shop.loadAll();
+        Shop.subscribeToGroupEvents();
         _navigatorKey.currentState?.pushReplacementNamed('home');
       }
     }
@@ -89,7 +96,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       }
     }
 
-    await Shop.cancelSubscriptions();
+    await Shop.cancelGroupSubscriptions();
     await _authStateChangedSubscription.cancel();
     _authStateChangedSubscription = FirebaseAuth.instance
         .authStateChanges()
@@ -100,12 +107,14 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
   @override
   void initState() {
     super.initState();
+    Group.initializeGroupUpdates();
     _initializeUser();
   }
 
   @override
   void dispose() {
     _authStateChangedSubscription.cancel();
+    Group.cancelGroupUpdates();
     super.dispose();
   }
 

@@ -128,9 +128,9 @@ class Shop {
     return _currentTotalController.stream.listen(onUpdate);
   }
 
-  static StreamSubscription<DatabaseEvent>? _userDataAddedSubscription,
-      _userDataChangedSubscription,
-      _userDataRemovedSubscription;
+  static StreamSubscription<DatabaseEvent>? _groupDataAddedSubscription,
+      _groupDataChangedSubscription,
+      _groupDataRemovedSubscription;
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
@@ -405,8 +405,10 @@ class Shop {
         shops[currentShopId]['items'][categoryEntry.key] = sorted;
       }
     }
+  }
 
-    orderUpdateListener(event) {
+  static void subscribeToGroupEvents() {
+    onGroupUpdated(event) {
       String updatedUserId = event.snapshot.key;
       Map? data = event.snapshot.value;
       if (data == null) {
@@ -419,21 +421,19 @@ class Shop {
     }
 
     var users = Database.realtime.child('users/${Database.groupId}');
-    _userDataAddedSubscription = users.onChildAdded.listen(orderUpdateListener);
-    _userDataChangedSubscription =
-        users.onChildChanged.listen(orderUpdateListener);
-    _userDataRemovedSubscription =
-        users.onChildRemoved.listen(orderUpdateListener);
+    _groupDataAddedSubscription = users.onChildAdded.listen(onGroupUpdated);
+    _groupDataChangedSubscription = users.onChildChanged.listen(onGroupUpdated);
+    _groupDataRemovedSubscription = users.onChildRemoved.listen(onGroupUpdated);
   }
 
-  static Future<void> cancelSubscriptions() async {
-    await _userDataAddedSubscription?.cancel();
-    await _userDataChangedSubscription?.cancel();
-    await _userDataRemovedSubscription?.cancel();
+  static Future<void> cancelGroupSubscriptions() async {
+    await _groupDataAddedSubscription?.cancel();
+    await _groupDataChangedSubscription?.cancel();
+    await _groupDataRemovedSubscription?.cancel();
 
-    _userDataAddedSubscription = null;
-    _userDataChangedSubscription = null;
-    _userDataRemovedSubscription = null;
+    _groupDataAddedSubscription = null;
+    _groupDataChangedSubscription = null;
+    _groupDataRemovedSubscription = null;
   }
 
   static bool containsReference(String referencePath) {
@@ -462,7 +462,7 @@ class Shop {
   }
 
   static Future<void>? pushCurrentOrder() {
-    var orders = <String, Map<String, int>>{};
+    var orderData = <String, Map<String, int>>{};
     var items = <String, OrderItem>{};
     var ordersUser = _orders[Database.userId];
     if (ordersUser == null) {
@@ -487,7 +487,7 @@ class Shop {
       var itemId = itemEntry.key;
       var item = itemEntry.value;
 
-      orders[itemId] = <String, int>{
+      orderData[itemId] = <String, int>{
         'timestamp': item.timestamp,
         'count': item.count,
       };
@@ -500,10 +500,10 @@ class Shop {
       String itemName = itemInfo['name'];
       String shopName = _getShopName(_currentShopId);
       int timestamp = DateTime.now().millisecondsSinceEpoch;
-      int newCount = count + (orders[itemId]?['count'] ?? 0);
+      int newCount = count + (orderData[itemId]?['count'] ?? 0);
       double price = newCount * (itemInfo['price'] as double);
 
-      orders[itemId] = <String, int>{
+      orderData[itemId] = <String, int>{
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'count': newCount,
       };
@@ -521,7 +521,7 @@ class Shop {
     });
 
     var future =
-        Database.userReference.child('orders/$_currentShopId').set(orders);
+        Database.userReference.child('orders/$_currentShopId').set(orderData);
 
     _currentTotal = 0;
     _currentOrder.clear();

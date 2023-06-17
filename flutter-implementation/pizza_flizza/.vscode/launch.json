@@ -5,21 +5,49 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "pizza_flizza",
+            "name": "Current Device",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "pizza_flizza (profile mode)",
+            "name": "Current Device (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "pizza_flizza (release mode)",
+            "name": "Current Device (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
+        },
+        {
+            "name": "Pixel 4a",
+			"request": "launch",
+			"type": "dart",
+			"deviceId": "11111JEC206254"
+        },
+        {
+            "name": "Pixel 4a Emulator",
+			"request": "launch",
+			"type": "dart",
+			"deviceId": "emulator-5554"
+        },
+        {
+            "name": "Chrome",
+			"request": "launch",
+			"type": "dart",
+			"deviceId": "chrome"
         }
-    ]
+    ],
+	"compounds": [
+		{
+			"name": "Pixel 4a & Chrome",
+			"configurations": ["Pixel 4a", "Chrome"],
+		},
+		{
+			"name": "Pixel 4a & Pixel 4a Emulator",
+			"configurations": ["Pixel 4a", "Pixel 4a Emulator"],
+		}
+	]
 }

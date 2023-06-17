@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/paypal/paypal_payment.dart';
 
 typedef OnRemoveOverlay = void Function();
 
@@ -18,15 +21,14 @@ class ProfileOverlay extends StatefulWidget {
 class _ProfileOverlayState extends State<ProfileOverlay> {
   static const double _itemSpacer = 16;
   final String _thirdPartyProviderHintEmail =
-      ' (specified by ${Database.providerId})';
+      (Database.providerId == 'password')
+          ? ''
+          : ' (specified by ${Database.providerId})';
   String? _email = Database.userEmail;
   String? _userName = Database.userName;
-  String _password = '';
   String _groupId = Database.groupId;
 
-  bool _emailChanging = false;
   bool _userNameChanging = false;
-  bool _passwordChanging = false;
   bool _groupIdChanging = false;
 
   final _textProgress = const SizedBox(
@@ -97,7 +99,6 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                           },
                           child: TextField(
                             decoration: InputDecoration(
-                              suffix: _emailChanging ? _textProgress : null,
                               border: const OutlineInputBorder(),
                               labelText: 'Email$_thirdPartyProviderHintEmail',
                             ),
@@ -111,11 +112,7 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                         ),
                         const SizedBox(height: _itemSpacer),
                         Focus(
-                          onFocusChange: (hasFocus) {
-                            if (!hasFocus) {
-                              print('lost group focus');
-                            }
-                          },
+                          onFocusChange: _onGroupChanged,
                           child: TextField(
                             decoration: InputDecoration(
                               suffix: _groupIdChanging ? _textProgress : null,
@@ -126,30 +123,70 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             controller: TextEditingController(
                               text: _groupId,
                             ),
-                            enabled: false,
+                            enabled: !_groupIdChanging,
                             onChanged: (value) => _groupId = value,
                           ),
                         ),
                         const SizedBox(height: _itemSpacer),
-                        Focus(
-                          onFocusChange: (hasFocus) {
-                            if (!hasFocus) {
-                              print('lost group focus');
-                            }
+                        TextButton(
+                          onPressed: (_email == null)
+                              ? null
+                              : () {
+                                  FirebaseAuth.instance
+                                      .sendPasswordResetEmail(email: _email!)
+                                      .then((value) {
+                                    Fluttertoast.showToast(
+                                      msg:
+                                          'An email to reset the password has been send to your inbox',
+                                      toastLength: Toast.LENGTH_LONG,
+                                    );
+                                  }).catchError(
+                                    (error) {
+                                      Fluttertoast.showToast(
+                                        msg:
+                                            'Failed to send password reset email',
+                                        toastLength: Toast.LENGTH_LONG,
+                                      );
+                                    },
+                                  );
+                                },
+                          child: const Text(
+                            'Reset password',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            // Payment.processPayment("sb-1nk43y26329305@business.example.com", 12);
                           },
-                          child: TextField(
-                            decoration: InputDecoration(
-                              suffix: _passwordChanging ? _textProgress : null,
-                              border: const OutlineInputBorder(),
-                              labelText: 'Password',
+                          child: const Text(
+                            'Make Payment',
+                            style: TextStyle(
+                              color: Colors.white,
                             ),
-                            obscureText: true,
-                            textInputAction: TextInputAction.done,
-                            controller: TextEditingController(
-                              text: _password,
-                            ),
-                            enabled: false,
-                            onChanged: (value) => _password = value,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            widget.onRemoveOverlay();
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    PaypalPayment(
+                                  onFinish: (number) async {
+                                    // payment done
+                                    print('order id: ' + number);
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Pay with Paypal',
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ],
@@ -224,10 +261,35 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
 
       Database.userName = _userName;
       await Database.userReference.child('name').set(_userName);
+      // clarify that an update is being applied
       await Future.delayed(const Duration(seconds: 1));
 
       setState(() {
         _userNameChanging = false;
+      });
+    }
+  }
+
+  Future<void> _onGroupChanged(bool hasFocus) async {
+    if (!hasFocus && (_groupId.isNotEmpty) && _groupId != Database.groupId) {
+      setState(() {
+        _groupIdChanging = true;
+      });
+
+      var oldReference = Database.userReference;
+      var snapshot = await oldReference.get();
+      Database.groupId = _groupId;
+      await Database.userReference.set(snapshot.value);
+      await oldReference.remove();
+
+      Shop.cancelGroupSubscriptions();
+      Shop.subscribeToGroupEvents();
+
+      // clarify that an update is being applied
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      setState(() {
+        _groupIdChanging = false;
       });
     }
   }

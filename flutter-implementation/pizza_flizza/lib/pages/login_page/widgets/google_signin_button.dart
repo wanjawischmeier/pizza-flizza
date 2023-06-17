@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/login_page/widgets/group_selection_dialog.dart';
+import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
 typedef OnGoogleSignInComplete = void Function(String displayName, User user);
 
@@ -20,6 +22,9 @@ class GoogleSignInButton extends StatefulWidget {
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   bool _isSigningIn = false;
+  int? _groupId;
+  String _groupName = '';
+  bool _groupSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +40,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
           ),
         ),
         onPressed: () async {
+          /*
           setState(() {
             _isSigningIn = true;
           });
@@ -44,6 +50,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
           // sign in process was aborted by user
           if (googleUser == null) {
+            _isSigningIn = false;
             return;
           }
 
@@ -70,6 +77,19 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
           widget.onGoogleSignInComplete?.call(
             googleUser.displayName ?? 'Undefined Username',
             user,
+          );
+          */
+          showDialog(
+            context: context,
+            builder: ((context) {
+              return GroupSelectionDialog(
+                onSelectionConfirmed: (groupName, groupId) {
+                  _groupName = groupName;
+                  _groupId = groupId;
+                  Navigator.of(context).pop();
+                },
+              );
+            }),
           );
         },
         child: Padding(
