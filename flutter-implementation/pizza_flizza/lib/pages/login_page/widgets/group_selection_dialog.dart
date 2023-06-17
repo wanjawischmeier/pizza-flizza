@@ -35,6 +35,9 @@ class _GroupSelectionDialogState extends State<GroupSelectionDialog> {
             autofocus: true,
             suggestionBackgroundColor: Themes.grayLight,
             onGroupNameChanged: (groupName, groupId) {
+              _groupName = groupName;
+              _groupId = groupId;
+
               if (_enabled && groupName.isEmpty) {
                 setState(() {
                   _enabled = false;
@@ -59,7 +62,9 @@ class _GroupSelectionDialogState extends State<GroupSelectionDialog> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        widget.onSelectionConfirmed?.call(_groupName, _groupId);
+                      },
                       child: const Text(
                         'Continue',
                         style: TextStyle(

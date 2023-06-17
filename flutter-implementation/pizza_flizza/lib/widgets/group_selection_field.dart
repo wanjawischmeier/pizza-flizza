@@ -110,7 +110,7 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
         },
         onSubmitted: (value) {
           if (value.isNotEmpty) {
-            widget.onSelectionConfirmed?.call(value, null);
+            widget.onSelectionConfirmed?.call(value, _groupId);
           }
         },
       ),
