@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pizza_flizza/other/theme.dart';
-import 'package:pizza_flizza/pages/login_page/widgets/group_selection_dialog.dart';
-import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
 typedef OnGoogleSignInComplete = Future<void> Function(User user);
 
@@ -22,9 +20,6 @@ class GoogleSignInButton extends StatefulWidget {
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   bool _isSigningIn = false;
-  int? _groupId;
-  String _groupName = '';
-  bool _groupSelected = false;
 
   @override
   Widget build(BuildContext context) {

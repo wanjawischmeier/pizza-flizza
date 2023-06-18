@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/other/custom_icons.dart';
 import 'package:pizza_flizza/other/logger.util.dart';

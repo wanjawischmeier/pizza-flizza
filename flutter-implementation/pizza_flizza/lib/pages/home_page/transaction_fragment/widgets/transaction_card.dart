@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/other/theme.dart';
 
 typedef OnDismiss = void Function(Object id);
 

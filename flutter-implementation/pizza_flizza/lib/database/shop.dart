@@ -594,8 +594,7 @@ class Shop {
     var futures = <Future>[];
 
     // update fulfilled, skip fulfilling own order
-    // TODO: remove bypass
-    if (item.userId != Database.userId || true) {
+    if (item.userId != Database.userId) {
       int fulfilledCount = _fulfilled[Database.userId]?[item.shopId]
                   ?[item.userId]
               ?.items[item.itemId]

@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
+import 'package:pizza_flizza/other/logger.util.dart';
 
 class PaypalServices {
+  final log = AppLogger();
+
   String domain = "https://api.sandbox.paypal.com"; // for sandbox mode
 //  String domain = "https://api.paypal.com"; // for production mode
 
@@ -180,7 +183,7 @@ class PaypalServices {
 
     if (response.statusCode == 201) {
       // Payment captured successfully
-      print('Payment captured successfully');
+      log.i('Payment captured successfully');
     } else {
       throw Exception(
           'Failed to capture PayPal payment. Status Code: ${response.statusCode}');

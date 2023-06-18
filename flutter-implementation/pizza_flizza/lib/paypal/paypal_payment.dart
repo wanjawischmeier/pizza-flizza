@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/other/logger.util.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/paypal/paypal_services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -7,7 +8,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class PaypalPayment extends StatefulWidget {
   final Function? onFinish;
 
-  PaypalPayment({this.onFinish});
+  const PaypalPayment({super.key, this.onFinish});
 
   @override
   State<StatefulWidget> createState() {
@@ -16,6 +17,7 @@ class PaypalPayment extends StatefulWidget {
 }
 
 class PaypalPaymentState extends State<PaypalPayment> {
+  final log = AppLogger();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String? orderId;
   String? checkoutUrl;
@@ -52,8 +54,8 @@ class PaypalPaymentState extends State<PaypalPayment> {
           orderId = res['id'];
           checkoutUrl = res['approve'];
         });
-      } catch (e) {
-        print('exception: ' + e.toString());
+      } catch (exception) {
+        log.e('exception: $exception');
       }
     });
   }
@@ -109,7 +111,7 @@ class PaypalPaymentState extends State<PaypalPayment> {
             "items": items,
             if (isEnableShipping && isEnableAddress)
               "shipping_address": {
-                "recipient_name": userFirstName + " " + userLastName,
+                "recipient_name": "$userFirstName $userLastName",
                 "line1": addressStreet,
                 "line2": "",
                 "city": addressCity,
@@ -129,7 +131,7 @@ class PaypalPaymentState extends State<PaypalPayment> {
 
   @override
   Widget build(BuildContext context) {
-    print(checkoutUrl);
+    log.d(checkoutUrl);
 
     if (checkoutUrl == null) {
       return Scaffold(
@@ -164,10 +166,10 @@ class PaypalPaymentState extends State<PaypalPayment> {
                   // Update loading bar.
                 },
                 onPageStarted: (String url) {
-                  print('started');
+                  log.d('started');
                 },
                 onPageFinished: (String url) {
-                  print('finished');
+                  log.d('finished');
                   // Navigator.of(context).pop();
                 },
                 onWebResourceError: (WebResourceError error) {},

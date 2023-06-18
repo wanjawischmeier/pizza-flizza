@@ -6,7 +6,6 @@ import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
-import 'package:pizza_flizza/paypal/paypal_payment.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
 typedef OnRemoveOverlay = void Function();
