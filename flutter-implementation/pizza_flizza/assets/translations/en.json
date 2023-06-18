@@ -6,5 +6,11 @@
        "male":"Hi man ;) {}",
        "female":"Hello girl :) {}",
        "other":"Hello {}"
-    }
+    },
+
+
+    "login_page_title": "Login Page",
+    "login_email_field_title": "Email",
+    "login_email_field_hint_login": "Enter your email",
+    "login_email_field_hint_create": "Enter a valid email"
  }

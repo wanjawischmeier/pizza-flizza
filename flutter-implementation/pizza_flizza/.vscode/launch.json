@@ -31,6 +31,12 @@
             "name": "Pixel 4a Emulator",
 			"request": "launch",
 			"type": "dart",
+			"deviceId": "11111JEC206254"
+        },
+        {
+            "name": "Pixel One Emulator",
+			"request": "launch",
+			"type": "dart",
 			"deviceId": "emulator-5554"
         },
         {

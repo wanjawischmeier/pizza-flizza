@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,7 +29,8 @@ class _LoginPageState extends State<LoginPage> {
 
   // taken from: https://stackoverflow.com/a/50663835/13215204
   final _emailRegEx = RegExp(
-      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+  );
   bool _isLoading = false;
   bool _loginMode = true;
   String _email = '';
@@ -48,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Themes.grayDark,
       appBar: AppBar(
-        title: const Text("Login Page"),
+        title: const Text("login.page_title").tr(),
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -99,12 +101,13 @@ class _LoginPageState extends State<LoginPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: TextField(
                             decoration: InputDecoration(
-                                border: const OutlineInputBorder(),
-                                labelText: 'Email',
-                                errorText: _emailError,
-                                hintText: _loginMode
-                                    ? 'Enter your email'
-                                    : 'Enter a valid email'),
+                              border: const OutlineInputBorder(),
+                              labelText: 'login.fields.email.title'.tr(),
+                              errorText: _emailError,
+                              hintText: _loginMode
+                                  ? 'login.fields.email.hint_login'.tr()
+                                  : 'login.fields.email.hint_create'.tr(),
+                            ),
                             textInputAction: TextInputAction.next,
                             onChanged: (value) {
                               _email = value;
@@ -128,12 +131,13 @@ class _LoginPageState extends State<LoginPage> {
                                       bottom: 0),
                                   child: TextField(
                                     decoration: InputDecoration(
-                                        border: const OutlineInputBorder(),
-                                        labelText: 'Username',
-                                        errorText: _userNameError,
-                                        hintText: _loginMode
-                                            ? 'Enter your username'
-                                            : 'Choose a valid username'),
+                                      border: const OutlineInputBorder(),
+                                      labelText: 'login.fields.password.title',
+                                      errorText: _userNameError,
+                                      hintText: _loginMode
+                                          ? 'login.fields.password.hint_login'
+                                          : 'login.fields.password.hint_create',
+                                    ),
                                     textInputAction: TextInputAction.next,
                                     onChanged: (value) {
                                       _userName = value;
@@ -180,12 +184,13 @@ class _LoginPageState extends State<LoginPage> {
                           child: TextField(
                             obscureText: true,
                             decoration: InputDecoration(
-                                border: const OutlineInputBorder(),
-                                labelText: 'Password',
-                                errorText: _passwordError,
-                                hintText: _loginMode
-                                    ? 'Enter your password'
-                                    : 'Enter a secure password'),
+                              border: const OutlineInputBorder(),
+                              labelText: 'login.fields.password.title'.tr(),
+                              errorText: _passwordError,
+                              hintText: _loginMode
+                                  ? 'login.fields.password.hint_login'.tr()
+                                  : 'login.fields.password.hint_create'.tr(),
+                            ),
                             textInputAction: TextInputAction.done,
                             onChanged: (value) {
                               _password = value;
@@ -220,7 +225,11 @@ class _LoginPageState extends State<LoginPage> {
                                       });
                                     },
                                     child: Text(
-                                      _loginMode ? 'Create Account' : 'Log in',
+                                      _loginMode
+                                          ? 'login.actions.mode_switch.create'
+                                              .tr()
+                                          : 'login.actions.mode_switch.log_in'
+                                              .tr(),
                                       style: const TextStyle(
                                           color: Colors.blue, fontSize: 15),
                                     ),
@@ -239,10 +248,13 @@ class _LoginPageState extends State<LoginPage> {
                                   alignment: Alignment.centerLeft,
                                   child: TextButton(
                                     onPressed: _resetPassword,
-                                    child: const Text(
-                                      'Forgot Password',
-                                      style: TextStyle(
-                                          color: Colors.blue, fontSize: 15),
+                                    child: Text(
+                                      'login.actions.forgot_password.header'
+                                          .tr(),
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 15,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -261,7 +273,7 @@ class _LoginPageState extends State<LoginPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: _checkForm,
+                            onPressed: _isLoading ? null : _checkForm,
                             child: _isLoading
                                 ? const SizedBox(
                                     height: 25,
@@ -272,9 +284,13 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   )
                                 : Text(
-                                    _loginMode ? 'Log in' : 'Create',
+                                    _loginMode
+                                        ? 'login.actions.go.log_in'.tr()
+                                        : 'login.actions.go.create'.tr(),
                                     style: const TextStyle(
-                                        color: Colors.white, fontSize: 25),
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                    ),
                                   ),
                           ),
                         ),
@@ -286,9 +302,9 @@ class _LoginPageState extends State<LoginPage> {
                         height: _loginMode ? 120 : 0,
                         child: GoogleSignInButton(
                           onGoogleSignInComplete: (user) async {
-                            if (user.displayName == null) {
+                            if (user.email == null) {
                               Fluttertoast.showToast(
-                                msg: 'Error: Failed to get google username',
+                                msg: 'login.errors.no_email_google'.tr(),
                               );
 
                               await FirebaseAuth.instance.signOut();
@@ -298,9 +314,9 @@ class _LoginPageState extends State<LoginPage> {
                               return;
                             }
 
-                            if (user.email == null) {
+                            if (user.displayName == null) {
                               Fluttertoast.showToast(
-                                msg: 'Error: Account email not specified',
+                                msg: 'login.errors.no_username_google'.tr(),
                               );
 
                               await FirebaseAuth.instance.signOut();
@@ -366,37 +382,37 @@ class _LoginPageState extends State<LoginPage> {
     bool error = false;
 
     // check email
-    if (_email == '') {
-      _emailError = 'Please enter an email';
+    if (_email.isEmpty) {
+      _emailError = 'login.errors.no_email'.tr();
       error = true;
     } else if (!_emailRegEx.hasMatch(_email)) {
-      _emailError = 'Please enter a valid email';
+      _emailError = 'login.errors.invalid_email'.tr();
       error = true;
     }
 
     // check username when creating account
     if (!_loginMode) {
-      if (_userName == '') {
-        _userNameError = 'Please enter an username';
+      if (_userName.isEmpty) {
+        _userNameError = 'login.errors.no_username'.tr();
         error = true;
       } else if (_userName.length < 6) {
-        _userNameError = 'Please enter at least 6 characters';
+        _userNameError = 'login.errors.invalid_username'.tr();
         error = true;
       }
 
-      if (_groupName == '') {
-        _groupNameError = 'Please enter a group id';
+      if (_groupName.isEmpty) {
+        _groupNameError = 'login.errors.no_group_name'.tr();
         error = true;
       }
     }
 
     // check password
-    if (_password == '') {
-      _passwordError = 'Please enter a password';
+    if (_password.isEmpty) {
+      _passwordError = 'login.errors.no_password'.tr();
       error = true;
     } else if (_password.length < 6) {
       // firebase auth only requires passwords to be at least 6 characters
-      _passwordError = 'Please enter at least 6 characters';
+      _passwordError = 'login.errors.invalid_password'.tr();
       error = true;
     }
 
@@ -423,25 +439,27 @@ class _LoginPageState extends State<LoginPage> {
       credential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: _email, password: _password);
     } catch (error) {
-      switch ((error as FirebaseAuthException).code) {
+      String code = (error as FirebaseAuthException).code;
+      String pattern = 'login.errors.firebase_auth.$code';
+      String message = pattern.tr();
+      if (message == pattern) {
+        message = 'login.errors.firebase_auth.default'.tr();
+      }
+
+      switch (code) {
         case 'user-not-found':
           setState(() {
-            _emailError = 'Unknown email, try creating an account';
+            _emailError = message;
           });
           break;
         case 'wrong-password':
           setState(() {
-            _passwordError = 'Incorrect password';
+            _passwordError = message;
           });
-          break;
-        case 'too-many-requests':
-          Fluttertoast.showToast(
-            msg: 'Too many requests, try again later',
-          );
           break;
         default:
           Fluttertoast.showToast(
-            msg: 'Unknown error',
+            msg: message,
           );
       }
     }
@@ -452,7 +470,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (user == null) {
         Fluttertoast.showToast(
-          msg: 'Error: Failed to get account credentials',
+          msg: 'login.errors.no_credentials_create'.tr(),
         );
 
         await FirebaseAuth.instance.signOut();
@@ -464,7 +482,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (email == null) {
         Fluttertoast.showToast(
-          msg: 'Error: Account email not specified',
+          msg: 'login.errors.no_email_create'.tr(),
         );
 
         await FirebaseAuth.instance.signOut();
@@ -479,7 +497,7 @@ class _LoginPageState extends State<LoginPage> {
       if (group == null) {
         FirebaseAuth.instance.signOut();
         Fluttertoast.showToast(
-          msg: 'Profile corrupted : Not asssociated with a group',
+          msg: 'login.errors.no_group_create'.tr(),
           toastLength: Toast.LENGTH_LONG,
         );
       } else {
@@ -504,15 +522,22 @@ class _LoginPageState extends State<LoginPage> {
       credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: _email, password: _password);
     } catch (error) {
-      switch ((error as FirebaseAuthException).code) {
+      String code = (error as FirebaseAuthException).code;
+      String pattern = 'login.errors.firebase_auth.$code';
+      String message = pattern.tr();
+      if (message == pattern) {
+        message = 'login.errors.firebase_auth.default'.tr();
+      }
+
+      switch (code) {
         case 'email-already-in-use':
           setState(() {
-            _emailError = 'Email already used, try logging in';
+            _emailError = message;
           });
           break;
         default:
           Fluttertoast.showToast(
-            msg: 'Unknown error',
+            msg: message,
           );
       }
     }
@@ -523,13 +548,13 @@ class _LoginPageState extends State<LoginPage> {
 
       if (user == null) {
         Fluttertoast.showToast(
-          msg: 'Error: Failed to get account credentials',
+          msg: 'login.errors.no_credentials_create'.tr(),
         );
 
         await FirebaseAuth.instance.signOut();
       } else if (email == null) {
         Fluttertoast.showToast(
-          msg: 'Error: Account email not specified',
+          msg: 'login.errors.no_email_create'.tr(),
         );
 
         await FirebaseAuth.instance.signOut();
@@ -557,27 +582,27 @@ class _LoginPageState extends State<LoginPage> {
 
   void _resetPassword() {
     // check email
-    if (_email == '') {
+    if (_email.isEmpty) {
       setState(() {
-        _emailError = 'Please enter an email';
+        _emailError = 'login.errors.no_email'.tr();
       });
       return;
     } else if (!_emailRegEx.hasMatch(_email)) {
       setState(() {
-        _emailError = 'Please enter a valid email';
+        _emailError = 'login.errors.invalid_email'.tr();
       });
       return;
     }
 
     FirebaseAuth.instance.sendPasswordResetEmail(email: _email).then((value) {
       Fluttertoast.showToast(
-        msg: 'An email to reset the password has been send to your inbox',
+        msg: 'login.actions.forgot_password.send'.tr(),
         toastLength: Toast.LENGTH_LONG,
       );
     }).catchError(
       (error) {
         Fluttertoast.showToast(
-          msg: 'Failed to send password reset email',
+          msg: 'login.actions.forgot_password.failed'.tr(),
           toastLength: Toast.LENGTH_LONG,
         );
       },
