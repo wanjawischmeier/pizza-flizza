@@ -305,11 +305,12 @@ class _ShopFragmentState extends State<ShopFragment>
                                         const Text(
                                             'Heute geöffnet von 07:00 - 22:00 Uhr'),
                                         */
-                                      const Text('msg').tr(),
+                                      // const Text('msg').tr(),
                                     ],
                                   ),
                                 ),
-                                Expanded(
+                                const Expanded(
+                                  /*
                                   child: Align(
                                     alignment: Alignment.bottomCenter,
                                     child: Padding(
@@ -336,6 +337,12 @@ class _ShopFragmentState extends State<ShopFragment>
                                         ],
                                       ),
                                     ),
+                                  ),
+                                  */
+                                  child: Text(
+                                    'shop information\ncoming soon :)',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 18),
                                   ),
                                 ),
                               ],

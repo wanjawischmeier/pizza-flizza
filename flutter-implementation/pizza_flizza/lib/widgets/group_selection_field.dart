@@ -10,15 +10,22 @@ typedef OnGroupNameChanged = void Function(String groupName, int? groupId);
 class GroupSelectionField extends StatefulWidget {
   final OnGroupNameChanged? onGroupNameChanged;
   final OnGroupNameChanged? onSelectionConfirmed;
-  final String? error;
-  final bool autofocus;
+  final int? groupId;
+  final String? groupName, error;
+  final bool enabled, autofocus, clearHintOnConfirm;
   final Color suggestionBackgroundColor;
+  final Widget? suffix;
 
   const GroupSelectionField({
     super.key,
+    this.groupId,
+    this.groupName,
     this.error,
+    this.enabled = true,
     this.autofocus = false,
+    this.clearHintOnConfirm = false,
     this.suggestionBackgroundColor = Themes.grayMid,
+    this.suffix,
     this.onGroupNameChanged,
     this.onSelectionConfirmed,
   });
@@ -40,6 +47,9 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
   @override
   void initState() {
     super.initState();
+
+    _groupId = widget.groupId;
+    _groupNameController.text = widget.groupName ?? '';
 
     _groupsUpdatedSubscription = Group.subscribeToGroupsUpdated((groups) {
       setState(() {
@@ -63,12 +73,16 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
       textFieldConfiguration: TextFieldConfiguration(
         decoration: InputDecoration(
           border: const OutlineInputBorder(),
+          suffix: widget.suffix,
           labelText: 'Group',
           helperText: _groupNameHint,
           errorText: widget.error,
-          suffixIcon: _groupActionIcon ?? const SizedBox(height: 0),
+          suffixIcon: (widget.suffix == null)
+              ? _groupActionIcon ?? const SizedBox(height: 0)
+              : null,
           hintText: 'Enter the name of a group',
         ),
+        enabled: widget.enabled,
         controller: _groupNameController,
         focusNode: widget.autofocus ? (FocusNode()..requestFocus()) : null,
         onChanged: (value) {
@@ -110,6 +124,13 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
         },
         onSubmitted: (value) {
           if (value.isNotEmpty) {
+            if (widget.clearHintOnConfirm) {
+              setState(() {
+                _groupActionIcon = null;
+                _groupNameHint = null;
+              });
+            }
+
             widget.onSelectionConfirmed?.call(value, _groupId);
           }
         },
@@ -130,9 +151,15 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
 
         setState(() {
           _matchingGroups.clear();
-          _groupActionIcon = const Icon(Icons.add_reaction);
-          _groupNameHint = 'You will be added to the group';
           _groupNameController.text = suggestion.groupName;
+
+          if (widget.clearHintOnConfirm) {
+            _groupActionIcon = null;
+            _groupNameHint = null;
+          } else {
+            _groupActionIcon = const Icon(Icons.add_reaction);
+            _groupNameHint = 'You will be added to the group';
+          }
         });
 
         widget.onSelectionConfirmed?.call(suggestion.groupName, _groupId);

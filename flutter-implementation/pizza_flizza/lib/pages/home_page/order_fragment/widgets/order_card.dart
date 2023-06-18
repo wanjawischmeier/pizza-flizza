@@ -46,6 +46,7 @@ class _OrderCardWidgetState extends State<OrderCardWidget> {
           Expanded(
             child: RemoteItemImage(itemId: widget.itemId),
           ),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [

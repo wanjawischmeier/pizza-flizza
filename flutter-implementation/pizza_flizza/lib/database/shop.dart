@@ -372,11 +372,11 @@ class Shop {
 
     for (String currentShopId in shops.keys) {
       // list product images for the shop
-      var snapshot = await Database.storage
+      var imagesSnapshot = await Database.storage
           .child(
               'images/${Database.imageResolution}/shops/$currentShopId/items')
           .listAll();
-      _itemReferences[currentShopId] = snapshot.items;
+      _itemReferences[currentShopId] = imagesSnapshot.items;
 
       for (var categoryEntry in shops[currentShopId]['items'].entries) {
         var sorted =
@@ -407,7 +407,7 @@ class Shop {
     }
   }
 
-  static void subscribeToGroupEvents() {
+  static void initializeUserGroupUpdates() {
     onGroupUpdated(event) {
       String updatedUserId = event.snapshot.key;
       Map? data = event.snapshot.value;
@@ -426,7 +426,7 @@ class Shop {
     _groupDataRemovedSubscription = users.onChildRemoved.listen(onGroupUpdated);
   }
 
-  static Future<void> cancelGroupSubscriptions() async {
+  static Future<void> cancelUserGroupUpdates() async {
     await _groupDataAddedSubscription?.cancel();
     await _groupDataChangedSubscription?.cancel();
     await _groupDataRemovedSubscription?.cancel();
@@ -462,6 +462,10 @@ class Shop {
   }
 
   static Future<void>? pushCurrentOrder() {
+    if (Database.userId == null) {
+      return null;
+    }
+
     var orderData = <String, Map<String, int>>{};
     var items = <String, OrderItem>{};
     var ordersUser = _orders[Database.userId];
@@ -511,7 +515,7 @@ class Shop {
       items[itemId] = OrderItem(
         itemId,
         _currentShopId,
-        Database.userId,
+        Database.userId!,
         timestamp,
         itemName,
         shopName,
@@ -583,6 +587,10 @@ class Shop {
   }
 
   static Future<void>? fulfillItem(OrderItem item, int count) {
+    if (Database.userId == null) {
+      return null;
+    }
+
     var futures = <Future>[];
 
     // update fulfilled, skip fulfilling own order
@@ -618,7 +626,7 @@ class Shop {
           };
         }
       } else {
-        _fulfilled[Database.userId] = {
+        _fulfilled[Database.userId!] = {
           item.shopId: {
             item.userId: Order(
               item.shopId,

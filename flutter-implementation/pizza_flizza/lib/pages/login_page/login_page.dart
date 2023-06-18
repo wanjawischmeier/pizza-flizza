@@ -5,14 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/other/custom_icons.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/login_page/widgets/google_signin_button.dart';
+import 'package:pizza_flizza/pages/login_page/widgets/group_selection_dialog.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
+typedef OnLoginComplete = void Function(User user, Group? group);
+
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final OnLoginComplete? onLoginComplete;
+
+  const LoginPage({super.key, this.onLoginComplete});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -162,6 +168,10 @@ class _LoginPageState extends State<LoginPage> {
                                       _groupName = groupName;
                                       _groupId = groupId;
                                     },
+                                    onSelectionConfirmed: (groupName, groupId) {
+                                      _groupName = groupName;
+                                      _groupId = groupId;
+                                    },
                                   ),
                                 ),
                         ),
@@ -276,31 +286,69 @@ class _LoginPageState extends State<LoginPage> {
                         padding: const EdgeInsets.only(top: 40),
                         height: _loginMode ? 120 : 0,
                         child: GoogleSignInButton(
-                          onGoogleSignInComplete: (displayName, user) {
-                            showDialog(
-                              context: context,
-                              builder: ((context) {
-                                return AlertDialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  backgroundColor: Themes.grayMid,
-                                  title: const Text('Join a group'),
-                                  content: GroupSelectionField(
-                                    autofocus: true,
-                                    onSelectionConfirmed: (groupName, groupId) {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                );
-                              }),
-                            );
+                          onGoogleSignInComplete: (user) async {
+                            if (user.displayName == null) {
+                              Fluttertoast.showToast(
+                                msg: 'Error: Failed to get google username',
+                              );
 
-                            _initializeDatabaseIfNeeded(
-                              _groupName,
-                              user.uid,
-                              displayName,
-                            );
+                              await FirebaseAuth.instance.signOut();
+                              setState(() {
+                                _isLoading = false;
+                              });
+                              return;
+                            }
+
+                            if (user.email == null) {
+                              Fluttertoast.showToast(
+                                msg: 'Error: Account email not specified',
+                              );
+
+                              await FirebaseAuth.instance.signOut();
+                              setState(() {
+                                _isLoading = false;
+                              });
+                              return;
+                            }
+
+                            var group = Group.findUserGroup(user.uid);
+                            if (group == null) {
+                              bool? success = await showDialog(
+                                context: context,
+                                builder: ((context) {
+                                  return GroupSelectionDialog(
+                                    onSelectionConfirmed: (groupName, groupId) {
+                                      _groupName = groupName;
+                                      _groupId = groupId;
+                                      Navigator.of(context).pop(true);
+                                    },
+                                  );
+                                }),
+                              );
+
+                              if (success == null) {
+                                await FirebaseAuth.instance.signOut();
+                                setState(() {
+                                  _isLoading = false;
+                                });
+                                return;
+                              }
+
+                              var group = await Group.joinGroup(
+                                _groupName,
+                                _groupId,
+                                user.uid,
+                                user.displayName!,
+                              );
+                              _groupId = group.groupId;
+
+                              widget.onLoginComplete?.call(user, group);
+                            } else {
+                              _groupName = group.groupName;
+                              _groupId = group.groupId;
+
+                              widget.onLoginComplete?.call(user, group);
+                            }
                           },
                         ),
                       ),
@@ -370,8 +418,10 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
+    UserCredential? credential;
+
     try {
-      await FirebaseAuth.instance
+      credential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: _email, password: _password);
     } catch (error) {
       switch ((error as FirebaseAuthException).code) {
@@ -397,6 +447,48 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
 
+    if (credential != null) {
+      User? user = credential.user;
+      String? email = user?.email;
+
+      if (user == null) {
+        Fluttertoast.showToast(
+          msg: 'Error: Failed to get account credentials',
+        );
+
+        await FirebaseAuth.instance.signOut();
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      if (email == null) {
+        Fluttertoast.showToast(
+          msg: 'Error: Account email not specified',
+        );
+
+        await FirebaseAuth.instance.signOut();
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // find group associated with user
+      var group = Group.findUserGroup(user.uid);
+      if (group == null) {
+        FirebaseAuth.instance.signOut();
+        Fluttertoast.showToast(
+          msg: 'Profile corrupted : Not asssociated with a group',
+          toastLength: Toast.LENGTH_LONG,
+        );
+      } else {
+        _groupId = group.groupId;
+        widget.onLoginComplete?.call(user, group);
+      }
+    }
+
     setState(() {
       _isLoading = false;
     });
@@ -407,20 +499,11 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
+    UserCredential? credential;
+
     try {
-      var credential = await FirebaseAuth.instance
+      credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: _email, password: _password);
-      User? user = credential.user;
-      if (user == null) {
-        Fluttertoast.showToast(
-          msg: 'Failed to get account credentials',
-        );
-
-        await FirebaseAuth.instance.signOut();
-        return;
-      }
-
-      _initializeDatabaseIfNeeded(_groupName, user.uid, _userName);
     } catch (error) {
       switch ((error as FirebaseAuthException).code) {
         case 'email-already-in-use':
@@ -432,6 +515,39 @@ class _LoginPageState extends State<LoginPage> {
           Fluttertoast.showToast(
             msg: 'Unknown error',
           );
+      }
+    }
+
+    if (credential != null) {
+      User? user = credential.user;
+      String? email = user?.email;
+
+      if (user == null) {
+        Fluttertoast.showToast(
+          msg: 'Error: Failed to get account credentials',
+        );
+
+        await FirebaseAuth.instance.signOut();
+      } else if (email == null) {
+        Fluttertoast.showToast(
+          msg: 'Error: Account email not specified',
+        );
+
+        await FirebaseAuth.instance.signOut();
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      } else {
+        var group = await Group.joinGroup(
+          _groupName,
+          _groupId,
+          user.uid,
+          _userName,
+        );
+
+        _groupId = group.groupId;
+        widget.onLoginComplete?.call(user, group);
       }
     }
 
@@ -467,25 +583,5 @@ class _LoginPageState extends State<LoginPage> {
         );
       },
     );
-  }
-
-  Future<void> _initializeDatabaseIfNeeded(
-      String groupId, String userId, String userName) async {
-    var userReference = Database.realtime.child('users/$groupId/$userId');
-    var lookupReference = Database.realtime.child('user_lookup/$userId');
-
-    var snapshot = (await userReference.once()).snapshot;
-    if (snapshot.value == null) {
-      Database.userName = userName;
-      await userReference.set({
-        'name': userName,
-      });
-    }
-
-    snapshot = (await lookupReference.once()).snapshot;
-    if (snapshot.value == null) {
-      Database.groupId = groupId;
-      await lookupReference.set(groupId);
-    }
   }
 }

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/paypal/paypal_payment.dart';
+import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
 typedef OnRemoveOverlay = void Function();
 
@@ -20,13 +22,15 @@ class ProfileOverlay extends StatefulWidget {
 
 class _ProfileOverlayState extends State<ProfileOverlay> {
   static const double _itemSpacer = 16;
+  static const _artificialDelay = Duration(milliseconds: 500);
   final String _thirdPartyProviderHintEmail =
       (Database.providerId == 'password')
           ? ''
           : ' (specified by ${Database.providerId})';
   String? _email = Database.userEmail;
-  String? _userName = Database.userName;
-  String _groupId = Database.groupId;
+  String? _userName;
+  String? _groupName = Database.groupName;
+  int? _groupId = Database.groupId;
 
   bool _userNameChanging = false;
   bool _groupIdChanging = false;
@@ -42,6 +46,8 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
   @override
   void initState() {
     super.initState();
+
+    _userName = Database.userName;
   }
 
   @override
@@ -91,41 +97,61 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                           ),
                         ),
                         const SizedBox(height: _itemSpacer),
-                        Focus(
-                          onFocusChange: (hasFocus) {
-                            if (!hasFocus) {
-                              print('lost group focus');
-                            }
-                          },
-                          child: TextField(
-                            decoration: InputDecoration(
-                              border: const OutlineInputBorder(),
-                              labelText: 'Email$_thirdPartyProviderHintEmail',
-                            ),
-                            textInputAction: TextInputAction.done,
-                            controller: TextEditingController(
-                              text: _email,
-                            ),
-                            enabled: Database.providerId == null,
-                            onChanged: (value) => _email = value,
+                        TextField(
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            labelText: 'Email$_thirdPartyProviderHintEmail',
                           ),
+                          textInputAction: TextInputAction.done,
+                          controller: TextEditingController(
+                            text: _email,
+                          ),
+                          enabled: false,
+                          onChanged: (value) => _email = value,
                         ),
                         const SizedBox(height: _itemSpacer),
-                        Focus(
-                          onFocusChange: _onGroupChanged,
-                          child: TextField(
-                            decoration: InputDecoration(
-                              suffix: _groupIdChanging ? _textProgress : null,
-                              border: const OutlineInputBorder(),
-                              labelText: 'Group',
-                            ),
-                            textInputAction: TextInputAction.done,
-                            controller: TextEditingController(
-                              text: _groupId,
-                            ),
-                            enabled: !_groupIdChanging,
-                            onChanged: (value) => _groupId = value,
-                          ),
+                        GroupSelectionField(
+                          groupId: _groupId,
+                          groupName: _groupName,
+                          clearHintOnConfirm: true,
+                          enabled: !_groupIdChanging,
+                          suffix: _groupIdChanging ? _textProgress : null,
+                          suggestionBackgroundColor: Themes.grayLight,
+                          onGroupNameChanged: (groupName, groupId) {
+                            _groupName = groupName;
+                            _groupId = groupId;
+                          },
+                          onSelectionConfirmed: (groupName, groupId) async {
+                            _groupName = groupName;
+                            _groupId = groupId;
+
+                            if (Database.userId != null &&
+                                Database.userName != null &&
+                                _groupId != Database.groupId) {
+                              setState(() {
+                                _groupIdChanging = true;
+                              });
+
+                              await Shop.cancelUserGroupUpdates();
+
+                              var group = await Group.switchGroup(
+                                groupName,
+                                groupId,
+                                Database.userId!,
+                                Database.userName!,
+                              );
+                              _groupId = group.groupId;
+
+                              Shop.initializeUserGroupUpdates();
+
+                              // clarify that an update is being applied
+                              await Future.delayed(_artificialDelay);
+
+                              setState(() {
+                                _groupIdChanging = false;
+                              });
+                            }
+                          },
                         ),
                         const SizedBox(height: _itemSpacer),
                         TextButton(
@@ -157,6 +183,7 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             ),
                           ),
                         ),
+                        /*
                         TextButton(
                           onPressed: () {
                             // Payment.processPayment("sb-1nk43y26329305@business.example.com", 12);
@@ -184,11 +211,12 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                               ),
                             );
                           },
-                          child: Text(
+                          child: const Text(
                             'Pay with Paypal',
                             textAlign: TextAlign.center,
                           ),
                         ),
+                        */
                       ],
                     )),
               ),
@@ -206,11 +234,10 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        onPressed: () {
-                          // sign out logic is handled by listener in main
-                          FirebaseAuth.instance.signOut().then((value) {
-                            widget.onRemoveOverlay();
-                          });
+                        onPressed: () async {
+                          await Shop.cancelUserGroupUpdates();
+                          await FirebaseAuth.instance.signOut();
+                          widget.onRemoveOverlay();
                         },
                         child: const Text(
                           'Log out',
@@ -262,34 +289,10 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
       Database.userName = _userName;
       await Database.userReference.child('name').set(_userName);
       // clarify that an update is being applied
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(_artificialDelay);
 
       setState(() {
         _userNameChanging = false;
-      });
-    }
-  }
-
-  Future<void> _onGroupChanged(bool hasFocus) async {
-    if (!hasFocus && (_groupId.isNotEmpty) && _groupId != Database.groupId) {
-      setState(() {
-        _groupIdChanging = true;
-      });
-
-      var oldReference = Database.userReference;
-      var snapshot = await oldReference.get();
-      Database.groupId = _groupId;
-      await Database.userReference.set(snapshot.value);
-      await oldReference.remove();
-
-      Shop.cancelGroupSubscriptions();
-      Shop.subscribeToGroupEvents();
-
-      // clarify that an update is being applied
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      setState(() {
-        _groupIdChanging = false;
       });
     }
   }

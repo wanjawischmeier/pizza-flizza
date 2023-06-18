@@ -1,12 +1,13 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:pizza_flizza/database/database.dart';
 
 class Group {
   int groupId;
   String groupName;
-  List<String> users;
+  Map<String, String> users;
 
   Group(
     this.groupId,
@@ -27,34 +28,36 @@ class Group {
 
   static final _groups = <int, Group>{};
 
-  static List<String> parseUsers(List? rawUsers) {
-    var users = <String>[];
+  static void _parseAndAddGroup(String? key, Map? group) {
+    if (key != null && group != null) {
+      int id = int.parse(key);
+      var rawUsers = group['users'] as Map?;
+      var users = <String, String>{};
 
-    if (rawUsers != null) {
-      for (String userId in rawUsers) {
-        users.add(userId);
+      if (rawUsers != null) {
+        rawUsers.forEach((userId, userName) {
+          if (userId != null) {
+            users[userId] = userName;
+          }
+        });
       }
-    }
 
-    return users;
+      _groups[id] = Group(
+        id,
+        group['name'],
+        users,
+      );
+
+      _groupsUpdatedController.add(_groups);
+    }
   }
 
-  static void initializeGroupUpdates() {
+  static Future<void> initializeGroupUpdates() async {
     onGroupUpdated(DatabaseEvent event) {
-      String? key = event.snapshot.key;
-      var group = event.snapshot.value as Map?;
-
-      if (key != null && group != null) {
-        int id = int.parse(key);
-
-        _groups[id] = Group(
-          id,
-          group['name'],
-          parseUsers(group['users']),
-        );
-
-        _groupsUpdatedController.add(_groups);
-      }
+      _parseAndAddGroup(
+        event.snapshot.key,
+        event.snapshot.value as Map?,
+      );
     }
 
     onGroupRemoved(DatabaseEvent event) {
@@ -73,6 +76,12 @@ class Group {
         reference.onChildChanged.listen(onGroupUpdated);
     _groupsDataRemovedSubscription =
         reference.onChildRemoved.listen(onGroupRemoved);
+
+    var snapshot = await reference.get();
+    var groups = snapshot.value as Map?;
+    groups?.forEach((key, group) {
+      _parseAndAddGroup(key, group);
+    });
   }
 
   static Future<void> cancelGroupUpdates() async {
@@ -85,30 +94,90 @@ class Group {
     _groupsDataRemovedSubscription = null;
   }
 
-  static Future<int> createGroup(String groupName) async {
-    int id = DateTime.now().millisecondsSinceEpoch;
+  /// Initializes a group's entry in the local database and cloud.
+  /// Can ONLY be called if an entry does not already exist.
+  /// Returns the created group's id.
+  static Future<Group> initializeGroupWithUser(
+      String groupName, String userId, String userName) async {
+    var group = Group(
+      DateTime.now().millisecondsSinceEpoch,
+      groupName,
+      {userId: userName},
+    );
 
-    _groups[id] = Group(id, groupName, []);
-
-    await Database.realtime.child('groups/$id').set({
+    _groups[group.groupId] = group;
+    await Database.realtime.child('groups/${group.groupId}').set({
       'name': groupName,
+      'users': {userId: userName},
     });
 
-    return id;
+    return group;
   }
 
-  static Future<void> joinGroup(
-      int groupId, String userId, String userName) async {
-    var reference = Database.realtime.child('groups/$groupId/users');
-    var snapshot = await reference.get();
-    var users = snapshot.value as List?;
-
-    if (users == null) {
-      await reference.child('0').set(userId);
-    } else if (!users.contains(userId)) {
-      await reference.child(users.length.toString()).set(userId);
+  static Future<Group> joinGroup(
+      String groupName, int? groupId, String userId, String userName) async {
+    if (FirebaseAuth.instance.currentUser?.uid != userId) {
+      // the user does not have the required database access
+      throw Exception(
+        "Can't join the group, the user associated with the userId has to be signed in",
+      );
     }
 
-    Database.realtime.child('users/$groupId/$userId/name').set(userName);
+    Group? group;
+
+    if (groupId == null) {
+      // no existing group referenced, create and initialize group
+      group = await initializeGroupWithUser(groupName, userId, userName);
+      groupId = group.groupId;
+    } else {
+      // check wether group exists in database
+      group = _groups[groupId];
+
+      if (group == null) {
+        // for some reason an id is passed that does not exist in the database
+        // discard it and create a new one
+        group = await initializeGroupWithUser(groupName, userId, userName);
+        _groups[groupId] = group;
+        groupId = group.groupId;
+      } else {
+        group.users[userId] = userName;
+
+        // we don't have write access to the whole group
+        // only write users entry
+        await Database.realtime
+            .child('groups/$groupId/users/$userId')
+            .set(userName);
+      }
+    }
+
+    return group;
+  }
+
+  static Future<Group> switchGroup(String newGroupName, int? newGroupId,
+      String userId, String userName) async {
+    Group? oldGroup = findUserGroup(userId);
+    if (oldGroup != null) {
+      if (oldGroup.groupId == newGroupId) {
+        return oldGroup;
+      }
+
+      if (oldGroup.users.length <= 1) {
+        // the group is empty apart from the current user, remove it
+        await Database.realtime.child('groups/${oldGroup.groupId}').remove();
+      } else {
+        // only remove the current user
+        await Database.realtime
+            .child('groups/${oldGroup.groupId}/users/$userId')
+            .remove();
+      }
+    }
+
+    return await joinGroup(newGroupName, newGroupId, userId, userName);
+  }
+
+  static Group? findUserGroup(String userId) {
+    return _groups.values
+        .where((group) => group.users.containsKey(userId))
+        .firstOrNull;
   }
 }

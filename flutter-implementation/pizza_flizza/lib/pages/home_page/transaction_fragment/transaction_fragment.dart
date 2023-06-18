@@ -39,21 +39,20 @@ class _TransactionFragmentState extends State<TransactionFragment> {
 
       String fulfillerName = 'Unknown Fulfiller';
       String userName = 'Unknown User';
-      String? currentUserName = Database.userName;
       Future<void> future;
 
-      if (fulfillerId == Database.userId && currentUserName != null) {
+      if (fulfillerId == Database.userId && Database.userName != null) {
         // if the user is
-        fulfillerName = currentUserName;
+        fulfillerName = Database.userName!;
         future = Database.getUserName(userId).then((name) {
           userName = name;
         });
-      } else if (currentUserName != null) {
+      } else if (Database.userName != null) {
         // userId being Database.userId is implied
         future = Database.getUserName(fulfillerId).then((name) {
           fulfillerName = name;
         });
-        userName = currentUserName;
+        userName = Database.userName!;
       } else {
         var fulfillerFuture = Database.getUserName(fulfillerId).then((name) {
           fulfillerName = name;

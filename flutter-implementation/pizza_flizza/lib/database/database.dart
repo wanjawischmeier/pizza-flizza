@@ -9,8 +9,8 @@ class Database {
   static var realtime = FirebaseDatabase.instance.ref();
 
   static const String imageResolution = '256px';
-  static late String groupId, userId;
-  static String? userName, userEmail, providerId;
+  static String? userId, userName, userEmail, providerId, groupName;
+  static int? groupId;
 
   static DatabaseReference get groupReference =>
       Database.realtime.child('users/${Database.groupId}');

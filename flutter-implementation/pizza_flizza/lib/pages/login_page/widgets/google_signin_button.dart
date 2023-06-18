@@ -5,7 +5,7 @@ import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/login_page/widgets/group_selection_dialog.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
-typedef OnGoogleSignInComplete = void Function(String displayName, User user);
+typedef OnGoogleSignInComplete = Future<void> Function(User user);
 
 // based on: https://gist.github.com/sbis04/21e6ca27f2336a15cb6c5f704415ecd9
 class GoogleSignInButton extends StatefulWidget {
@@ -40,7 +40,6 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
           ),
         ),
         onPressed: () async {
-          /*
           setState(() {
             _isSigningIn = true;
           });
@@ -71,26 +70,13 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
           User? user = credential.user;
           if (user == null) {
             await FirebaseAuth.instance.signOut();
-            return;
+          } else {
+            await widget.onGoogleSignInComplete?.call(user);
           }
 
-          widget.onGoogleSignInComplete?.call(
-            googleUser.displayName ?? 'Undefined Username',
-            user,
-          );
-          */
-          showDialog(
-            context: context,
-            builder: ((context) {
-              return GroupSelectionDialog(
-                onSelectionConfirmed: (groupName, groupId) {
-                  _groupName = groupName;
-                  _groupId = groupId;
-                  Navigator.of(context).pop();
-                },
-              );
-            }),
-          );
+          setState(() {
+            _isSigningIn = false;
+          });
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
