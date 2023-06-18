@@ -107,8 +107,9 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       backgroundColor: Themes.grayMid,
       accentColor: color,
       id: timestamp,
-      header:
-          'Bought $preposition $credit\n${order.timeFormatted} on ${order.dateFormatted}\nat ${order.shopName}',
+      header: 'Bought $preposition $credit',
+      subHeader:
+          '${order.timeFormatted} on ${order.dateFormatted} at ${order.shopName}',
       content: order.itemsFormatted,
       trailing: Helper.formatPrice(order.price),
       icon: Icon(iconData),

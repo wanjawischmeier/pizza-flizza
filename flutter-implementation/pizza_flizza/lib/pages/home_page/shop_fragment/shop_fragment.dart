@@ -309,7 +309,7 @@ class _ShopFragmentState extends State<ShopFragment>
                                     ],
                                   ),
                                 ),
-                                const Expanded(
+                                Expanded(
                                   /*
                                   child: Align(
                                     alignment: Alignment.bottomCenter,
@@ -342,7 +342,10 @@ class _ShopFragmentState extends State<ShopFragment>
                                   child: Text(
                                     'shop information\ncoming soon :)',
                                     textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 18),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white.withOpacity(0.5),
+                                    ),
                                   ),
                                 ),
                               ],

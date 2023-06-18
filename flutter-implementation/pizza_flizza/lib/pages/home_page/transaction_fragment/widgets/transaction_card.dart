@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/other/theme.dart';
 
 typedef OnDismiss = void Function(Object id);
 
@@ -9,6 +10,7 @@ class TransactionCardWidget extends StatelessWidget {
   final Color accentColor;
   final Object id;
   final String header, content, trailing;
+  final String? subHeader;
   final Icon? icon;
   final bool dismissable;
   final OnDismiss? onDismiss;
@@ -19,6 +21,7 @@ class TransactionCardWidget extends StatelessWidget {
     required this.accentColor,
     required this.id,
     required this.header,
+    this.subHeader,
     required this.content,
     required this.trailing,
     this.icon,
@@ -39,11 +42,25 @@ class TransactionCardWidget extends StatelessWidget {
               children: [
                 Container(
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.only(bottom: borderRadius),
                   child: Text(
                     header,
                     style: const TextStyle(fontSize: 18),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: borderRadius),
+                  child: subHeader == null
+                      ? Container()
+                      : Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            subHeader!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.5),
+                            ),
+                          ),
+                        ),
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
