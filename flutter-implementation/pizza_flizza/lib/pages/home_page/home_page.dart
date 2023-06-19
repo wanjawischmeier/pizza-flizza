@@ -1,4 +1,5 @@
 import 'package:cached_firestorage/lib.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/pages/home_page/widgets/profile_overlay.dart';
@@ -32,19 +33,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   late List<BottomNavigationBarItem> _bottomNavigationBarItems;
 
-  static const Map<String, Tuple3<IconData, AppBarType, Widget>>
+  static final Map<String, Tuple3<IconData, AppBarType, Widget>>
       _widgetOptions = {
-    'Order': Tuple3(
+    'home.options.order'.tr(): const Tuple3(
       Icons.online_prediction_rounded,
       AppBarType.location,
       OrderFragment(),
     ),
-    'Shop': Tuple3(
+    'home.options.shop'.tr(): const Tuple3(
       Icons.shop_2,
       AppBarType.location,
       ShopFragment(),
     ),
-    'Transactions': Tuple3(
+    'home.options.transactions'.tr(): const Tuple3(
       Icons.transcribe_sharp,
       AppBarType.name,
       TransactionFragment(),

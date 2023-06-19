@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_firestorage/lib.dart';
 import 'package:pizza_flizza/database/database.dart';
@@ -361,8 +362,8 @@ class _ShopFragmentState extends State<ShopFragment>
                           outerColor: Themes.grayLight,
                           animationDuration: const Duration(milliseconds: 100),
                           text: _state == ShopState.noOrders
-                              ? 'No open orders'
-                              : 'Slide to shop',
+                              ? 'shop.no_open_orders'.tr()
+                              : 'shop.slide_to_shop'.tr(),
                           onSubmit: () {
                             return _controller.reverse();
                           },

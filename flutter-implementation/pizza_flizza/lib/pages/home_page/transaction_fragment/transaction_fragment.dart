@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/order.dart';
@@ -37,8 +37,8 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       });
       var date = DateTime.fromMillisecondsSinceEpoch(latestChange);
 
-      String fulfillerName = 'Unknown Fulfiller';
-      String userName = 'Unknown User';
+      String fulfillerName = 'transaction.unknown_fulfiller'.tr();
+      String userName = 'transaction.unknown_user'.tr();
       Future<void> future;
 
       if (fulfillerId == Database.userId && Database.userName != null) {
@@ -85,21 +85,21 @@ class _TransactionFragmentState extends State<TransactionFragment> {
     var timestamp = orderEntry.key, order = orderEntry.value;
     bool dismissable;
     Color color;
-    String preposition, credit;
+    String messageTemplate, credit;
     IconData? iconData;
 
     if (order.fulfillerId == Database.userId) {
       // order fulfilled by user
       dismissable = true;
       color = Themes.cream;
-      preposition = 'for';
+      messageTemplate = 'transaction.bought_for';
       credit = order.userName;
       iconData = Icons.check;
     } else {
       // order placed by user
       color = Themes.grayLight;
       dismissable = false;
-      preposition = 'by';
+      messageTemplate = 'transaction.bought_by';
       credit = order.fulfillerName;
     }
 
@@ -107,9 +107,10 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       backgroundColor: Themes.grayMid,
       accentColor: color,
       id: timestamp,
-      header: 'Bought $preposition $credit',
-      subHeader:
-          '${order.timeFormatted} on ${order.dateFormatted} at ${order.shopName}',
+      header: messageTemplate.tr(args: [credit]),
+      subHeader: 'transaction.date_location'.tr(
+        args: [order.timeFormatted, order.dateFormatted, order.shopName],
+      ),
       content: order.itemsFormatted,
       trailing: Helper.formatPrice(order.price),
       icon: Icon(iconData),
@@ -135,8 +136,9 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       backgroundColor: Themes.grayMid,
       accentColor: Themes.grayMid,
       id: timestamp,
-      header:
-          '${order.timeFormatted} on ${order.dateFormatted}\nat ${order.shopName}',
+      header: 'transaction.date_location_newline'.tr(
+        args: [order.timeFormatted, order.dateFormatted, order.shopName],
+      ),
       content: order.itemsFormatted,
       trailing: Helper.formatPrice(order.price),
       dismissable: false,
@@ -205,9 +207,9 @@ class _TransactionFragmentState extends State<TransactionFragment> {
           ),
           padding: const EdgeInsets.all(16),
           child: const Text(
-            'No Transactions',
+            'transaction.no_transactions',
             style: TextStyle(fontSize: 24),
-          ),
+          ).tr(),
         ),
       );
     }
@@ -233,16 +235,16 @@ class _TransactionFragmentState extends State<TransactionFragment> {
               _historyUser.clear();
               Shop.clearUserHistory();
             },
-            child: const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Clear History',
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: const Text(
+                'transaction.clear_history',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.normal,
                   color: Colors.white,
                 ),
-              ),
+              ).tr(),
             ),
           );
         } else {

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
@@ -26,7 +27,7 @@ class _GroupSelectionDialogState extends State<GroupSelectionDialog> {
         borderRadius: BorderRadius.circular(16),
       ),
       backgroundColor: Themes.grayMid,
-      title: const Text('Select a group'),
+      title: const Text('group_selection.header').tr(),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -66,12 +67,12 @@ class _GroupSelectionDialogState extends State<GroupSelectionDialog> {
                         widget.onSelectionConfirmed?.call(_groupName, _groupId);
                       },
                       child: const Text(
-                        'Continue',
+                        'group_selection.continue',
                         style: TextStyle(
                           fontSize: 20,
                           color: Colors.white,
                         ),
-                      ),
+                      ).tr(),
                     ),
                   ),
                 ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/database.dart';
@@ -80,14 +81,14 @@ class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Flexible(
-                          child: Text(
-                            'Your Order',
+                        Flexible(
+                          child: const Text(
+                            'shopping_cart.header',
                             style: TextStyle(
                               fontSize: 24,
                               decoration: TextDecoration.none,
                             ),
-                          ),
+                          ).tr(),
                         ),
                         Container(
                           decoration: BoxDecoration(
@@ -169,12 +170,12 @@ class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
                   ),
                   onPressed: widget.onRemoveOverlay,
                   child: const Text(
-                    'Close',
+                    'shopping_cart.close',
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.white,
                     ),
-                  ),
+                  ).tr(),
                 ),
               ),
             ],

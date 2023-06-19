@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -87,16 +88,16 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Image.asset('assets/google_logo.png', height: 35),
-                      const Padding(
-                        padding: EdgeInsets.only(left: 10),
-                        child: Text(
-                          'Sign in with Google',
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: const Text(
+                          'login.actions.sign_in_with_google',
                           style: TextStyle(
                             fontSize: 20,
                             color: Themes.grayDark,
                             fontWeight: FontWeight.w600,
                           ),
-                        ),
+                        ).tr(),
                       )
                     ],
                   ),

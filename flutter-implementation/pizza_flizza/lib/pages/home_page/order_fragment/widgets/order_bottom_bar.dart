@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
@@ -132,12 +133,12 @@ class _OrderBottomBarState extends State<OrderBottomBar>
                     ),
                   ),
                   onPressed: Shop.pushCurrentOrder,
-                  child: const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      'Order',
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: const Text(
+                      'order.button',
                       style: TextStyle(fontSize: 18),
-                    ),
+                    ).tr(),
                   ),
                 ),
               ),

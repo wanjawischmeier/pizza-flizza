@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -23,9 +24,9 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
   static const double _itemSpacer = 16;
   static const _artificialDelay = Duration(milliseconds: 500);
   final String _thirdPartyProviderHintEmail =
-      (Database.providerId == 'password')
+      (Database.providerId == null || Database.providerId == 'password')
           ? ''
-          : ' (specified by ${Database.providerId})';
+          : 'profile_overlay.email_specifier'.tr(args: [Database.providerId!]);
   String? _email = Database.userEmail;
   String? _userName;
   String? _groupName = Database.groupName;
@@ -60,17 +61,17 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Your Profile',
+                  padding: const EdgeInsets.all(16),
+                  child: const Text(
+                    'profile_overlay.header',
                     style: TextStyle(
                       fontSize: 24,
                       decoration: TextDecoration.none,
                     ),
-                  ),
+                  ).tr(),
                 ),
               ),
               Expanded(
@@ -85,7 +86,7 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             decoration: InputDecoration(
                               suffix: _userNameChanging ? _textProgress : null,
                               border: const OutlineInputBorder(),
-                              labelText: 'Username',
+                              labelText: 'login.fields.username.title'.tr(),
                             ),
                             textInputAction: TextInputAction.done,
                             controller: TextEditingController(
@@ -99,7 +100,8 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                         TextField(
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
-                            labelText: 'Email$_thirdPartyProviderHintEmail',
+                            labelText:
+                                '${"login.fields.email.title".tr()}$_thirdPartyProviderHintEmail',
                           ),
                           textInputAction: TextInputAction.done,
                           controller: TextEditingController(
@@ -161,26 +163,27 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                                       .sendPasswordResetEmail(email: _email!)
                                       .then((value) {
                                     Fluttertoast.showToast(
-                                      msg:
-                                          'An email to reset the password has been send to your inbox',
+                                      msg: 'login.actions.forgot_password.send'
+                                          .tr(),
                                       toastLength: Toast.LENGTH_LONG,
                                     );
                                   }).catchError(
                                     (error) {
                                       Fluttertoast.showToast(
                                         msg:
-                                            'Failed to send password reset email',
+                                            'login.actions.forgot_password.failed'
+                                                .tr(),
                                         toastLength: Toast.LENGTH_LONG,
                                       );
                                     },
                                   );
                                 },
                           child: const Text(
-                            'Reset password',
+                            'login.actions.forgot_password.header',
                             style: TextStyle(
                               color: Colors.white,
                             ),
-                          ),
+                          ).tr(),
                         ),
                         /*
                         TextButton(
@@ -239,12 +242,12 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                           widget.onRemoveOverlay();
                         },
                         child: const Text(
-                          'Log out',
+                          'profile_overlay.log_out',
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.white,
                           ),
-                        ),
+                        ).tr(),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -259,12 +262,12 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                         ),
                         onPressed: widget.onRemoveOverlay,
                         child: const Text(
-                          'Close',
+                          'profile_overlay.close',
                           style: TextStyle(
                             fontSize: 20,
                             color: Colors.white,
                           ),
-                        ),
+                        ).tr(),
                       ),
                     ),
                   ],

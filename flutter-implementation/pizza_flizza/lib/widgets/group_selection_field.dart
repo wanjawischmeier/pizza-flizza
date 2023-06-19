@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:pizza_flizza/database/group.dart';
@@ -74,13 +75,13 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
         decoration: InputDecoration(
           border: const OutlineInputBorder(),
           suffix: widget.suffix,
-          labelText: 'Group',
+          labelText: 'login.fields.group.title'.tr(),
           helperText: _groupNameHint,
           errorText: widget.error,
           suffixIcon: (widget.suffix == null)
               ? _groupActionIcon ?? const SizedBox(height: 0)
               : null,
-          hintText: 'Enter the name of a group',
+          hintText: 'login.fields.group.hint'.tr(),
         ),
         enabled: widget.enabled,
         controller: _groupNameController,
@@ -111,12 +112,12 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
           if (exactlyMatching.isEmpty) {
             _groupId = null;
             _groupActionIcon = const Icon(Icons.add);
-            _groupNameHint = 'A new group will be created';
+            _groupNameHint = 'login.fields.group.hint_create'.tr();
           } else {
             _matchingGroups.clear();
             _groupId = exactlyMatching.firstOrNull?.groupId;
             _groupActionIcon = const Icon(Icons.add_reaction);
-            _groupNameHint = 'You will be added to the group';
+            _groupNameHint = 'login.fields.group.hint_add'.tr();
           }
 
           setState(() {});
@@ -142,7 +143,8 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
           leading: const Icon(Icons.group),
           title: Text(suggestion.groupName),
           subtitle: Text(
-              '${suggestion.users.length} member${suggestion.users.length == 1 ? '' : 's'}'),
+            'login.fields.group.subtitle_${suggestion.users.length == 1 ? 'singular' : 'plural'}',
+          ).tr(args: [suggestion.users.length.toString()]),
         );
       },
       noItemsFoundBuilder: (context) => const SizedBox(),
@@ -158,7 +160,7 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
             _groupNameHint = null;
           } else {
             _groupActionIcon = const Icon(Icons.add_reaction);
-            _groupNameHint = 'You will be added to the group';
+            _groupNameHint = 'login.fields.group.hint_add'.tr();
           }
         });
 

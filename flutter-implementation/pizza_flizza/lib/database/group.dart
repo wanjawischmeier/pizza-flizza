@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:pizza_flizza/database/database.dart';
@@ -118,9 +119,7 @@ class Group {
       String groupName, int? groupId, String userId, String userName) async {
     if (FirebaseAuth.instance.currentUser?.uid != userId) {
       // the user does not have the required database access
-      throw Exception(
-        "Can't join the group, the user associated with the userId has to be signed in",
-      );
+      throw Exception('database.not_signed_in'.tr());
     }
 
     Group? group;

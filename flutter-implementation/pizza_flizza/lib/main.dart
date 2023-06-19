@@ -127,7 +127,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       group = Group.findUserGroup(user.uid);
       if (group == null) {
         Fluttertoast.showToast(
-          msg: 'Profile corrupted : Not asssociated with a group',
+          msg: 'login.errors.no_group_create'.tr(),
           toastLength: Toast.LENGTH_LONG,
         );
         await FirebaseAuth.instance.signOut();
@@ -148,7 +148,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
     if (userSnapshot.value == null) {
       FirebaseAuth.instance.signOut();
       Fluttertoast.showToast(
-        msg: 'Profile corrupted : No username specified',
+        msg: 'login.errors.no_username_create'.tr(),
         toastLength: Toast.LENGTH_LONG,
       );
     } else {

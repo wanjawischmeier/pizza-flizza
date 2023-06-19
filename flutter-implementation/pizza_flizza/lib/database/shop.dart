@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:pizza_flizza/other/helper.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 
@@ -37,7 +37,7 @@ class Shop {
   }
 
   static String _getShopName(String shopId) {
-    return shops[shopId]?['name'] ?? 'Unknown Shop';
+    return shops[shopId]?['name'] ?? 'database.unknown_shop'.tr();
   }
 
   static Map getItemInfo(String shopId, String itemId) {
@@ -54,7 +54,7 @@ class Shop {
     }
 
     return {
-      'name': 'Unknown Item Name',
+      'name': 'database.unknown_item_name'.tr(),
       'category': 'unknown_category_id',
       'price': '0',
       'bought': '0',
@@ -374,7 +374,8 @@ class Shop {
       // list product images for the shop
       var imagesSnapshot = await Database.storage
           .child(
-              'images/${Database.imageResolution}/shops/$currentShopId/items')
+            'images/${Database.imageResolution}/shops/$currentShopId/items',
+          )
           .listAll();
       _itemReferences[currentShopId] = imagesSnapshot.items;
 

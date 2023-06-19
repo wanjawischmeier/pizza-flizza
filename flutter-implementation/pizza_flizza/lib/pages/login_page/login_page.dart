@@ -132,11 +132,14 @@ class _LoginPageState extends State<LoginPage> {
                                   child: TextField(
                                     decoration: InputDecoration(
                                       border: const OutlineInputBorder(),
-                                      labelText: 'login.fields.username.title',
+                                      labelText:
+                                          'login.fields.username.title'.tr(),
                                       errorText: _userNameError,
                                       hintText: _loginMode
                                           ? 'login.fields.username.hint_login'
-                                          : 'login.fields.username.hint_create',
+                                              .tr()
+                                          : 'login.fields.username.hint_create'
+                                              .tr(),
                                     ),
                                     textInputAction: TextInputAction.next,
                                     onChanged: (value) {
@@ -227,12 +230,10 @@ class _LoginPageState extends State<LoginPage> {
                                     child: Text(
                                       _loginMode
                                           ? 'login.actions.mode_switch.create'
-                                              .tr()
-                                          : 'login.actions.mode_switch.log_in'
-                                              .tr(),
+                                          : 'login.actions.mode_switch.log_in',
                                       style: const TextStyle(
                                           color: Colors.blue, fontSize: 15),
-                                    ),
+                                    ).tr(),
                                   ),
                                 ),
                               ),
@@ -248,14 +249,13 @@ class _LoginPageState extends State<LoginPage> {
                                   alignment: Alignment.centerLeft,
                                   child: TextButton(
                                     onPressed: _resetPassword,
-                                    child: Text(
-                                      'login.actions.forgot_password.header'
-                                          .tr(),
-                                      style: const TextStyle(
+                                    child: const Text(
+                                      'login.actions.forgot_password.header',
+                                      style: TextStyle(
                                         color: Colors.blue,
                                         fontSize: 15,
                                       ),
-                                    ),
+                                    ).tr(),
                                   ),
                                 ),
                               ),
@@ -285,13 +285,13 @@ class _LoginPageState extends State<LoginPage> {
                                   )
                                 : Text(
                                     _loginMode
-                                        ? 'login.actions.go.log_in'.tr()
-                                        : 'login.actions.go.create'.tr(),
+                                        ? 'login.actions.go.log_in'
+                                        : 'login.actions.go.create',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 25,
                                     ),
-                                  ),
+                                  ).tr(),
                           ),
                         ),
                       ]),

@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pizza_flizza/database/item.dart';
@@ -29,7 +30,7 @@ class Database {
       if (snapshot.value != null) {
         return snapshot.value as String;
       } else {
-        return 'Unknown Username';
+        return 'database.unknown_username'.tr();
       }
     });
   }
