@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database/database.dart';
 
 import 'item.dart';
@@ -63,6 +64,23 @@ class FulfilledOrder extends Order {
     super.items,
   );
 
+  FulfilledOrder.fromUserItem(
+    OrderItem item,
+    String currentUserId,
+    String currentUserName,
+    DateTime date,
+  )   : fulfillerId = currentUserId,
+        userId = currentUserId,
+        fulfillerName = currentUserName,
+        userName = currentUserName,
+        timeFormatted = DateFormat.Hm().format(date),
+        dateFormatted = DateFormat('dd.MM.yy').format(date),
+        super(
+          item.shopId,
+          item.shopName,
+          {item.itemId: item},
+        );
+
   DatabaseReference get databaseReference =>
       Database.userReference.child('fulfilled/$shopId/$userId');
 
@@ -107,6 +125,31 @@ class HistoryOrder {
               )),
         );
 
+  HistoryOrder operator +(HistoryOrder other) {
+    Map<String, HistoryItem> newItems = Map.from(items);
+    other.items.forEach((key, value) {
+      var existing = newItems[key];
+
+      if (existing == null) {
+        newItems[key] = value;
+      } else {
+        newItems[key] = HistoryItem(
+          existing.itemName,
+          existing.count + value.count,
+          existing.price + value.price,
+        );
+      }
+    });
+
+    return HistoryOrder(
+      other.shopId,
+      other.shopName,
+      other.timeFormatted,
+      other.dateFormatted,
+      newItems,
+    );
+  }
+
   // TODO: remove this mess in favor of inheritance
   double get price {
     double price = 0;
@@ -129,5 +172,16 @@ class HistoryOrder {
     });
 
     return result.substring(0, result.length - 1);
+  }
+
+  /// itemId, count
+  Map<String, int> get itemsParsed {
+    var parsed = <String, int>{};
+
+    items.forEach((itemId, item) {
+      parsed[itemId] = item.count;
+    });
+
+    return parsed;
   }
 }

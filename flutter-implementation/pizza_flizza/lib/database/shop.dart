@@ -408,7 +408,7 @@ class Shop {
   }
 
   static void initializeUserGroupUpdates() {
-    onGroupUpdated(event) {
+    onChildUpdated(event) {
       String updatedUserId = event.snapshot.key;
       Map? data = event.snapshot.value;
       if (data == null) {
@@ -420,10 +420,33 @@ class Shop {
       parseHistoryUserOrders(updatedUserId, data['history']);
     }
 
+    onChildRemoved(event) {
+      String updatedUserId = event.snapshot.key;
+      Map? data = event.snapshot.value;
+      if (data == null || data.isEmpty || updatedUserId != Database.userId) {
+        return;
+      }
+
+      if (data.containsKey('orders')) {
+        _orders.clear();
+        _ordersUpdatedController.add(_orders);
+      }
+
+      if (data.containsKey('fulfilled')) {
+        _fulfilled.clear();
+        _fulfilledUpdatedController.add(_fulfilled);
+      }
+
+      if (data.containsKey('history')) {
+        _history.clear();
+        _historyUpdatedController.add(_history);
+      }
+    }
+
     var users = Database.realtime.child('users/${Database.groupId}');
-    _groupDataAddedSubscription = users.onChildAdded.listen(onGroupUpdated);
-    _groupDataChangedSubscription = users.onChildChanged.listen(onGroupUpdated);
-    _groupDataRemovedSubscription = users.onChildRemoved.listen(onGroupUpdated);
+    _groupDataAddedSubscription = users.onChildAdded.listen(onChildUpdated);
+    _groupDataChangedSubscription = users.onChildChanged.listen(onChildUpdated);
+    _groupDataRemovedSubscription = users.onChildRemoved.listen(onChildRemoved);
   }
 
   static Future<void> cancelUserGroupUpdates() async {
@@ -574,12 +597,18 @@ class Shop {
       if (historyShop == null) {
         historyShop = {latestChange: historyOrder};
       } else {
+        var oldOrder = historyShop[latestChange];
+
+        if (oldOrder != null) {
+          historyOrder += oldOrder;
+        }
+
         historyShop[latestChange] = historyOrder;
       }
     }
     var historyFuture = Database.userReference
         .child('history/${order.shopId}/$latestChange')
-        .set(order.itemsParsed);
+        .set(historyOrder.itemsParsed);
 
     _fulfilledUpdatedController.add(_fulfilled);
     _historyUpdatedController.add(_history);
@@ -587,14 +616,26 @@ class Shop {
   }
 
   static Future<void>? fulfillItem(OrderItem item, int count) {
-    if (Database.userId == null) {
+    if (Database.userId == null || Database.userName == null) {
       return null;
     }
 
     var futures = <Future>[];
 
     // update fulfilled, skip fulfilling own order
-    if (item.userId != Database.userId) {
+    if (item.userId == Database.userId) {
+      var newItem = OrderItem.copy(item);
+      newItem.count = count;
+
+      archiveFulfilledOrder(
+        FulfilledOrder.fromUserItem(
+          newItem,
+          Database.userId!,
+          Database.userName!,
+          DateTime.now(),
+        ),
+      );
+    } else {
       int fulfilledCount = _fulfilled[Database.userId]?[item.shopId]
                   ?[item.userId]
               ?.items[item.itemId]
@@ -678,7 +719,9 @@ class Shop {
     return Future.wait(futures);
   }
 
-  static Future<void> clearUserHistory() {
+  static Future<void> clearUserHistory() async {
+    _history.clear();
+    _historyUpdatedController.add(_history);
     return Database.userReference.child('history').remove();
   }
 }

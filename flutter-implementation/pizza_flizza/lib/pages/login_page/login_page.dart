@@ -132,11 +132,11 @@ class _LoginPageState extends State<LoginPage> {
                                   child: TextField(
                                     decoration: InputDecoration(
                                       border: const OutlineInputBorder(),
-                                      labelText: 'login.fields.password.title',
+                                      labelText: 'login.fields.username.title',
                                       errorText: _userNameError,
                                       hintText: _loginMode
-                                          ? 'login.fields.password.hint_login'
-                                          : 'login.fields.password.hint_create',
+                                          ? 'login.fields.username.hint_login'
+                                          : 'login.fields.username.hint_create',
                                     ),
                                     textInputAction: TextInputAction.next,
                                     onChanged: (value) {
