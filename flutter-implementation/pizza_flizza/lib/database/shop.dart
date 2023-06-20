@@ -134,7 +134,15 @@ class Shop {
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
-  static void parseOpenUserOrders(String userId, Map? userOrders) {
+  static Future<void> parseOpenUserOrders(
+      String userId, Map? userOrders) async {
+    String userName;
+    if (userId == Database.userId && Database.userName != null) {
+      userName = Database.userName!;
+    } else {
+      userName = await Database.getUserName(userId);
+    }
+
     // clear map in case of empty orders
     if (userOrders == null) {
       if (_orders.containsKey(userId)) {
@@ -177,6 +185,7 @@ class Shop {
           itemId,
           shopId,
           userId,
+          userName,
           timestamp,
           itemName,
           shopName,
@@ -207,8 +216,15 @@ class Shop {
     }
   }
 
-  static void parseUserFulfilledOrders(
-      String fulfillerId, Map? fulfilledOrders) {
+  static Future<void> parseUserFulfilledOrders(
+      String fulfillerId, Map? fulfilledOrders) async {
+    String fulfillerName;
+    if (fulfillerId == Database.userId && Database.userName != null) {
+      fulfillerName = Database.userName!;
+    } else {
+      fulfillerName = await Database.getUserName(fulfillerId);
+    }
+
     // clear map in case of empty orders
     if (fulfilledOrders == null) {
       if (_fulfilled.containsKey(fulfillerId)) {
@@ -239,6 +255,7 @@ class Shop {
 
       for (var userEntry in fulfilledShop.entries) {
         String userId = userEntry.key;
+        String userName = await Database.getUserName(userId);
         Map fulfilledItems = userEntry.value;
         var items = <String, OrderItem>{};
 
@@ -258,6 +275,7 @@ class Shop {
             itemId,
             shopId,
             userId,
+            userName,
             timestamp,
             itemName,
             shopName,
@@ -275,9 +293,21 @@ class Shop {
           items[itemId] = orderItem;
         }
 
-        _fulfilled[fulfillerId]?[shopId]?[userId] = Order(
+        var latestChange = 0;
+        items.forEach((itemId, item) {
+          if (item.timestamp > latestChange) {
+            latestChange = item.timestamp;
+          }
+        });
+
+        _fulfilled[fulfillerId]?[shopId]?[userId] = FulfilledOrder.fromDate(
+          fulfillerId,
+          userId,
           shopId,
           shopName,
+          fulfillerName,
+          userName,
+          DateTime.fromMillisecondsSinceEpoch(latestChange),
           items,
         );
         log.logOrderItems(items, userId, shopId, fulfillerId);
@@ -424,18 +454,34 @@ class Shop {
     onChildRemoved(event) {
       String updatedUserId = event.snapshot.key;
       Map? data = event.snapshot.value;
-      if (data == null || data.isEmpty || updatedUserId != Database.userId) {
+      if (data == null || data.isEmpty) {
+        return;
+      }
+
+      Map? fulfilled = data['fulfilled'];
+      if (fulfilled != null) {
+        bool containsUser = false;
+        for (Map fulfilledShop in fulfilled.values) {
+          for (String userId in fulfilledShop.keys) {
+            if (userId == Database.userId) {
+              containsUser = true;
+            }
+          }
+        }
+
+        if (containsUser) {
+          _fulfilled.clear();
+          _fulfilledUpdatedController.add(_fulfilled);
+        }
+      }
+
+      if (updatedUserId != Database.userId) {
         return;
       }
 
       if (data.containsKey('orders')) {
         _orders.clear();
         _ordersUpdatedController.add(_orders);
-      }
-
-      if (data.containsKey('fulfilled')) {
-        _fulfilled.clear();
-        _fulfilledUpdatedController.add(_fulfilled);
       }
 
       if (data.containsKey('history')) {
@@ -485,14 +531,16 @@ class Shop {
     _currentTotalController.add(_currentTotal);
   }
 
-  static Future<void>? pushCurrentOrder() {
-    if (Database.userId == null) {
-      return null;
+  static Future<void> pushCurrentOrder() {
+    var userId = Database.userId;
+    var userName = Database.userName;
+    if (userId == null || userName == null) {
+      return Future.delayed(Duration.zero);
     }
 
     var orderData = <String, Map<String, int>>{};
     var items = <String, OrderItem>{};
-    var ordersUser = _orders[Database.userId];
+    var ordersUser = _orders[userId];
     if (ordersUser == null) {
       ordersUser = {
         _currentShopId: Order(
@@ -539,7 +587,8 @@ class Shop {
       items[itemId] = OrderItem(
         itemId,
         _currentShopId,
-        Database.userId!,
+        userId,
+        userName,
         timestamp,
         itemName,
         shopName,
@@ -580,115 +629,112 @@ class Shop {
     var fulfilledFuture = order.databaseReference.remove();
 
     // add to history
-    int latestChange = 0;
-    for (var item in order.items.values) {
-      if (item.timestamp > latestChange) {
-        latestChange = item.timestamp;
-      }
-    }
     var historyOrder = HistoryOrder.fromFulfilledOrder(order);
+    /*
     var historyUser = _history[order.userId];
     if (historyUser == null) {
       historyUser = {
-        order.shopId: {latestChange: historyOrder}
+        order.shopId: {order.timestamp: historyOrder}
       };
     } else {
       var historyShop = historyUser[order.shopId];
 
       if (historyShop == null) {
-        historyShop = {latestChange: historyOrder};
+        historyShop = {order.timestamp: historyOrder};
       } else {
-        var oldOrder = historyShop[latestChange];
+        var oldOrder = historyShop[order.timestamp];
 
         if (oldOrder != null) {
           historyOrder += oldOrder;
         }
 
-        historyShop[latestChange] = historyOrder;
+        historyShop[order.timestamp] = historyOrder;
       }
     }
-    var historyFuture = Database.userReference
-        .child('history/${order.shopId}/$latestChange')
+    */
+
+    var historyFuture = Database.realtime
+        .child(
+            'users/${Database.groupId}/${order.userId}/history/${order.shopId}/${order.timestamp}')
         .set(historyOrder.itemsParsed);
 
     _fulfilledUpdatedController.add(_fulfilled);
-    _historyUpdatedController.add(_history);
+    // _historyUpdatedController.add(_history);
     return Future.wait([fulfilledFuture, historyFuture]);
   }
 
   static Future<void>? fulfillItem(OrderItem item, int count) {
-    if (Database.userId == null || Database.userName == null) {
+    var fulfillerId = Database.userId;
+    var fulfillerName = Database.userName;
+    if (fulfillerId == null || fulfillerName == null) {
       return null;
     }
 
     var futures = <Future>[];
+    var date = DateTime.now();
 
     // update fulfilled, skip fulfilling own order
-    if (item.userId == Database.userId) {
+    if (item.userId == fulfillerId) {
       var newItem = OrderItem.copy(item);
       newItem.count = count;
 
       archiveFulfilledOrder(
         FulfilledOrder.fromUserItem(
           newItem,
-          Database.userId!,
-          Database.userName!,
-          DateTime.now(),
+          fulfillerId,
+          fulfillerName,
+          date,
         ),
       );
     } else {
-      int fulfilledCount = _fulfilled[Database.userId]?[item.shopId]
-                  ?[item.userId]
+      int fulfilledCount = _fulfilled[fulfillerId]?[item.shopId]?[item.userId]
               ?.items[item.itemId]
               ?.count ??
           0;
-      String shopName = _getShopName(item.shopId);
 
-      if (_fulfilled.containsKey(Database.userId)) {
-        if (_fulfilled[Database.userId]!.containsKey(item.shopId)) {
-          if (_fulfilled[Database.userId]![item.shopId]!
-              .containsKey(item.userId)) {
-            _fulfilled[Database.userId]![item.shopId]![item.userId]!
+      var fulfilledOrder = FulfilledOrder.fromDate(
+        fulfillerId,
+        item.userId,
+        item.shopId,
+        item.shopName,
+        fulfillerName,
+        item.userName,
+        date,
+        {item.itemId: OrderItem.copy(item)},
+      );
+
+      if (_fulfilled.containsKey(fulfillerId)) {
+        if (_fulfilled[fulfillerId]!.containsKey(item.shopId)) {
+          if (_fulfilled[fulfillerId]![item.shopId]!.containsKey(item.userId)) {
+            _fulfilled[fulfillerId]![item.shopId]![item.userId]!
                 .items[item.itemId] = OrderItem.copy(item);
           } else {
-            _fulfilled[Database.userId]![item.shopId]![item.userId] = Order(
-              item.shopId,
-              shopName,
-              {item.itemId: OrderItem.copy(item)},
-            );
+            _fulfilled[fulfillerId]![item.shopId]![item.userId] =
+                fulfilledOrder;
           }
         } else {
-          _fulfilled[Database.userId]![item.shopId] = {
-            item.userId: Order(
-              item.shopId,
-              shopName,
-              {item.itemId: OrderItem.copy(item)},
-            ),
+          _fulfilled[fulfillerId]![item.shopId] = {
+            item.userId: fulfilledOrder,
           };
         }
       } else {
-        _fulfilled[Database.userId!] = {
+        _fulfilled[fulfillerId] = {
           item.shopId: {
-            item.userId: Order(
-              item.shopId,
-              shopName,
-              {item.itemId: OrderItem.copy(item)},
-            ),
+            item.userId: fulfilledOrder,
           }
         };
       }
 
-      var fulfilledItem =
-          _fulfilled[Database.userId]![item.shopId]![item.userId]!
-                  .items[item.itemId] ??
-              OrderItem.copy(item);
+      var fulfilledItem = _fulfilled[fulfillerId]![item.shopId]![item.userId]!
+              .items[item.itemId] ??
+          OrderItem.copy(item);
       fulfilledItem.count = fulfilledCount + count;
       // update price!
       fulfilledItem.price = -1;
 
       Map map = {
         'count': fulfilledCount + count,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'timestamp': date.millisecondsSinceEpoch,
       };
 
       var reference = Database.userReference

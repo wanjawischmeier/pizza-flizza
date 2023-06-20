@@ -19,7 +19,7 @@ class ShopItemInfo {
 }
 
 class ShopItem {
-  String itemId, shopId, userId, itemName, shopName;
+  String itemId, shopId, userId, userName, itemName, shopName;
   int count;
   double price;
   ShopItemInfo shopInfo;
@@ -28,6 +28,7 @@ class ShopItem {
     this.itemId,
     this.shopId,
     this.userId,
+    this.userName,
     this.itemName,
     this.shopName,
     this.count,
@@ -38,8 +39,8 @@ class ShopItem {
 class OrderItem extends ShopItem with EquatableMixin {
   int timestamp;
 
-  DatabaseReference get databaseReference =>
-      Database.userReference.child('orders/$shopId/$itemId');
+  DatabaseReference get databaseReference => Database.realtime
+      .child('users/${Database.groupId}/$userId/orders/$shopId/$itemId');
 
   DatabaseReference get shopReference => Database.realtime
       .child('shops/$shopId/items/${shopInfo.categoryId}/$itemId');
@@ -59,6 +60,7 @@ class OrderItem extends ShopItem with EquatableMixin {
     super.itemId,
     super.shopId,
     super.userId,
+    super.userName,
     this.timestamp,
     super.itemName,
     super.shopName,
@@ -72,6 +74,7 @@ class OrderItem extends ShopItem with EquatableMixin {
           order.itemId,
           order.shopId,
           order.userId,
+          order.userName,
           order.itemName,
           order.shopName,
           order.count,

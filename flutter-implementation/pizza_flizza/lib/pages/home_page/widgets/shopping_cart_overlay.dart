@@ -127,6 +127,7 @@ class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
 
                       return TransactionCardWidget(
                         backgroundColor: Themes.grayLight,
+                        secondaryColor: Themes.cream,
                         accentColor: Themes.cream,
                         id: itemId,
                         header: '${item.count}x\t${item.itemName}',

@@ -5,8 +5,7 @@ typedef OnDismiss = void Function(Object id);
 class TransactionCardWidget extends StatelessWidget {
   static const double borderRadius = 8;
 
-  final Color backgroundColor;
-  final Color accentColor;
+  final Color backgroundColor, secondaryColor, accentColor;
   final Object id;
   final String header, content, trailing;
   final String? subHeader;
@@ -17,6 +16,7 @@ class TransactionCardWidget extends StatelessWidget {
   const TransactionCardWidget({
     super.key,
     required this.backgroundColor,
+    required this.secondaryColor,
     required this.accentColor,
     required this.id,
     required this.header,
@@ -43,17 +43,21 @@ class TransactionCardWidget extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     header,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 18),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: borderRadius),
+                  padding: const EdgeInsets.only(top: 4, bottom: borderRadius),
                   child: subHeader == null
                       ? Container()
                       : Container(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             subHeader!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.white.withOpacity(0.5),
@@ -72,10 +76,10 @@ class TransactionCardWidget extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: borderRadius * 2),
+            padding: const EdgeInsets.only(left: 4, right: borderRadius * 2),
             child: Container(
               decoration: BoxDecoration(
-                color: accentColor,
+                color: secondaryColor,
                 borderRadius: BorderRadius.circular(borderRadius),
               ),
               padding: const EdgeInsets.all(borderRadius),

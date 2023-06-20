@@ -24,62 +24,6 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   var _historyUser = <int, HistoryOrder>{};
   final _futures = <Future>[];
 
-  Future<void> filterOrder(
-      String fulfillerId, String userId, Order order) async {
-    // order is relevant if fulfilled or ordered by user
-    if (fulfillerId == Database.userId || userId == Database.userId) {
-      int latestChange = 0;
-
-      order.items.forEach((itemId, item) {
-        if (item.timestamp > latestChange) {
-          latestChange = item.timestamp;
-        }
-      });
-      var date = DateTime.fromMillisecondsSinceEpoch(latestChange);
-
-      String fulfillerName = 'transaction.unknown_fulfiller'.tr();
-      String userName = 'transaction.unknown_user'.tr();
-      Future<void> future;
-
-      if (fulfillerId == Database.userId && Database.userName != null) {
-        // if the user is
-        fulfillerName = Database.userName!;
-        future = Database.getUserName(userId).then((name) {
-          userName = name;
-        });
-      } else if (Database.userName != null) {
-        // userId being Database.userId is implied
-        future = Database.getUserName(fulfillerId).then((name) {
-          fulfillerName = name;
-        });
-        userName = Database.userName!;
-      } else {
-        var fulfillerFuture = Database.getUserName(fulfillerId).then((name) {
-          fulfillerName = name;
-        });
-        var userFuture = Database.getUserName(userId).then((name) {
-          userName = name;
-        });
-        future = Future.wait([fulfillerFuture, userFuture]);
-      }
-
-      return future.then((value) {
-        // use hash to account for possible duplicate itemId's
-        _fulfilledRelevant[order.hashCode] = FulfilledOrder(
-          fulfillerId,
-          userId,
-          order.shopId,
-          order.shopName,
-          fulfillerName,
-          userName,
-          DateFormat.Hm().format(date),
-          DateFormat('dd.MM.yy').format(date),
-          order.items,
-        );
-      });
-    }
-  }
-
   TransactionCardWidget renderFulfilledOrderAt(int index) {
     var orderEntry = _fulfilledRelevant.entries.elementAt(index);
     var timestamp = orderEntry.key, order = orderEntry.value;
@@ -105,6 +49,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
 
     return TransactionCardWidget(
       backgroundColor: Themes.grayMid,
+      secondaryColor: color,
       accentColor: color,
       id: timestamp,
       header: messageTemplate.tr(args: [credit]),
@@ -134,6 +79,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
 
     return TransactionCardWidget(
       backgroundColor: Themes.grayMid,
+      secondaryColor: Themes.grayLight,
       accentColor: Themes.grayMid,
       id: timestamp,
       header: 'transaction.date_location_newline'.tr(
@@ -160,7 +106,10 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       orders.forEach((fulfillerId, ordersFulfiller) {
         ordersFulfiller.forEach((shopId, ordersShop) {
           ordersShop.forEach((userId, order) {
-            _futures.add(filterOrder(fulfillerId, userId, order));
+            // order is relevant if fulfilled or ordered by user
+            if (fulfillerId == Database.userId || userId == Database.userId) {
+              _fulfilledRelevant[order.hashCode] = order;
+            }
           });
         });
       });

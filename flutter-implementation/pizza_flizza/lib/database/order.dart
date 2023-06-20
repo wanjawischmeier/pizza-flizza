@@ -8,7 +8,7 @@ import 'item.dart';
 typedef OrderMap = Map<String, Map<String, Order>>;
 
 /// fulfillerId, shopId, userId
-typedef FulfilledMap = Map<String, Map<String, Map<String, Order>>>;
+typedef FulfilledMap = Map<String, Map<String, Map<String, FulfilledOrder>>>;
 
 /// userId, shopId, timestamp
 typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder>>>;
@@ -51,6 +51,7 @@ class Order {
 class FulfilledOrder extends Order {
   String fulfillerId, userId, fulfillerName, userName;
   String timeFormatted, dateFormatted;
+  int timestamp;
 
   FulfilledOrder(
     this.fulfillerId,
@@ -61,20 +62,44 @@ class FulfilledOrder extends Order {
     this.userName,
     this.timeFormatted,
     this.dateFormatted,
+    this.timestamp,
     super.items,
   );
 
-  FulfilledOrder.fromUserItem(
-    OrderItem item,
-    String currentUserId,
-    String currentUserName,
+  FulfilledOrder.fromDate(
+    String newFulfillerId,
+    String newUserId,
+    String newShopId,
+    String newShopName,
+    String newFulfillerName,
+    String newUserName,
     DateTime date,
-  )   : fulfillerId = currentUserId,
-        userId = currentUserId,
-        fulfillerName = currentUserName,
-        userName = currentUserName,
+    Map<String, OrderItem> items,
+  )   : fulfillerId = newFulfillerId,
+        userId = newUserId,
+        fulfillerName = newFulfillerName,
+        userName = newUserName,
         timeFormatted = DateFormat.Hm().format(date),
         dateFormatted = DateFormat('dd.MM.yy').format(date),
+        timestamp = date.millisecondsSinceEpoch,
+        super(
+          newShopId,
+          newShopName,
+          items,
+        );
+
+  FulfilledOrder.fromUserItem(
+    OrderItem item,
+    String newUserId,
+    String newUserName,
+    DateTime date,
+  )   : fulfillerId = newUserId,
+        userId = newUserId,
+        fulfillerName = newUserName,
+        userName = newUserName,
+        timeFormatted = DateFormat.Hm().format(date),
+        dateFormatted = DateFormat('dd.MM.yy').format(date),
+        timestamp = date.millisecondsSinceEpoch,
         super(
           item.shopId,
           item.shopName,

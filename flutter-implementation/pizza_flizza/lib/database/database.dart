@@ -24,7 +24,7 @@ class Database {
 
   static Future<String> getUserName(String userId) {
     return Database.realtime
-        .child('users/${Database.groupId}/$userId/name')
+        .child('groups/${Database.groupId}/users/$userId')
         .get()
         .then((snapshot) {
       if (snapshot.value != null) {

@@ -289,7 +289,9 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
       });
 
       Database.userName = _userName;
-      await Database.userReference.child('name').set(_userName);
+      await Database.realtime
+          .child('groups/${Database.groupId}/users/${Database.userId}')
+          .set(_userName);
       // clarify that an update is being applied
       await Future.delayed(_artificialDelay);
 
