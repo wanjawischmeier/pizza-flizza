@@ -1,5 +1,5 @@
 // Function to delete account data asynchronously
-async function deleteAccountData(user) {
+async function deleteAccountData(user, deleteAccount) {
     try {
         // Get the currently signed-in user
         var user = firebase.auth().currentUser;
@@ -22,8 +22,12 @@ async function deleteAccountData(user) {
 
                 // Remove the user's UID from the users field
                 delete groupData.users[user.uid];
+            }
 
-                // Update the group data in Firebase Realtime Database
+            // Update the group in Firebase Realtime Database
+            if (Object.keys(groupData.users).length === 0) {
+                groupsRef.child(groupId).remove();
+            } else {
                 groupsRef.child(groupId).update(groupData);
             }
         });
@@ -41,7 +45,9 @@ async function deleteAccountData(user) {
         }
 
         // Delete user account from Firebase Authentication
-        await user.delete();
+        if (deleteAccount) {
+            await user.delete();
+        }
 
         // Account data deletion successful
         return { success: true, errorMessage: '' };
@@ -54,13 +60,18 @@ async function deleteAccountData(user) {
 }
 
 async function confirmDelete(user) {
-    var confirmDelete = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+    var action = document.querySelector('input[name="action"]:checked').value;
+    var deleteAccount = action == 'delete-account';
+    var confirmRequestMessage = deleteAccount ? 'delete your account' : 'clear all data from your profile';
+    var successMessage = deleteAccount ? 'Account deletion' : 'Clearing data';
+
+    var confirmDelete = confirm(`Are you sure you want to ${confirmRequestMessage}? This action cannot be undone.`);
 
     if (confirmDelete) {
-        var deletionResult = await deleteAccountData(user);
+        var deletionResult = await deleteAccountData(user, deleteAccount);
 
         if (deletionResult.success) {
-            infoMessageDiv.textContent = 'Account data deletion successful';
+            infoMessageDiv.textContent = `${successMessage} successful`;
 
             // Reset the form fields
             loginForm.reset();
@@ -115,16 +126,16 @@ loginForm.addEventListener('submit', function (event) {
 function signInWithGoogle() {
     var provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider)
-      .then(function(userCredential) {
-        // Logged in successfully with Google
-        var user = userCredential.user;
-        console.log('User logged in with Google:', user);
-        
-        confirmDelete(user);
-      })
-      .catch(function(error) {
-        // Handle login errors
-        console.error('Google login error:', error.message);
-        infoMessageDiv.textContent = error.message;
-      });
-  }
+        .then(function (userCredential) {
+            // Logged in successfully with Google
+            var user = userCredential.user;
+            console.log('User logged in with Google:', user);
+
+            confirmDelete(user);
+        })
+        .catch(function (error) {
+            // Handle login errors
+            console.error('Google login error:', error.message);
+            infoMessageDiv.textContent = error.message;
+        });
+}

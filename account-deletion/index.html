@@ -25,8 +25,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 10px;
+      margin-top: 40px;
+      margin-bottom: 20px;
       font-size: small;
+    }
+
+    .radio-description {
+      font-size: small;
+      text-align: center;
     }
 
     .info-message {
@@ -42,12 +48,22 @@
     <h2>PizzaFlizza Account Deletion</h2>
     <input type="email" id="email" placeholder="Email" required>
     <input type="password" id="password" placeholder="Password" required>
-    <button type="submit">Delete Account</button>
+    <button type="submit">Continue</button>
 
     <div class="google-signin">
       <button type="button" onclick="signInWithGoogle(event)">Sign In With Google</button>
       <p2>Use this option if you created the account using Google</p2>
     </div>
+
+    <div class="actions">
+      <label>
+        <input type="radio" name="action" value="clear-data" checked> Clear Data
+      </label>
+      <label>
+        <input type="radio" name="action" value="delete-account"> Delete Account
+      </label>
+    </div>
+    <p2 class="radio-description">Choose whether you only want to clear data from your profile<br>(groups, open orders, fulfillments, preferences etc.)<br>or want to delete the account entirely.</p2>
 
     <div id="info-message" class="info-message"></div>
   </form>
