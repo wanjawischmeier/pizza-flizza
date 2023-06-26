@@ -1,0 +1,158 @@
+{
+   "login": {
+      "page_title": "Login Page",
+
+
+      "fields": {
+         "email": {
+            "title": "Email",
+            "hint_login": "Enter your email",
+            "hint_create": "Enter a valid email"
+         },
+         "username": {
+            "title": "Username",
+            "hint_login": "Enter your username",
+            "hint_create": "Choose a valid username"
+         },
+         "group": {
+            "title": "Group",
+            "hint": "Enter the name of a group",
+            "hint_create": "A new group will be created",
+            "hint_add": "You will be added to the group",
+            "subtitle_singular": "{} member",
+            "subtitle_plural": "{} members"
+         },
+         "password": {
+            "title": "Password",
+            "hint_login": "Enter your password",
+            "hint_create": "Enter a secure password"
+         }
+      },
+
+
+      "actions": {
+         "mode_switch": {
+            "create": "Create Account",
+            "log_in": "Log in"
+         },
+         "forgot_password": {
+            "header": "Forgot Password",
+            "send": "An email to reset the password has been send to your inbox",
+            "failed": "Failed to send password reset email"
+         },
+         "go": {
+            "create": "Create",
+            "log_in": "Log in"
+         },
+         "sign_in_with_google": "Sign in with Google"
+      },
+
+
+      "errors": {
+         "toast_header": "Error:",
+         "toast_header_corrupted": "Profile corrupted:",
+
+         "no_email_google": "@:login.errors.toast_header Google email not specified",
+         "no_username_google": "@:login.errors.toast_header Failed to get google username",
+         "no_credentials_create": "@:login.errors.toast_header Failed to get account credentials",
+         "no_email_create": "@:login.errors.toast_header Account email not specified",
+         "no_username_create": "@:login.errors.toast_header Username not specified",
+         "no_group_create": "@:login.errors.toast_header_corrupted Not asssociated with a group",
+
+         "no_email": "Please enter an email",
+         "no_username": "Please enter an username",
+         "no_group_name": "Please select a group",
+         "no_password": "Please enter a password",
+
+         "invalid_email": "Please enter a valid email",
+         "invalid_username": "Please enter at least 6 characters",
+         "invalid_password": "Please enter at least 6 characters",
+
+         "firebase_auth": {
+            "default": "Unknown error",
+            "user-not-found": "Unknown email, try creating an account",
+            "wrong-password": "Incorrect password",
+            "too-many-requests": "Too many requests, try again later",
+            "network-request-failed": "Failed to reach server.\nCheck your internet connection",
+            "email-already-in-use": "Email already used, try logging in"
+         }
+      }
+   },
+
+
+
+
+   "database": {
+      "unknown_username": "Unknown Username",
+      "unknown_shop": "Unknown Shop",
+      "unknown_item_name": "Unknown Item Name",
+
+      "not_signed_in": "Can't join the group, the user associated with the userId has to be signed in"
+   },
+
+
+
+
+   "home": {
+      "options": {
+         "order": "Order",
+         "shop": "Shop",
+         "transactions": "Transactions"
+      }
+   },
+
+
+
+
+   "order": {
+      "button": "Order"
+   },
+
+
+
+
+   "shop": {
+      "no_open_orders": "No open orders",
+      "slide_to_shop": "Slide to shop"
+   },
+
+
+
+
+   "transaction": {
+      "unknown_fulfiller": "Unknown Fulfiller",
+      "unknown_user": "Unknown User",
+      "bought_for": "Bought for {}",
+      "bought_by": "Bought by {}",
+      "date_location": "{} on {} at {}",
+      "date_location_newline": "{} on {} at {}",
+      "no_transactions": "No Transactions",
+      "clear_history": "Clear History"
+   },
+
+
+
+
+   "profile_overlay": {
+      "header": "Your Profile",
+      "email_specifier": " (specified by {})",
+      "log_out": "Log out",
+      "close": "Close"
+   },
+
+
+
+
+   "shopping_cart": {
+      "header": "Your Order",
+      "close": "Close"
+   },
+
+
+
+
+   "group_selection": {
+      "header": "Select a group",
+      "continue": "Continue"
+   }
+}
