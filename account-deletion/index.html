@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Your HTML head content -->
+  <style>
+    .info-message {
+      color: gray;
+      margin-top: 10px;
+      font-size: small;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Add your login form -->
+  <form id="login-form">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit">Delete Account</button>
+  </form>
+
+  <!-- Add a div for displaying error messages -->
+  <div id="info-message" class="info-message"></div>
+
+  <!-- Add your delete account script -->
+  <script>
+    // Your delete account data function and other JavaScript code
+  </script>
+
+  <!-- Add the Firebase SDKs -->
+  <!--
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+  -->
+  <!-- Add the Firebase SDKs (non-module versions) -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-database-compat.js"></script>
+
+
+  <script src="delete_account.js"></script>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyABDG4LszorQ1vhnP5FFbyTzPJjND7kjkI",
+      authDomain: "pizza-ffc84.firebaseapp.com",
+      databaseURL: "https://pizza-ffc84-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "pizza-ffc84",
+      storageBucket: "pizza-ffc84.appspot.com",
+      messagingSenderId: "207376636349",
+      appId: "1:207376636349:web:a9a862eb393754fc171ad4"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</body>
+
+</html>
