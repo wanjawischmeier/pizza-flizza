@@ -18,12 +18,20 @@
 
     .login-form button {
       padding: 10px 20px;
-      margin: 4px;
+      align-self: center;
+    }
+
+    .google-signin {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+      font-size: small;
     }
 
     .info-message {
       color: gray;
-      margin-top: 10px;
+      margin-top: 20px;
       font-size: small;
     }
   </style>
@@ -36,7 +44,10 @@
     <input type="password" id="password" placeholder="Password" required>
     <button type="submit">Delete Account</button>
 
-    <button type="button" onclick="signInWithGoogle(event)">Sign In With Google</button>
+    <div class="google-signin">
+      <button type="button" onclick="signInWithGoogle(event)">Sign In With Google</button>
+      <p2>Use this option if you created the account using Google</p2>
+    </div>
 
     <div id="info-message" class="info-message"></div>
   </form>
