@@ -1,5 +1,5 @@
 // Function to delete account data asynchronously
-async function deleteAccountData() {
+async function deleteAccountData(user) {
     try {
         // Get the currently signed-in user
         var user = firebase.auth().currentUser;
@@ -9,15 +9,12 @@ async function deleteAccountData() {
 
         // Fetch the snapshot of all groups
         var groupsSnapshot = await groupsRef.once('value');
-        console.log(groupsSnapshot);
-
         var userGroupId = null;
 
         // Iterate over each group and remove the user's UID from the users field
         groupsSnapshot.forEach(function (groupSnapshot) {
             var groupId = groupSnapshot.key;
             var groupData = groupSnapshot.val();
-            console.log(groupSnapshot);
 
             // Check if the group has a users field
             if (groupData.users && groupData.users[user.uid]) {
@@ -25,7 +22,6 @@ async function deleteAccountData() {
 
                 // Remove the user's UID from the users field
                 delete groupData.users[user.uid];
-                console.log(groupData);
 
                 // Update the group data in Firebase Realtime Database
                 groupsRef.child(groupId).update(groupData);
@@ -57,6 +53,23 @@ async function deleteAccountData() {
     }
 }
 
+async function confirmDelete(user) {
+    var confirmDelete = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+
+    if (confirmDelete) {
+        var deletionResult = await deleteAccountData(user);
+
+        if (deletionResult.success) {
+            infoMessageDiv.textContent = 'Account data deletion successful';
+
+            // Reset the form fields
+            loginForm.reset();
+        } else {
+            infoMessageDiv.textContent = deletionResult.errorMessage;
+        }
+    }
+}
+
 
 // Get a reference to the login form
 var loginForm = document.getElementById('login-form');
@@ -75,25 +88,9 @@ loginForm.addEventListener('submit', function (event) {
         .then(async function (userCredential) {
             // User successfully logged in
             var user = userCredential.user;
-            console.log('User logged in:', user);
+            console.log('User logged in:', user.uid);
 
-            var confirmDelete = confirm('Are you sure you want to delete your account? This action cannot be undone.');
-
-            if (confirmDelete) {
-                var deletionResult = await deleteAccountData(user);
-                console.log(deletionResult);
-
-                infoMessageDiv.textContent = deletionResult.errorMessage;
-
-                if (deletionResult.success) {
-                    infoMessageDiv.textContent = 'Account data deletion successful';
-
-                    // Reset the form fields
-                    loginForm.reset();
-                } else {
-                    infoMessageDiv.textContent = deletionResult.errorMessage;
-                }
-            }
+            confirmDelete(user);
         })
         .catch(function (error) {
             // Handle login error
@@ -113,3 +110,21 @@ loginForm.addEventListener('submit', function (event) {
             }
         });
 });
+
+// Sign in with Google function
+function signInWithGoogle() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .then(function(userCredential) {
+        // Logged in successfully with Google
+        var user = userCredential.user;
+        console.log('User logged in with Google:', user);
+        
+        confirmDelete(user);
+      })
+      .catch(function(error) {
+        // Handle login errors
+        console.error('Google login error:', error.message);
+        infoMessageDiv.textContent = error.message;
+      });
+  }
