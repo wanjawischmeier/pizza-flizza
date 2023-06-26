@@ -79,6 +79,7 @@ class _ShopFragmentState extends State<ShopFragment>
 
     setState(() {
       _count = _foregroundItem?.count ?? 0;
+      _swipedCount = 0;
 
       if (_ordersShop.isEmpty) {
         _state = ShopState.noOrders;
@@ -214,7 +215,10 @@ class _ShopFragmentState extends State<ShopFragment>
 
                           if (_ordersShop.isEmpty) {
                             if (_fulfilled.isEmpty) {
-                              _state = ShopState.noOrders;
+                              setState(() {
+                                _swipedCount = 0;
+                                _state = ShopState.noOrders;
+                              });
                               _controller.forward();
                             } else {
                               _state = ShopState.locked;

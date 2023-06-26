@@ -50,12 +50,17 @@ class ShopCardWidget extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: FittedBox(
-                fit: BoxFit.contain,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(name),
-                )),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+            ),
           )
         ],
       ),

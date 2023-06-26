@@ -123,35 +123,42 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             _groupId = groupId;
                           },
                           onSelectionConfirmed: (groupName, groupId) async {
+                            var userId = Database.userId;
+                            var userName = Database.userName;
                             _groupName = groupName;
                             _groupId = groupId;
 
-                            if (Database.userId != null &&
-                                Database.userName != null &&
-                                _groupId != Database.groupId) {
-                              setState(() {
-                                _groupIdChanging = true;
-                              });
-
-                              await Shop.cancelUserGroupUpdates();
-
-                              var group = await Group.switchGroup(
-                                groupName,
-                                groupId,
-                                Database.userId!,
-                                Database.userName!,
-                              );
-                              _groupId = group.groupId;
-
-                              Shop.initializeUserGroupUpdates();
-
-                              // clarify that an update is being applied
-                              await Future.delayed(_artificialDelay);
-
-                              setState(() {
-                                _groupIdChanging = false;
-                              });
+                            if (userId == null ||
+                                userName == null ||
+                                _groupId == Database.groupId) {
+                              return;
                             }
+
+                            setState(() {
+                              _groupIdChanging = true;
+                            });
+
+                            await Shop.cancelUserGroupUpdates();
+
+                            var group = await Group.switchGroup(
+                              groupName,
+                              groupId,
+                              userId,
+                              userName,
+                            );
+                            _groupId = group.groupId;
+                            _groupName = group.groupName;
+                            Database.groupId = _groupId;
+                            Database.groupName = _groupName;
+
+                            Shop.initializeUserGroupUpdates();
+
+                            // clarify that an update is being applied
+                            await Future.delayed(_artificialDelay);
+
+                            setState(() {
+                              _groupIdChanging = false;
+                            });
                           },
                         ),
                         const SizedBox(height: _itemSpacer),

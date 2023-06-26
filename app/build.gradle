@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.wanjawischmeier.pizza"
         minSdk 24
-        targetSdk 33
+        targetSdk 34
         versionCode 7
         versionName "0.2.3"
 

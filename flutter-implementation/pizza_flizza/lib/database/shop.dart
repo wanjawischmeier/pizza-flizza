@@ -460,17 +460,17 @@ class Shop {
 
       Map? fulfilled = data['fulfilled'];
       if (fulfilled != null) {
-        bool containsUser = false;
+        bool changed = false;
         for (Map fulfilledShop in fulfilled.values) {
           for (String userId in fulfilledShop.keys) {
             if (userId == Database.userId) {
-              containsUser = true;
+              _fulfilled.remove(updatedUserId);
+              changed = true;
             }
           }
         }
 
-        if (containsUser) {
-          _fulfilled.clear();
+        if (changed) {
           _fulfilledUpdatedController.add(_fulfilled);
         }
       }
