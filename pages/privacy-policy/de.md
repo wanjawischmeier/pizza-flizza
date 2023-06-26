@@ -17,7 +17,7 @@ Zusammenfassend nutzt die App leider nach dem Erstellen eines Kontos den Cloud-D
 	-   Anzahl
 	-   Zeitpunkt
 
--   Für andere Benutzer/innen erfüllte Bestellungen
+-   Für andere Benutzer*innen erfüllte Bestellungen
 	-   Anzahl
 	-   Zeitpunkt
     
