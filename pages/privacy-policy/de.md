@@ -24,15 +24,15 @@ Zusammenfassend nutzt die App leider nach dem Erstellen eines Kontos den Cloud-D
 -   Einen Verlauf an in der Vergangenheit liegenden eigenen Bestellungen
     
 
-Der Verlauf kann jederzeit in der App gelöscht werden und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt keinerlei standortbezogene Daten und verwendet auch keinerlei Analyse-Tools zum Auswerten von In-App- oder Kaufverhalten. Es werden auch keine Diagnosedaten oder Absturzberichte gesendet. Lediglich eine anonyme Statistik zur Anzahl an Käufen pro Artikel liegt vor. Das Löschen des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der folgenden Adresse möglich:
+Der Verlauf **kann jederzeit in der App gelöscht werden** und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt **keinerlei standortbezogene Daten** und verwendet auch **keinerlei Analyse-Tools** zum Auswerten von In-App- oder Kaufverhalten. Es werden auch **keine Diagnosedaten oder Absturzberichte** gesendet. Lediglich eine anonyme Statistik zur Anzahl an Käufen pro Artikel liegt vor. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der folgenden Adresse möglich:
 
-https://wanjawischmeier.github.io/pizza-flizza/pages/account-management
+[https://wanjawischmeier.github.io/pizza-flizza/pages/account-management](https://wanjawischmeier.github.io/pizza-flizza/pages/account-management)
 
   
 
 ## Rechtsgrundlagen
 
-Die folgende Datenschutzerklärung gibt Ihnen transparente Informationen zu den rechtlichen Grundsätzen und Vorschriften, also den Rechtsgrundlagen der Datenschutz-Grundverordnung, die PizzaFlizza ermöglichen, personenbezogene Daten zu verarbeiten. Was das EU-Recht betrifft, ist auf die VERORDNUNG (EU) 2016/679 DES EUROPÄISCHEN PARLAMENTS UND DES RATES vom 27. April 2016 zu verweisen. Diese Datenschutz-Grundverordnung der EU können Sie selbstverständlich online auf EUR-Lex, dem Zugang zum EU-Recht, unter https://eur-lex.europa.eu/legal-content/DE/ALL/?uri=celex%3A32016R0679 nachlesen.
+Die folgende Datenschutzerklärung gibt Ihnen transparente Informationen zu den rechtlichen Grundsätzen und Vorschriften, also den Rechtsgrundlagen der Datenschutz-Grundverordnung, die PizzaFlizza ermöglichen, personenbezogene Daten zu verarbeiten. Was das EU-Recht betrifft, ist auf die VERORDNUNG (EU) 2016/679 DES EUROPÄISCHEN PARLAMENTS UND DES RATES vom 27. April 2016 zu verweisen. Diese Datenschutz-Grundverordnung der EU können Sie selbstverständlich online auf EUR-Lex, dem Zugang zum EU-Recht, unter [https://eur-lex.europa.eu/legal-content/DE/ALL/?uri=celex%3A32016R0679](https://eur-lex.europa.eu/legal-content/DE/ALL/?uri=celex%3A32016R0679) nachlesen.
 
 Die App verarbeitet Ihre Daten nur, wenn Sie nach Artikel 6 Absatz 1 lit. a DSGVO Ihr Einverständnis hierzu geben.
 
@@ -86,7 +86,7 @@ Landesbeauftragte für Datenschutz: Marit Hansen
 Adresse: Holstenstraße 98, 24103 Kiel  
 Telefonnummer: 04 31/988-12 00  
 E-Mail-Adresse: mail@datenschutzzentrum.de  
-Website: https://www.datenschutzzentrum.de
+Website: [https://www.datenschutzzentrum.de](https://www.datenschutzzentrum.de)
 
   
 
@@ -110,9 +110,9 @@ Im Allgemeinen speichern die genutzten Cloud-Dienste Daten, bis Sie das Recht zu
 
 ### Widerspruchsrecht
 
-Sie haben auch jederzeit das Recht und die Möglichkeit, Ihre Einwilligung zur Datenspeicherung in der Cloud zu widerrufen. Das Löschen des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der folgenden Adresse möglich:
+Sie haben auch jederzeit das Recht und die Möglichkeit, Ihre Einwilligung zur Datenspeicherung in der Cloud zu widerrufen. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der folgenden Adresse möglich:
 
-https://wanjawischmeier.github.io/pizza-flizza/pages/account-management
+[https://wanjawischmeier.github.io/pizza-flizza/pages/account-management](https://wanjawischmeier.github.io/pizza-flizza/pages/account-management)
 
   
 
@@ -122,11 +122,11 @@ PizzaFlizza verwendet die Google Cloud, einen Online-Speicherdienst für Dateien
 
 Google verarbeitet Daten von Ihnen u.a. auch in den USA. Es ist darauf hinzuweisen, dass nach Meinung des Europäischen Gerichtshofs derzeit kein angemessenes Schutzniveau für den Datentransfer in die USA besteht. Dies kann mit verschiedenen Risiken für die Rechtmäßigkeit und Sicherheit der Datenverarbeitung einhergehen.
 
-Als Grundlage der Datenverarbeitung bei Empfängern mit Sitz in Drittstaaten (außerhalb der Europäischen Union, Island, Liechtenstein, Norwegen, also insbesondere in den USA) oder einer Datenweitergabe dorthin verwendet Google sogenannte Standardvertragsklauseln (= Art. 46. Abs. 2 und 3 DSGVO). Standardvertragsklauseln (Standard Contractual Clauses – SCC) sind von der EU-Kommission bereitgestellte Mustervorlagen und sollen sicherstellen, dass Ihre Daten auch dann den europäischen Datenschutzstandards entsprechen, wenn diese in Drittländer (wie beispielsweise in die USA) überliefert und dort gespeichert werden. Durch diese Klauseln verpflichtet sich Google, bei der Verarbeitung Ihrer relevanten Daten, das europäische Datenschutzniveau einzuhalten, selbst wenn die Daten in den USA gespeichert, verarbeitet und verwaltet werden. Diese Klauseln basieren auf einem Durchführungsbeschluss der EU-Kommission. Sie finden den Beschluss und die entsprechenden Standardvertragsklauseln u.a. hier: https://eur-lex.europa.eu/eli/dec_impl/2021/914/oj?locale=de
+Als Grundlage der Datenverarbeitung bei Empfängern mit Sitz in Drittstaaten (außerhalb der Europäischen Union, Island, Liechtenstein, Norwegen, also insbesondere in den USA) oder einer Datenweitergabe dorthin verwendet Google sogenannte Standardvertragsklauseln (= Art. 46. Abs. 2 und 3 DSGVO). Standardvertragsklauseln (Standard Contractual Clauses – SCC) sind von der EU-Kommission bereitgestellte Mustervorlagen und sollen sicherstellen, dass Ihre Daten auch dann den europäischen Datenschutzstandards entsprechen, wenn diese in Drittländer (wie beispielsweise in die USA) überliefert und dort gespeichert werden. Durch diese Klauseln verpflichtet sich Google, bei der Verarbeitung Ihrer relevanten Daten, das europäische Datenschutzniveau einzuhalten, selbst wenn die Daten in den USA gespeichert, verarbeitet und verwaltet werden. Diese Klauseln basieren auf einem Durchführungsbeschluss der EU-Kommission. Sie finden den Beschluss und die entsprechenden Standardvertragsklauseln u.a. hier: [https://eur-lex.europa.eu/eli/dec_impl/2021/914/oj?locale=de](https://eur-lex.europa.eu/eli/dec_impl/2021/914/oj?locale=de)
 
-Google hält einen Vertrag über die Auftragsverarbeitung gemäß Art. 28 DSGVO bereit, der als datenschutzrechtliche Grundlage für unsere Kundenbeziehung zu Google fungiert. Dieser verweist inhaltlich auf die EU-Standardvertragsklauseln. Hier finden Sie die Auftragsverarbeitungsbedingungen: https://business.safety.google/intl/de/adsprocessorterms
+Google hält einen Vertrag über die Auftragsverarbeitung gemäß Art. 28 DSGVO bereit, der als datenschutzrechtliche Grundlage für unsere Kundenbeziehung zu Google fungiert. Dieser verweist inhaltlich auf die EU-Standardvertragsklauseln. Hier finden Sie die Auftragsverarbeitungsbedingungen: [https://business.safety.google/intl/de/adsprocessorterms](https://business.safety.google/intl/de/adsprocessorterms)
 
-Mehr über die Daten, die durch die Verwendung von Google Cloud verarbeitet werden, erfahren Sie in der Privacy Policy auf https://policies.google.com/privacy?hl=de.
+Mehr über die Daten, die durch die Verwendung von Google Cloud verarbeitet werden, erfahren Sie in der Privacy Policy auf [https://policies.google.com/privacy?hl=de](https://policies.google.com/privacy?hl=de).
 
   
 
@@ -168,8 +168,8 @@ Die App gibt Nutzern die Möglichkeit zur Verwendung des Authentifizierungsdiens
 
 Google verarbeitet Daten von Ihnen u.a. auch in den USA. Es ist jedoch darauf hinzuweisen, dass nach Meinung des Europäischen Gerichtshofs derzeit kein angemessenes Schutzniveau für den Datentransfer in die USA besteht. Dies kann mit verschiedenen Risiken für die Rechtmäßigkeit und Sicherheit der Datenverarbeitung einhergehen.
 
-Als Grundlage der Datenverarbeitung bei Empfängern mit Sitz in Drittstaaten (außerhalb der Europäischen Union, Island, Liechtenstein, Norwegen, also insbesondere in den USA) oder einer Datenweitergabe dorthin verwendet Google sogenannte Standardvertragsklauseln (= Art. 46. Abs. 2 und 3 DSGVO). Standardvertragsklauseln (Standard Contractual Clauses – SCC) sind von der EU-Kommission bereitgestellte Mustervorlagen und sollen sicherstellen, dass Ihre Daten auch dann den europäischen Datenschutzstandards entsprechen, wenn diese in Drittländer (wie beispielsweise in die USA) überliefert und dort gespeichert werden. Durch diese Klauseln verpflichtet sich Google, bei der Verarbeitung Ihrer relevanten Daten, das europäische Datenschutzniveau einzuhalten, selbst wenn die Daten in den USA gespeichert, verarbeitet und verwaltet werden. Diese Klauseln basieren auf einem Durchführungsbeschluss der EU-Kommission. Sie finden den Beschluss und die entsprechenden Standardvertragsklauseln u.a. hier: https://eur-lex.europa.eu/eli/dec_impl/2021/914/oj?locale=de
+Als Grundlage der Datenverarbeitung bei Empfängern mit Sitz in Drittstaaten (außerhalb der Europäischen Union, Island, Liechtenstein, Norwegen, also insbesondere in den USA) oder einer Datenweitergabe dorthin verwendet Google sogenannte Standardvertragsklauseln (= Art. 46. Abs. 2 und 3 DSGVO). Standardvertragsklauseln (Standard Contractual Clauses – SCC) sind von der EU-Kommission bereitgestellte Mustervorlagen und sollen sicherstellen, dass Ihre Daten auch dann den europäischen Datenschutzstandards entsprechen, wenn diese in Drittländer (wie beispielsweise in die USA) überliefert und dort gespeichert werden. Durch diese Klauseln verpflichtet sich Google, bei der Verarbeitung Ihrer relevanten Daten, das europäische Datenschutzniveau einzuhalten, selbst wenn die Daten in den USA gespeichert, verarbeitet und verwaltet werden. Diese Klauseln basieren auf einem Durchführungsbeschluss der EU-Kommission. Sie finden den Beschluss und die entsprechenden Standardvertragsklauseln u.a. hier: [https://eur-lex.europa.eu/eli/dec_impl/2021/914/oj?locale=de](https://eur-lex.europa.eu/eli/dec_impl/2021/914/oj?locale=de)
 
-Mehr über Standardvertragsklauseln bei Google erfahren Sie in den Google Ads Datenverarbeitungsbedingungen (Google Ads Data Processing Terms) unter https://business.safety.google/intl/de/adsprocessorterms/.
+Mehr über Standardvertragsklauseln bei Google erfahren Sie in den Google Ads Datenverarbeitungsbedingungen (Google Ads Data Processing Terms) unter [https://business.safety.google/intl/de/adsprocessorterms](https://business.safety.google/intl/de/adsprocessorterms).
 
-Bei Google können Sie unter https://adssettings.google.com/authenticated Ihre Einwilligung zur Verwendung von Single-Sign-On-Anmeldungen per Opt-Out-Funktion widerrufen. Mehr über die Daten, die durch die Verwendung von Google Single-Sign-On verarbeitet werden, erfahren Sie in der Privacy Policy auf https://policies.google.com/privacy?hl=de.
+Bei Google können Sie unter [https://adssettings.google.com/authenticated](https://adssettings.google.com/authenticated) Ihre Einwilligung zur Verwendung von Single-Sign-On-Anmeldungen per Opt-Out-Funktion widerrufen. Mehr über die Daten, die durch die Verwendung von Google Single-Sign-On verarbeitet werden, erfahren Sie in der Privacy Policy auf [https://policies.google.com/privacy?hl=de](https://policies.google.com/privacy?hl=de).
