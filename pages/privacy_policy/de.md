@@ -9,8 +9,7 @@ Diese Datenschutzerklärung (Fassung 26.06.2023) soll Ihnen gemäß der Vorgaben
 Zusammenfassend nutzt die App leider nach dem Erstellen eines Kontos den Cloud-Dienst Google Firebase zum Speichern der mit dem Profil assoziierten Daten. Erfasst werden:
 
 -   Der in der App frei wählbare Benutzername
-
--   Bei Anmeldung über einen Drittanbieter wird wenn existent zuerst der dort angegebene Benutzername verwendet    
+	-   Bei Anmeldung über einen Drittanbieter wird wenn existent zuerst der dort angegebene Benutzername verwendet    
 
 -   Die dem Konto zugehörige Email Adresse
     
