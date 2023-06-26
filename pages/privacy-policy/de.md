@@ -24,7 +24,7 @@ Zusammenfassend nutzt die App leider nach dem Erstellen eines Kontos den Cloud-D
 -   Einen Verlauf an in der Vergangenheit liegenden eigenen Bestellungen
     
 
-Der Verlauf **kann jederzeit in der App gelöscht werden** und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt **keinerlei standortbezogene Daten** und verwendet auch **keinerlei Analyse-Tools** zum Auswerten von In-App- oder Kaufverhalten. Es werden auch **keine Diagnosedaten oder Absturzberichte** gesendet. Lediglich eine anonyme Statistik zur Anzahl an Käufen pro Artikel liegt vor. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der folgenden Adresse möglich:
+Der Verlauf **kann jederzeit in der App gelöscht werden** und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt **keinerlei standortbezogene Daten** und verwendet auch **keinerlei Analyse-Tools** zum Auswerten von In-App- oder Kaufverhalten. Es werden **keine Diagnosedaten oder Absturzberichte** gesendet. Lediglich eine anonyme Statistik zur Anzahl an Käufen pro Artikel liegt vor. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der folgenden Adresse möglich:
 
 [https://wanjawischmeier.github.io/pizza-flizza/pages/account-management](https://wanjawischmeier.github.io/pizza-flizza/pages/account-management)
 
