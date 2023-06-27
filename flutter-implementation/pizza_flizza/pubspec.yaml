@@ -70,6 +70,7 @@ dependencies:
   http_auth: ^1.0.2
   webview_flutter: ^4.2.2
   flutter_typeahead: ^4.6.1
+  intro_slider: ^4.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

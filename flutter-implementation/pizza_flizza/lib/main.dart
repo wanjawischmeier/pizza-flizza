@@ -14,6 +14,7 @@ import 'package:pizza_flizza/other/firebase_options.dart';
 import 'package:pizza_flizza/pages/home_page/home_page.dart';
 import 'package:pizza_flizza/pages/login_page/login_page.dart';
 import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/login_page/widgets/intro_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,20 +109,26 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       initialRoute:
           FirebaseAuth.instance.currentUser == null ? 'login' : 'home',
       onGenerateRoute: (settings) {
+        Widget widget;
+
         switch (settings.name) {
           case 'login':
-            return MaterialPageRoute(
-              settings: settings,
-              builder: (_) => LoginPage(
-                onLoginComplete: _loadUserData,
-              ),
+            widget = LoginPage(
+              onLoginComplete: _loadUserData,
             );
+            break;
+          case 'intro':
+            widget = const IntroScreen();
+            break;
           default:
-            return MaterialPageRoute(
-              settings: settings,
-              builder: (_) => const HomePage(),
-            );
+            widget = const HomePage();
+            break;
         }
+
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => widget,
+        );
       },
     );
   }
@@ -161,7 +168,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       Shop.initializeUserGroupUpdates();
       await Shop.loadAll();
       _initializeUser();
-      _navigatorKey.currentState?.pushReplacementNamed('home');
+      _navigatorKey.currentState?.pushReplacementNamed('intro');
     }
   }
 }

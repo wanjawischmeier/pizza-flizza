@@ -51,6 +51,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "207376636349-1mchua511jam1ru27l3uh3qt647ibtnr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wanjawischmeier.pizza_flizza",
+            "certificate_hash": "eb5a0b2a88f47cb8acffe133acbda0d5cd8372d0"
+          }
+        },
+        {
           "client_id": "207376636349-bf2rjmgaf352v6r7tjn2mp5bi1dj5j5d.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
