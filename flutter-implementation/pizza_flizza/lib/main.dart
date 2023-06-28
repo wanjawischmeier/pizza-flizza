@@ -12,9 +12,9 @@ import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/firebase_options.dart';
 import 'package:pizza_flizza/pages/home_page/home_page.dart';
+import 'package:pizza_flizza/pages/intro_page/intro_page.dart';
 import 'package:pizza_flizza/pages/login_page/login_page.dart';
 import 'package:pizza_flizza/other/theme.dart';
-import 'package:pizza_flizza/pages/login_page/widgets/intro_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -118,7 +118,11 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
             );
             break;
           case 'intro':
-            widget = const IntroScreen();
+            widget = IntroPage(
+              onIntroComplete: () {
+                _navigatorKey.currentState?.pushReplacementNamed('home');
+              },
+            );
             break;
           default:
             widget = const HomePage();

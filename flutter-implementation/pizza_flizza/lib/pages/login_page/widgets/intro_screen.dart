@@ -2,6 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:intro_slider/intro_slider.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 
+// thanks to: https://stackoverflow.com/a/62341566/13215204
+class UnorderedListItem extends StatelessWidget {
+  const UnorderedListItem(this.lines, {super.key});
+  final List<InlineSpan>? lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Text(
+          "• ",
+          style: TextStyle(fontSize: 22),
+        ),
+        Expanded(
+          child: RichText(
+              text: TextSpan(
+            style: const TextStyle(fontSize: 22),
+            children: lines,
+          )),
+        ),
+      ],
+    );
+  }
+}
+
 class IntroScreen extends StatefulWidget {
   const IntroScreen({super.key});
 
@@ -28,18 +54,14 @@ class _IntroScreenState extends State<IntroScreen> {
     );
     listContentConfig.add(
       const ContentConfig(
-        title: "PENCIL",
-        description:
-            "Ye indulgence unreserved connection alteration appearance",
-        pathImage: "images/photo_pencil.png",
-        backgroundColor: Color.fromARGB(255, 58, 107, 206),
-      ),
-    );
-    listContentConfig.add(
-      const ContentConfig(
-        title: "RULER",
-        description:
-            "Much evil soon high in hope do view. Out may few northward believing attempted. Yet timed being songs marry one defer men our. Although finished blessing do of",
+        title: "Privacy Policy",
+        widgetDescription: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text('center'),
+            Text('bottom'),
+          ],
+        ),
         pathImage: "images/photo_ruler.png",
         backgroundColor: Color(0xff9932CC),
       ),
