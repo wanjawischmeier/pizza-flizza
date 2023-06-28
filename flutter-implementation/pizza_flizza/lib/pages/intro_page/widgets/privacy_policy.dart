@@ -2,36 +2,69 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/other/theme.dart';
-import 'package:pizza_flizza/pages/intro_page/intro_page.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+typedef OnContinue = void Function();
 
 // thanks to: https://stackoverflow.com/a/62341566/13215204
 class UnorderedListItem extends StatelessWidget {
-  final List<InlineSpan>? lines;
+  final String textKey;
+  final List<String> highlighted;
+  final bool bulletPoint;
   final double lineFontSize;
+  final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
 
   const UnorderedListItem(
-    this.lines, {
+    this.highlighted,
+    this.textKey, {
     super.key,
+    this.bulletPoint = true,
     this.lineFontSize = 14,
   });
 
   @override
   Widget build(BuildContext context) {
+    var text = textKey.tr();
+    // split text at all highlighted words
+    var segments = text
+        .splitMapJoin(
+          RegExp('(${highlighted.join("|")})'),
+          onMatch: (Match match) {
+            return '#${match.group(0)}#'; // Include the delimiter in the result
+          },
+          onNonMatch: (String nonMatch) {
+            return nonMatch;
+          },
+        )
+        .split('#')
+        .where((segment) => segment.isNotEmpty);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      padding: EdgeInsets.symmetric(
+          vertical: bulletPoint ? 4 : 0, horizontal: bulletPoint ? 8 : 0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            "• ",
-            style: TextStyle(fontSize: lineFontSize),
+          Container(
+            child: bulletPoint
+                ? Text(
+                    "• ",
+                    style: TextStyle(fontSize: lineFontSize),
+                  )
+                : null,
           ),
           Expanded(
             child: RichText(
                 text: TextSpan(
               style: TextStyle(fontSize: lineFontSize),
-              children: lines,
+              children: [
+                for (String segment in segments) ...[
+                  TextSpan(
+                    text: segment,
+                    style: highlighted.contains(segment) ? boldStyle : null,
+                  ),
+                ],
+              ],
             )),
           ),
         ],
@@ -50,8 +83,13 @@ class PrivacyPolicySlide extends StatefulWidget {
 }
 
 class _PrivacyPolicySlideState extends State<PrivacyPolicySlide> {
+  static const String _disclaimerPath = 'intro.privacy_policy.disclaimer';
+  final List<String> _disclaimerHighlighted =
+      '$_disclaimerPath.highlighted'.tr().split(';');
+  final List<String> _infoHighlighted =
+      'intro.privacy_policy.info_highlighted'.tr().split(';');
   final _privacyPolicyUri = Uri.parse(
-    'https://wanjawischmeier.github.io/pizza-flizza/pages/privacy-policy/de',
+    'intro.privacy_policy.policy_url'.tr(),
   );
 
   bool _policyChecked = false;
@@ -61,79 +99,76 @@ class _PrivacyPolicySlideState extends State<PrivacyPolicySlide> {
     return Column(
       children: [
         const Spacer(),
-        Image.asset(
-          'assets/privacy_policy.png',
-          color: Themes.grayLight,
-          scale: 4,
+        Container(
+          width: 150,
+          padding: const EdgeInsets.only(bottom: 16),
+          child: ClipOval(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              color: Themes.grayMid,
+              child: const FittedBox(
+                child: Icon(
+                  Icons.privacy_tip_outlined,
+                  color: Themes.cream,
+                ),
+              ),
+            ),
+          ),
         ),
         const Text(
-          'About Your Data...',
-          style: TextStyle(fontSize: 20),
-        ),
+          'intro.privacy_policy.title',
+          style: TextStyle(fontSize: 22),
+        ).tr(),
         const Spacer(),
         Container(
           padding: const EdgeInsets.only(left: 16),
           alignment: Alignment.centerLeft,
           child: const Text(
-            'PizzaFlizza erfasst und speichert:',
+            'intro.privacy_policy.disclaimer.header',
             style: TextStyle(fontSize: 14),
-          ),
+          ).tr(),
         ),
-        const Padding(
-          padding: EdgeInsets.all(8),
+        Padding(
+          padding: const EdgeInsets.all(8),
           child: Column(
             children: [
-              UnorderedListItem([
-                TextSpan(text: 'Den von dir festgelegten '),
-                TextSpan(
-                  text: 'Benutzernamen',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ]),
-              UnorderedListItem([
-                TextSpan(text: 'Die dem Konto zugehörige '),
-                TextSpan(
-                  text: 'Email',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ]),
-              UnorderedListItem([
-                TextSpan(text: 'Deine '),
-                TextSpan(
-                  text: 'Bestellungen',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ]),
-              UnorderedListItem([
-                TextSpan(text: 'Für andere Benutzer*innen '),
-                TextSpan(
-                  text: 'erfüllte Bestellungen',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ]),
-              UnorderedListItem([
-                TextSpan(text: 'Einen '),
-                TextSpan(
-                  text: 'Verlauf',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(
-                  text:
-                      ' an in der Vergangenheit liegenden eigenen Bestellungen',
-                ),
-              ]),
-              UnorderedListItem([
-                TextSpan(text: 'Eine '),
-                TextSpan(
-                  text: 'anonyme Statistik',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(text: ' zur Anzahl an Käufen pro Artikel'),
-              ]),
+              UnorderedListItem(
+                _disclaimerHighlighted,
+                '$_disclaimerPath.username',
+              ),
+              UnorderedListItem(
+                _disclaimerHighlighted,
+                '$_disclaimerPath.email',
+              ),
+              UnorderedListItem(
+                _disclaimerHighlighted,
+                '$_disclaimerPath.your_orders',
+              ),
+              UnorderedListItem(
+                _disclaimerHighlighted,
+                '$_disclaimerPath.other_orders',
+              ),
+              UnorderedListItem(
+                _disclaimerHighlighted,
+                '$_disclaimerPath.history',
+              ),
+              UnorderedListItem(
+                _disclaimerHighlighted,
+                '$_disclaimerPath.stats',
+              ),
             ],
           ),
         ),
         const Spacer(),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+          child: UnorderedListItem(
+            _infoHighlighted,
+            'intro.privacy_policy.info',
+            bulletPoint: false,
+            lineFontSize: 10,
+          ),
+        ),
         Row(
           children: [
             Checkbox(
@@ -144,10 +179,7 @@ class _PrivacyPolicySlideState extends State<PrivacyPolicySlide> {
                 });
 
                 if (_policyChecked) {
-                  Future.delayed(
-                    const Duration(milliseconds: 500),
-                    widget.onContinue,
-                  );
+                  widget.onContinue?.call();
                 }
               },
             ),
@@ -157,8 +189,7 @@ class _PrivacyPolicySlideState extends State<PrivacyPolicySlide> {
                   style: const TextStyle(fontSize: 14),
                   children: [
                     TextSpan(
-                      text:
-                          'I consent to Google having full insights into my ever-escalating pizza consumption.\n(I aggree to the ',
+                      text: 'intro.privacy_policy.consent_info'.tr(),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () async {
                           setState(() {
@@ -166,15 +197,12 @@ class _PrivacyPolicySlideState extends State<PrivacyPolicySlide> {
                           });
 
                           if (_policyChecked) {
-                            Future.delayed(
-                              const Duration(milliseconds: 500),
-                              widget.onContinue,
-                            );
+                            widget.onContinue?.call();
                           }
                         },
                     ),
                     TextSpan(
-                      text: 'Privacy Policy',
+                      text: 'intro.privacy_policy.consent_link'.tr(),
                       style: const TextStyle(
                         color: Colors.lightBlue,
                         decoration: TextDecoration.underline,
@@ -184,60 +212,14 @@ class _PrivacyPolicySlideState extends State<PrivacyPolicySlide> {
                           launchUrl(_privacyPolicyUri);
                         },
                     ),
-                    const TextSpan(text: ')'),
+                    TextSpan(text: 'intro.privacy_policy.consent_end'.tr()),
                   ],
                 ),
               ),
             ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 25),
-          child: RichText(
-            text: const TextSpan(
-              style: TextStyle(fontSize: 10),
-              children: [
-                TextSpan(text: 'Der Verlauf '),
-                TextSpan(
-                  text: 'kann jederzeit in der App gelöscht',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(
-                  text:
-                      ' werden und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt ',
-                ),
-                TextSpan(
-                  text: 'keinerlei standortbezogene Daten',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(text: ' und verwendet auch '),
-                TextSpan(
-                  text: 'keinerlei Analyse-Tools',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(
-                  text:
-                      ' zum Auswerten von In-App- oder Kaufverhalten. Es werden ',
-                ),
-                TextSpan(
-                  text: 'keine Diagnosedaten oder Absturzberichte',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(
-                  text:
-                      ' gesendet. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der in der Datenschutzerklärung genannten Adresse möglich.',
-                ),
-              ],
-            ),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 2),
-          child: Text(
-            'Privacy policy icon created by Anggara - Flaticon',
-            style: TextStyle(color: Colors.blueGrey, fontSize: 12),
-          ),
-        ),
+        const SizedBox(height: 50),
       ],
     );
   }

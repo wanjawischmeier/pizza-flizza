@@ -82,6 +82,53 @@
 
 
 
+   "intro": {
+      "group_selection": {
+         "title": "Join a group",
+         "subtitle": "Or create a new group for your friends, classmates & everyone you go shopping with"
+      },
+
+
+      "privacy_policy": {
+         "title": "About Your Data...",
+         "policy_url": "https://wanjawischmeier.github.io/pizza-flizza/pages/privacy-policy/de",
+
+         "disclaimer": {
+            "header": "PizzaFlizza erfasst und speichert:",
+            
+            "username": "Den von dir festgelegten Benutzernamen",
+            "username_highlighted": "Benutzernamen",
+
+            "email": "Die dem Konto zugehörige Email",
+            "email_highlighted": "Email",
+
+            "your_orders": "Deine Bestellungen",
+            "your_orders_highlighted": "Deine Bestellungen",
+
+            "other_orders": "Für andere Benutzer*innen erfüllte Bestellungen",
+            "other_orders_highlighted": "erfüllte Bestellungen",
+
+            "history": "Einen Verlauf an in der Vergangenheit liegenden eigenen Bestellungen",
+            "history_highlighted": "Verlauf",
+
+            "stats": "Eine anonyme Statistik zur Anzahl an Käufen pro Artikel",
+            "stats_highlighted": "anonyme Statistik",
+
+            "highlighted": "Benutzernamen;Email;Deine Bestellungen;erfüllte Bestellungen;Verlauf;anonyme Statistik"
+         },
+
+         "info": "Der Verlauf kann jederzeit in der App gelöscht werden und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt keinerlei standortbezogene Daten und verwendet auch keinerlei Analyse-Tools zum Auswerten von In-App- oder Kaufverhalten. Es werden keine Diagnosedaten oder Absturzberichte gesendet. Lediglich eine anonyme Statistik zur Anzahl an Käufen pro Artikel liegt vor. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der in der Datenschutzerklärung genannten Adresse möglich.",
+         "info_highlighted": "kann jederzeit in der App gelöscht werden;keinerlei standortbezogene Daten;keinerlei Analyse-Tools;keine Diagnosedaten oder Absturzberichte",
+
+         "consent_info": "I consent to Google having full insights into my ever-escalating pizza consumption.\n(I aggree to the ",
+         "consent_link": "Privacy Policy",
+         "consent_end": ")"
+      }
+   },
+
+
+
+
    "database": {
       "unknown_username": "Unknown Username",
       "unknown_shop": "Unknown Shop",

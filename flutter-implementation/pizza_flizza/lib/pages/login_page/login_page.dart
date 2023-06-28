@@ -4,16 +4,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pizza_flizza/database/database.dart';
 
 import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/other/custom_icons.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/login_page/widgets/google_signin_button.dart';
-import 'package:pizza_flizza/pages/login_page/widgets/group_selection_dialog.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
-typedef OnLoginComplete = void Function(User user, Group? group);
+typedef OnLoginComplete = void Function(
+    User user, String userName, Group? group);
 
 class LoginPage extends StatefulWidget {
   final OnLoginComplete? onLoginComplete;
@@ -35,7 +36,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _loginMode = true;
   String _email = '';
   String _userName = '';
-  int? _groupId;
   String _groupName = '';
   String _password = '';
   String? _emailError;
@@ -172,11 +172,9 @@ class _LoginPageState extends State<LoginPage> {
                                         });
                                       }
                                       _groupName = groupName;
-                                      _groupId = groupId;
                                     },
                                     onSelectionConfirmed: (groupName, groupId) {
                                       _groupName = groupName;
-                                      _groupId = groupId;
                                     },
                                   ),
                                 ),
@@ -326,44 +324,24 @@ class _LoginPageState extends State<LoginPage> {
                               return;
                             }
 
+                            // find group associated with user
+                            await Group.initializeGroupUpdates();
                             var group = Group.findUserGroup(user.uid);
-                            if (group == null) {
-                              bool? success = await showDialog(
-                                context: context,
-                                builder: ((context) {
-                                  return GroupSelectionDialog(
-                                    onSelectionConfirmed: (groupName, groupId) {
-                                      _groupName = groupName;
-                                      _groupId = groupId;
-                                      Navigator.of(context).pop(true);
-                                    },
-                                  );
-                                }),
-                              );
-
-                              if (success == null) {
-                                await FirebaseAuth.instance.signOut();
-                                setState(() {
-                                  _isLoading = false;
-                                });
+                            if (group != null) {
+                              // get username
+                              var userSnapshot = await Database.realtime
+                                  .child(
+                                      'groups/${group.groupId}/users/${user.uid}')
+                                  .get();
+                              if (userSnapshot.value != null) {
+                                widget.onLoginComplete?.call(
+                                    user, userSnapshot.value as String, group);
                                 return;
                               }
-
-                              var group = await Group.joinGroup(
-                                _groupName,
-                                _groupId,
-                                user.uid,
-                                user.displayName!,
-                              );
-                              _groupId = group.groupId;
-
-                              widget.onLoginComplete?.call(user, group);
-                            } else {
-                              _groupName = group.groupName;
-                              _groupId = group.groupId;
-
-                              widget.onLoginComplete?.call(user, group);
                             }
+
+                            widget.onLoginComplete
+                                ?.call(user, user.displayName!, group);
                           },
                         ),
                       ),
@@ -493,6 +471,7 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       // find group associated with user
+      await Group.initializeGroupUpdates();
       var group = Group.findUserGroup(user.uid);
       if (group == null) {
         FirebaseAuth.instance.signOut();
@@ -500,9 +479,21 @@ class _LoginPageState extends State<LoginPage> {
           msg: 'login.errors.no_group_create'.tr(),
           toastLength: Toast.LENGTH_LONG,
         );
+        return;
+      }
+
+      // get username
+      var userSnapshot = await Database.realtime
+          .child('groups/${group.groupId}/users/${user.uid}')
+          .get();
+      if (userSnapshot.value == null) {
+        FirebaseAuth.instance.signOut();
+        Fluttertoast.showToast(
+          msg: 'login.errors.no_username_create'.tr(),
+          toastLength: Toast.LENGTH_LONG,
+        );
       } else {
-        _groupId = group.groupId;
-        widget.onLoginComplete?.call(user, group);
+        widget.onLoginComplete?.call(user, userSnapshot.value as String, group);
       }
     }
 
@@ -561,17 +552,8 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {
           _isLoading = false;
         });
-        return;
       } else {
-        var group = await Group.joinGroup(
-          _groupName,
-          _groupId,
-          user.uid,
-          _userName,
-        );
-
-        _groupId = group.groupId;
-        widget.onLoginComplete?.call(user, group);
+        widget.onLoginComplete?.call(user, _userName, null);
       }
     }
 

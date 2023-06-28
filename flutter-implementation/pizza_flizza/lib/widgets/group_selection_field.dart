@@ -114,8 +114,8 @@ class GroupSelectionFieldState extends State<GroupSelectionField> {
             _groupActionIcon = const Icon(Icons.add);
             _groupNameHint = 'login.fields.group.hint_create'.tr();
           } else {
-            _matchingGroups.clear();
             _groupId = exactlyMatching.firstOrNull?.groupId;
+            _matchingGroups.clear();
             _groupActionIcon = const Icon(Icons.add_reaction);
             _groupNameHint = 'login.fields.group.hint_add'.tr();
           }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/pages/intro_page/page_physics.dart';
 
 import 'widgets/group_selection.dart';
 import 'widgets/privacy_policy.dart';
 
-typedef OnContinue = void Function();
-
 class IntroPage extends StatefulWidget {
-  final OnContinue? onIntroComplete;
+  final OnGroupSelected? onIntroComplete;
 
   const IntroPage({super.key, this.onIntroComplete});
 
@@ -18,6 +17,8 @@ class IntroPage extends StatefulWidget {
 class _IntroPageState extends State<IntroPage> {
   final PageController _pageController = PageController();
   double _currentPage = 0;
+  String? _groupName;
+  int? _groupId;
 
   late final List<Widget> _slides;
 
@@ -27,15 +28,20 @@ class _IntroPageState extends State<IntroPage> {
 
     _slides = [
       GroupSelectionSlide(
-        onContinue: () {
-          setState(() {
-            _goToPage(1);
-          });
+        onGroupSelected: (groupName, groupId) {
+          _groupName = groupName;
+          _groupId = groupId;
+
+          _goToPage(1);
         },
       ),
       PrivacyPolicySlide(
         onContinue: () {
-          widget.onIntroComplete?.call();
+          if (_groupName == null) {
+            _goToPage(0);
+          } else {
+            widget.onIntroComplete?.call(_groupName!, _groupId);
+          }
         },
       ),
     ];
@@ -61,7 +67,7 @@ class _IntroPageState extends State<IntroPage> {
           children: [
             PageView(
               controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
+              physics: CustomLockScrollPhysics(lockRight: true),
               children: _slides,
             ),
             AnimatedBuilder(
@@ -101,7 +107,7 @@ class _IntroPageState extends State<IntroPage> {
           margin: const EdgeInsets.symmetric(horizontal: 6.0),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _currentPage.round() == i ? Colors.blue : Colors.grey,
+            color: _currentPage.round() == i ? Themes.cream : Themes.grayLight,
           ),
         ),
       );
