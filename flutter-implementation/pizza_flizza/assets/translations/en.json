@@ -1,6 +1,6 @@
 {
    "login": {
-      "page_title": "Login Page",
+      "page_title": "Log In",
 
 
       "fields": {
@@ -37,8 +37,8 @@
          },
          "forgot_password": {
             "header": "Forgot Password",
-            "send": "An email to reset the password has been send to your inbox",
-            "failed": "Failed to send password reset email"
+            "send": "An email to reset the password has been send to your inbox.",
+            "failed": "Failed to send password reset email."
          },
          "go": {
             "create": "Create",
@@ -50,14 +50,14 @@
 
       "errors": {
          "toast_header": "Error:",
-         "toast_header_corrupted": "Profile corrupted:",
+         "toast_header_corrupted": "Profile incomplete:",
 
          "no_email_google": "@:login.errors.toast_header Google email not specified",
          "no_username_google": "@:login.errors.toast_header Failed to get google username",
          "no_credentials_create": "@:login.errors.toast_header Failed to get account credentials",
          "no_email_create": "@:login.errors.toast_header Account email not specified",
          "no_username_create": "@:login.errors.toast_header Username not specified",
-         "no_group_create": "@:login.errors.toast_header_corrupted Not asssociated with a group",
+         "no_group_create": "@:login.errors.toast_header_corrupted Not associated with a group",
 
          "no_email": "Please enter an email",
          "no_username": "Please enter an username",
@@ -94,31 +94,20 @@
          "policy_url": "https://wanjawischmeier.github.io/pizza-flizza/pages/privacy-policy/de",
 
          "disclaimer": {
-            "header": "PizzaFlizza erfasst und speichert:",
+            "header": "PizzaFlizza collects and stores:",
             
-            "username": "Den von dir festgelegten Benutzernamen",
-            "username_highlighted": "Benutzernamen",
+            "username": "The username you specified",
+            "email": "The email associated with the account",
+            "your_orders": "Your orders",
+            "other_orders": "Orders fulfilled for other users",
+            "history": "A history of your own orders in the past",
+            "stats": "An anonymous statistic on the number of purchases per item",
 
-            "email": "Die dem Konto zugehörige Email",
-            "email_highlighted": "Email",
-
-            "your_orders": "Deine Bestellungen",
-            "your_orders_highlighted": "Deine Bestellungen",
-
-            "other_orders": "Für andere Benutzer*innen erfüllte Bestellungen",
-            "other_orders_highlighted": "erfüllte Bestellungen",
-
-            "history": "Einen Verlauf an in der Vergangenheit liegenden eigenen Bestellungen",
-            "history_highlighted": "Verlauf",
-
-            "stats": "Eine anonyme Statistik zur Anzahl an Käufen pro Artikel",
-            "stats_highlighted": "anonyme Statistik",
-
-            "highlighted": "Benutzernamen;Email;Deine Bestellungen;erfüllte Bestellungen;Verlauf;anonyme Statistik"
+            "highlighted": "username;email;Your orders;fulfilled;history;anonymous statistic"
          },
 
-         "info": "Der Verlauf kann jederzeit in der App gelöscht werden und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt keinerlei standortbezogene Daten und verwendet auch keinerlei Analyse-Tools zum Auswerten von In-App- oder Kaufverhalten. Es werden keine Diagnosedaten oder Absturzberichte gesendet. Lediglich eine anonyme Statistik zur Anzahl an Käufen pro Artikel liegt vor. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der in der Datenschutzerklärung genannten Adresse möglich.",
-         "info_highlighted": "kann jederzeit in der App gelöscht werden;keinerlei standortbezogene Daten;keinerlei Analyse-Tools;keine Diagnosedaten oder Absturzberichte",
+         "info": "The history inside the app can be deleted at any time. It will then also be removed from the cloud. The app does not collect location-based data and does not use analysis tools to evaluate in-app or purchasing behavior. No diagnostic data or crash reports are sent. Only an anonymous statistic on the number of purchases per article is being maintained. You can delete the entire account or just all data associated with it at the address given in the privacy policy.",
+         "info_highlighted": "can be deleted at any time;does not collect location-based data;does not use analysis tools;No diagnostic data or crash reports",
 
          "consent_info": "I consent to Google having full insights into my ever-escalating pizza consumption.\n(I aggree to the ",
          "consent_link": "Privacy Policy",
@@ -134,7 +123,7 @@
       "unknown_shop": "Unknown Shop",
       "unknown_item_name": "Unknown Item Name",
 
-      "not_signed_in": "Can't join the group, the user associated with the userId has to be signed in"
+      "not_signed_in": "Can't join the group, the user associated with the userId has to be signed in."
    },
 
 
@@ -193,13 +182,5 @@
    "shopping_cart": {
       "header": "Your Order",
       "close": "Close"
-   },
-
-
-
-
-   "group_selection": {
-      "header": "Select a group",
-      "continue": "Continue"
    }
 }

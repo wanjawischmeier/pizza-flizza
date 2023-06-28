@@ -1,81 +1,117 @@
 {
    "login": {
-      "page_title": "Login Page",
+      "page_title": "Anmelden",
 
 
       "fields": {
          "email": {
             "title": "Email",
-            "hint_login": "Enter your email",
-            "hint_create": "Enter a valid email"
+            "hint_login": "Deine E-Mail Adresse",
+            "hint_create": "Bitte gib eine gültige E-Mail-Adresse ein"
          },
          "username": {
-            "title": "Username",
-            "hint_login": "Enter your username",
-            "hint_create": "Choose a valid username"
+            "title": "Benutzername",
+            "hint_login": "Wähle einen Benutzernamen",
+            "hint_create": "Bitte wähle einen gültigen Benutzernamen"
          },
          "group": {
-            "title": "Group",
-            "hint": "Enter the name of a group",
-            "hint_create": "A new group will be created",
-            "hint_add": "You will be added to the group",
-            "subtitle_singular": "{} member",
-            "subtitle_plural": "{} members"
+            "title": "Gruppe",
+            "hint": "Der Name einer Gruppe",
+            "hint_create": "Die Gruppe wird für dich erstellt",
+            "hint_add": "Du wirst der Gruppe hinzugefügt",
+            "subtitle_singular": "{} Mitglied",
+            "subtitle_plural": "{} Mitglieder"
          },
          "password": {
-            "title": "Password",
-            "hint_login": "Enter your password",
-            "hint_create": "Enter a secure password"
+            "title": "Passwort",
+            "hint_login": "Gib dein Passwort ein",
+            "hint_create": "Wähle ein sicheres Passwort"
          }
       },
 
 
       "actions": {
          "mode_switch": {
-            "create": "Create Account",
-            "log_in": "Log in"
+            "create": "Registrieren",
+            "log_in": "Anmelden"
          },
          "forgot_password": {
-            "header": "Forgot Password",
-            "send": "An email to reset the password has been send to your inbox",
-            "failed": "Failed to send password reset email"
+            "header": "Passwort vergessen",
+            "send": "Eine E-Mail zum Zurücksetzen des Passworts wurde an deinen Posteingang gesendet.",
+            "failed": "E-Mail zum Zurücksetzen des Passworts konnte nicht gesendet werden."
          },
          "go": {
-            "create": "Create",
-            "log_in": "Log in"
+            "create": "Konto erstellen",
+            "log_in": "Anmelden"
          },
-         "sign_in_with_google": "Sign in with Google"
+         "sign_in_with_google": "Mit Google anmelden"
       },
 
 
       "errors": {
-         "toast_header": "Error:",
-         "toast_header_corrupted": "Profile corrupted:",
+         "toast_header": "Fehler:",
+         "toast_header_corrupted": "Profil unvollständig:",
 
-         "no_email_google": "@:login.errors.toast_header Google email not specified",
-         "no_username_google": "@:login.errors.toast_header Failed to get google username",
-         "no_credentials_create": "@:login.errors.toast_header Failed to get account credentials",
-         "no_email_create": "@:login.errors.toast_header Account email not specified",
-         "no_username_create": "@:login.errors.toast_header Username not specified",
-         "no_group_create": "@:login.errors.toast_header_corrupted Not asssociated with a group",
+         "no_email_google": "@:login.errors.toast_header Google-E-Mail-Adresse nicht angegeben",
+         "no_username_google": "@:login.errors.toast_header Der Google-Benutzername konnte nicht abgerufen werden",
+         "no_credentials_create": "@:login.errors.toast_header Kontoanmeldeinformationen konnten nicht abgerufen werden",
+         "no_email_create": "@:login.errors.toast_header Konto-E-Mail nicht angegeben",
+         "no_username_create": "@:login.errors.toast_header Benutzername nicht angegeben",
+         "no_group_create": "@:login.errors.toast_header_corrupted Nicht mit einer Gruppe verbunden",
 
-         "no_email": "Please enter an email",
-         "no_username": "Please enter an username",
-         "no_group_name": "Please select a group",
-         "no_password": "Please enter a password",
+         "no_email": "Bitte gib eine E-Mail-Adresse an",
+         "no_username": "Bitte gib einen Benutzernamen an",
+         "no_group_name": "Bitte wähle eine Gruppe aus",
+         "no_password": "Bitte gib ein Passwort an",
 
-         "invalid_email": "Please enter a valid email",
-         "invalid_username": "Please enter at least 6 characters",
-         "invalid_password": "Please enter at least 6 characters",
+         "invalid_email": "Bitte gib eine gültige Email-Adresse ein",
+         "invalid_username": "Bitte gib mindestens 6 Zeichen ein",
+         "invalid_password": "Bitte gib mindestens 6 Zeichen ein",
 
          "firebase_auth": {
-            "default": "Unknown error",
-            "user-not-found": "Unknown email, try creating an account",
-            "wrong-password": "Incorrect password",
-            "too-many-requests": "Too many requests, try again later",
-            "network-request-failed": "Failed to reach server.\nCheck your internet connection",
-            "email-already-in-use": "Email already used, try logging in"
+            "default": "Unbekannter Fehler",
+            "user-not-found": "Unbekannte E-Mail. Versuche, ein Konto zu erstellen",
+            "wrong-password": "Falsches Passwort",
+            "too-many-requests": "Zu viele Anfragen, versuche es später noch einmal",
+            "network-request-failed": "Server konnte nicht erreicht werden.\nÜberprüfe deine Internetverbindung",
+            "email-already-in-use": "E-Mail-Adresse bereits verwendet. Versuche, dich anzumelden"
          }
+      }
+   },
+
+
+
+
+   "intro": {
+      "group_selection": {
+         "title": "Tritt einer Gruppe bei",
+         "subtitle": "Oder erstellen Sie eine neue Gruppe für Ihre Freunde und alle Menschen, mit denen Sie einkaufen gehen"
+      },
+
+
+      "privacy_policy": {
+         "title": "Über deine Daten...",
+         "policy_url": "https://wanjawischmeier.github.io/pizza-flizza/pages/privacy-policy/de",
+
+         "disclaimer": {
+            "header": "PizzaFlizza erfasst und speichert:",
+            
+            "username": "Den von dir festgelegten Benutzernamen",
+            "email": "Die dem Konto zugehörige Email",
+            "your_orders": "Deine Bestellungen",
+            "other_orders": "Für andere Benutzer*innen erfüllte Bestellungen",
+            "history": "Einen Verlauf an in der Vergangenheit liegenden eigenen Bestellungen",
+            "stats": "Eine anonyme Statistik zur Anzahl an Käufen pro Artikel",
+
+            "highlighted": "Benutzernamen;Email;Deine Bestellungen;erfüllte Bestellungen;Verlauf;anonyme Statistik"
+         },
+
+         "info": "Der Verlauf kann jederzeit in der App gelöscht werden und wird damit einhergehend auch unverzüglich aus der Cloud entfernt. Die App erhebt keinerlei standortbezogene Daten und verwendet auch keinerlei Analyse-Tools zum Auswerten von In-App- oder Kaufverhalten. Es werden keine Diagnosedaten oder Absturzberichte gesendet. Lediglich eine anonyme Statistik zur Anzahl an Käufen pro Artikel liegt vor. Das Löschen entweder des gesamten Kontos oder lediglich aller mit dem Profil assoziierten Daten ist unter der in der Datenschutzerklärung genannten Adresse möglich.",
+         "info_highlighted": "kann jederzeit in der App gelöscht werden;keinerlei standortbezogene Daten;keinerlei Analyse-Tools;keine Diagnosedaten oder Absturzberichte",
+
+         "consent_info": "Ich bin damit einverstanden, dass Google Einblick in meinen ausufernden Pizzakonsum erhält.\n(Ich stimme der ",
+         "consent_link": "Datenschutzerklärung",
+         "consent_end": " zu)"
       }
    },
 
@@ -83,11 +119,11 @@
 
 
    "database": {
-      "unknown_username": "Unknown Username",
-      "unknown_shop": "Unknown Shop",
-      "unknown_item_name": "Unknown Item Name",
+      "unknown_username": "Unbekannter Benutzername",
+      "unknown_shop": "Unbekanntes Geschäft",
+      "unknown_item_name": "Unbekannter Artikelname",
 
-      "not_signed_in": "Can't join the group, the user associated with the userId has to be signed in"
+      "not_signed_in": "Der Gruppe kann nicht beigetreten werden. Der mit der Benutzer-ID verknüpfte Benutzer muss angemeldet sein."
    },
 
 
@@ -95,9 +131,9 @@
 
    "home": {
       "options": {
-         "order": "Order",
-         "shop": "Shop",
-         "transactions": "Transactions"
+         "order": "Bestellen",
+         "shop": "Einkaufen",
+         "transactions": "Transaktionen"
       }
    },
 
@@ -105,54 +141,46 @@
 
 
    "order": {
-      "button": "Order"
+      "button": "Bestellen"
    },
 
 
 
 
    "shop": {
-      "no_open_orders": "No open orders",
-      "slide_to_shop": ""
+      "no_open_orders": "Keine offenen Bestellungen",
+      "slide_to_shop": "Zum Einkaufen schieben"
    },
 
 
 
 
    "transaction": {
-      "unknown_fulfiller": "Unknown Fulfiller",
-      "unknown_user": "Unknown User",
-      "bought_for": "Bought for {}",
-      "bought_by": "Bought by {}",
-      "date_location": "{} on {} at {}",
-      "date_location_newline": "{} on {} at {}",
-      "no_transactions": "No Transactions",
-      "clear_history": "Clear History"
+      "unknown_fulfiller": "Unbekannter Erfüller",
+      "unknown_user": "Unbekannter Benutzer",
+      "bought_for": "Gekauft für {}",
+      "bought_by": "Gekauft von {}",
+      "date_location": "{} am {} um {}",
+      "date_location_newline": "{} am {} um {}",
+      "no_transactions": "Keine Transaktionen",
+      "clear_history": "Verlauf löschen"
    },
 
 
 
 
    "profile_overlay": {
-      "header": "Your Profile",
-      "email_specifier": " (specified by {})",
-      "log_out": "Log out",
-      "close": "Close"
+      "header": "Dein Profil",
+      "email_specifier": " (festgelegt von {})",
+      "log_out": "Abmelden",
+      "close": "Schließen"
    },
 
 
 
 
    "shopping_cart": {
-      "header": "Your Order",
-      "close": "Close"
-   },
-
-
-
-
-   "group_selection": {
-      "header": "Select a group",
-      "continue": "Continue"
+      "header": "Deine Bestellung",
+      "close": "Schließen"
    }
 }
