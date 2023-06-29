@@ -33,11 +33,6 @@ void main() async {
     var group = Group.findUserGroup(user.uid);
     if (group == null) {
       FirebaseAuth.instance.signOut();
-      // localization not initialized at this point
-      Fluttertoast.showToast(
-        msg: 'Profile corrupted: Not asssociated with a group',
-        toastLength: Toast.LENGTH_LONG,
-      );
     } else {
       // get username
       var userSnapshot = await Database.realtime
@@ -117,10 +112,6 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
         var group = Group.findUserGroup(user.uid);
         if (group == null) {
           FirebaseAuth.instance.signOut();
-          Fluttertoast.showToast(
-            msg: 'login.errors.no_group_create'.tr(),
-            toastLength: Toast.LENGTH_LONG,
-          );
           _navigatorKey.currentState?.pushReplacementNamed('login');
         } else {
           // get username
@@ -171,6 +162,9 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
             break;
           case 'intro':
             widget = IntroPage(
+              onIntroCanceled: () {
+                _navigatorKey.currentState?.pushReplacementNamed('login');
+              },
               onIntroComplete: (groupName, groupId) async {
                 var user = FirebaseAuth.instance.currentUser;
                 var userName = Database.userName;

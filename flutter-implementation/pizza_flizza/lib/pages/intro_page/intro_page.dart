@@ -5,10 +5,17 @@ import 'package:pizza_flizza/pages/intro_page/page_physics.dart';
 import 'widgets/group_selection.dart';
 import 'widgets/privacy_policy.dart';
 
+typedef OnIntroCanceled = void Function();
+
 class IntroPage extends StatefulWidget {
+  final OnIntroCanceled? onIntroCanceled;
   final OnGroupSelected? onIntroComplete;
 
-  const IntroPage({super.key, this.onIntroComplete});
+  const IntroPage({
+    super.key,
+    this.onIntroCanceled,
+    this.onIntroComplete,
+  });
 
   @override
   State<IntroPage> createState() => _IntroPageState();
@@ -65,10 +72,21 @@ class _IntroPageState extends State<IntroPage> {
       child: Scaffold(
         body: Stack(
           children: [
-            PageView(
-              controller: _pageController,
-              physics: CustomLockScrollPhysics(lockRight: true),
-              children: _slides,
+            WillPopScope(
+              onWillPop: () {
+                if (_currentPage.round() == 0) {
+                  widget.onIntroCanceled?.call();
+                } else {
+                  _goToPage(_currentPage.round() - 1);
+                }
+
+                return Future(() => false);
+              },
+              child: PageView(
+                controller: _pageController,
+                physics: CustomLockScrollPhysics(lockRight: true),
+                children: _slides,
+              ),
             ),
             AnimatedBuilder(
               animation: _pageController,
