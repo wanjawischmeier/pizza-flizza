@@ -146,11 +146,13 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                               userId,
                               userName,
                             );
+
                             _groupId = group.groupId;
                             _groupName = group.groupName;
                             Database.groupId = _groupId;
                             Database.groupName = _groupName;
 
+                            Shop.clearOrderData();
                             Shop.initializeUserGroupUpdates();
 
                             // clarify that an update is being applied
@@ -192,40 +194,6 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             ),
                           ).tr(),
                         ),
-                        /*
-                        TextButton(
-                          onPressed: () {
-                            // Payment.processPayment("sb-1nk43y26329305@business.example.com", 12);
-                          },
-                          child: const Text(
-                            'Make Payment',
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            widget.onRemoveOverlay();
-
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    PaypalPayment(
-                                  onFinish: (number) async {
-                                    // payment done
-                                    print('order id: ' + number);
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'Pay with Paypal',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        */
                       ],
                     )),
               ),

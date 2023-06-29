@@ -86,6 +86,7 @@ class Shop {
   static final OrderMap _orders = {};
   static OrderMap get orders => _orders;
   static final FulfilledMap _fulfilled = {};
+  static FulfilledMap get fulfilled => _fulfilled;
   static final HistoryMap _history = {};
 
   static final StreamController _ordersPushedController =
@@ -438,6 +439,16 @@ class Shop {
     }
   }
 
+  static void clearOrderData() {
+    _orders.clear();
+    _fulfilled.clear();
+    _history.clear();
+
+    _ordersUpdatedController.add(_orders);
+    _fulfilledUpdatedController.add(_fulfilled);
+    _historyUpdatedController.add(_history);
+  }
+
   static void initializeUserGroupUpdates() {
     onChildUpdated(event) {
       String updatedUserId = event.snapshot.key;
@@ -458,10 +469,10 @@ class Shop {
         return;
       }
 
-      Map? fulfilled = data['fulfilled'];
-      if (fulfilled != null) {
+      Map? removedFulfilled = data['fulfilled'];
+      if (removedFulfilled != null) {
         bool changed = false;
-        for (Map fulfilledShop in fulfilled.values) {
+        for (Map fulfilledShop in removedFulfilled.values) {
           for (String userId in fulfilledShop.keys) {
             if (userId == Database.userId) {
               _fulfilled.remove(updatedUserId);
@@ -475,16 +486,12 @@ class Shop {
         }
       }
 
-      if (updatedUserId != Database.userId) {
-        return;
-      }
-
       if (data.containsKey('orders')) {
-        _orders.clear();
+        _orders.remove(updatedUserId);
         _ordersUpdatedController.add(_orders);
       }
 
-      if (data.containsKey('history')) {
+      if (updatedUserId == Database.userId && data.containsKey('history')) {
         _history.clear();
         _historyUpdatedController.add(_history);
       }

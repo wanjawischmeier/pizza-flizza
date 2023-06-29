@@ -51,7 +51,7 @@ class _ShopFragmentState extends State<ShopFragment>
   );
 
   late StreamSubscription<String> _shopChangedSubscription;
-  late StreamSubscription<OrderMap> _ordersSubscription2;
+  late StreamSubscription<OrderMap> _ordersSubscription;
   final _ordersShop = <int, OrderItem>{};
   final _fulfilled = <String>[];
 
@@ -69,25 +69,48 @@ class _ShopFragmentState extends State<ShopFragment>
       });
     });
 
-    if (_foregroundItem == null && _ordersShop.isNotEmpty) {
-      _foregroundItem = _ordersShop.values.first;
-    }
+    if (_ordersShop.isNotEmpty) {
+      if (_foregroundItem == null) {
+        _foregroundItem = _ordersShop.values.first;
+      } else {
+        var newForegroundItem =
+            _ordersShop.values.getMatchingItem(_foregroundItem!);
+        if (newForegroundItem != null) {
+          _foregroundItem = newForegroundItem;
+        }
+      }
 
-    if (_backgroundItem == null && _ordersShop.length > 1) {
-      _backgroundItem = _ordersShop.values.elementAt(1);
+      if (_ordersShop.length > 1) {
+        if (_backgroundItem == null) {
+          _backgroundItem = _ordersShop.values.elementAt(1);
+        } else {
+          var newBackgroundItem =
+              _ordersShop.values.getMatchingItem(_backgroundItem!);
+          if (newBackgroundItem != null) {
+            _backgroundItem = newBackgroundItem;
+          }
+        }
+      }
     }
 
     setState(() {
-      _count = _foregroundItem?.count ?? 0;
-      _swipedCount = 0;
+      var oldState = _state;
 
       if (_ordersShop.isEmpty) {
+        _foregroundItem = null;
+        _backgroundItem = null;
         _state = ShopState.noOrders;
-        _controller.forward();
-      } else if (lock) {
+      } else if (lock || _state == ShopState.noOrders) {
         _state = ShopState.locked;
+      }
+
+      // animate if state changed
+      if (_state != oldState) {
         _controller.forward();
       }
+
+      _count = _foregroundItem?.count ?? 0;
+      _swipedCount = 0;
     });
   }
 
@@ -101,9 +124,7 @@ class _ShopFragmentState extends State<ShopFragment>
       value: 1,
     );
 
-    _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
-      filterOrders(orders);
-    });
+    _ordersSubscription = Shop.subscribeToOrdersUpdated(filterOrders);
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       _fulfilled.clear();
@@ -114,7 +135,7 @@ class _ShopFragmentState extends State<ShopFragment>
   @override
   void dispose() {
     _shopChangedSubscription.cancel();
-    _ordersSubscription2.cancel();
+    _ordersSubscription.cancel();
     super.dispose();
   }
 
@@ -221,7 +242,6 @@ class _ShopFragmentState extends State<ShopFragment>
                               });
                               _controller.forward();
                             } else {
-                              _state = ShopState.locked;
                               _fulfilled.clear();
                               // some unfulfilled: restore original orders
                               filterOrders(Shop.orders, lock: true);
@@ -271,6 +291,8 @@ class _ShopFragmentState extends State<ShopFragment>
                                   child: Column(
                                     children: [
                                       Container(
+                                        width: 150,
+                                        height: 150,
                                         decoration: BoxDecoration(
                                           color: Themes.grayDark,
                                           borderRadius:
@@ -287,6 +309,11 @@ class _ShopFragmentState extends State<ShopFragment>
                                                 '/images/${Database.imageResolution}/shops/${Shop.currentShopId}/logo_large.png',
                                             mapKey:
                                                 '${Shop.currentShopId}_logo_large_${Database.imageResolution}',
+                                            loadingIndicator: const Padding(
+                                              padding: EdgeInsets.all(32),
+                                              child:
+                                                  CircularProgressIndicator(),
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -359,7 +386,10 @@ class _ShopFragmentState extends State<ShopFragment>
                         SlideAction(
                           sliderRotate: false,
                           enabled: _state == ShopState.locked,
-                          textColor: Colors.white,
+                          textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
                           innerColor: _state == ShopState.noOrders
                               ? Themes.grayLight
                               : Colors.white,
@@ -369,6 +399,7 @@ class _ShopFragmentState extends State<ShopFragment>
                               ? 'shop.no_open_orders'.tr()
                               : 'shop.slide_to_shop'.tr(),
                           onSubmit: () {
+                            _state = ShopState.unlocked;
                             return _controller.reverse();
                           },
                         ),

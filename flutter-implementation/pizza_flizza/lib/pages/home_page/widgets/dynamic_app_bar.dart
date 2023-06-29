@@ -41,7 +41,7 @@ class DynamicAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _DynamicAppBarState extends State<DynamicAppBar> {
   late bool _showCartBadge;
   int _orderCount = 0;
-  late StreamSubscription<OrderMap> _ordersSubscription2;
+  late StreamSubscription<OrderMap> _ordersSubscription;
 
   int countUserOrders(List<ShopItem> orders) {
     int count = 0;
@@ -59,7 +59,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
   void initState() {
     super.initState();
 
-    _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
+    _ordersSubscription = Shop.subscribeToOrdersUpdated((orders) {
       _orderCount = 0;
 
       orders[Database.userId]?.forEach((shopId, order) {
@@ -74,7 +74,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
 
   @override
   void dispose() {
-    _ordersSubscription2.cancel();
+    _ordersSubscription.cancel();
     super.dispose();
   }
 

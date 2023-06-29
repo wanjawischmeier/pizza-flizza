@@ -36,11 +36,9 @@ class _LoginPageState extends State<LoginPage> {
   bool _loginMode = true;
   String _email = '';
   String _userName = '';
-  String _groupName = '';
   String _password = '';
   String? _emailError;
   String? _userNameError;
-  String? _groupNameError;
   String? _passwordError;
 
   final GlobalKey<GroupSelectionFieldState> _groupSelectionKey = GlobalKey();
@@ -108,6 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                                   ? 'login.fields.email.hint_login'.tr()
                                   : 'login.fields.email.hint_create'.tr(),
                             ),
+                            keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
                             onChanged: (value) {
                               _email = value;
@@ -152,33 +151,6 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                         ),
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.fastOutSlowIn,
-                          child: _loginMode
-                              ? const SizedBox()
-                              : Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 15.0,
-                                      right: 15.0,
-                                      top: 15,
-                                      bottom: 0),
-                                  child: GroupSelectionField(
-                                    error: _groupNameError,
-                                    onGroupNameChanged: (groupName, groupId) {
-                                      if (_groupNameError != null) {
-                                        setState(() {
-                                          _groupNameError = null;
-                                        });
-                                      }
-                                      _groupName = groupName;
-                                    },
-                                    onSelectionConfirmed: (groupName, groupId) {
-                                      _groupName = groupName;
-                                    },
-                                  ),
-                                ),
-                        ),
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 15.0, right: 15.0, top: 15, bottom: 0),
@@ -213,11 +185,9 @@ class _LoginPageState extends State<LoginPage> {
                                   child: TextButton(
                                     onPressed: () {
                                       setState(() {
-                                        _groupName = '';
                                         _emailError = null;
                                         _userNameError = null;
                                         _passwordError = null;
-                                        _groupNameError = null;
 
                                         _groupSelectionKey.currentState
                                             ?.reset();
@@ -375,11 +345,6 @@ class _LoginPageState extends State<LoginPage> {
         error = true;
       } else if (_userName.length < 6) {
         _userNameError = 'login.errors.invalid_username'.tr();
-        error = true;
-      }
-
-      if (_groupName.isEmpty) {
-        _groupNameError = 'login.errors.no_group_name'.tr();
         error = true;
       }
     }

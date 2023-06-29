@@ -160,8 +160,8 @@
       "unknown_user": "Unknown User",
       "bought_for": "Bought for {}",
       "bought_by": "Bought by {}",
-      "date_location": "{} on {} at {}",
-      "date_location_newline": "{} on {} at {}",
+      "date": "{} on {}",
+      "date_location": "@:transaction.date at {}",
       "no_transactions": "No Transactions",
       "clear_history": "Clear History"
    },

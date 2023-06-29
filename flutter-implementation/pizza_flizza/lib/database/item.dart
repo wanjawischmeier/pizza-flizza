@@ -82,6 +82,24 @@ class OrderItem extends ShopItem with EquatableMixin {
         );
 }
 
+extension ItemFilter on Iterable<OrderItem> {
+  /// checks whether the given iterable contains an item.
+  /// NOT considering item counts.
+  bool containsItem(OrderItem item) {
+    return where(
+      (orderItem) =>
+          orderItem.userId == item.userId && orderItem.shopId == item.shopId,
+    ).isNotEmpty;
+  }
+
+  OrderItem? getMatchingItem(OrderItem item) {
+    return where(
+      (orderItem) =>
+          orderItem.userId == item.userId && orderItem.shopId == item.shopId,
+    ).firstOrNull;
+  }
+}
+
 class HistoryItem {
   String itemName;
   int count;

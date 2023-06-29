@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:pizza_flizza/database/database.dart';
 
+import 'shop.dart';
+
 class Group {
   int groupId;
   String groupName;
@@ -131,7 +133,6 @@ class Group {
     } else {
       // check wether group exists in database
       group = _groups[groupId];
-
       if (group == null) {
         // for some reason an id is passed that does not exist in the database
         // discard it and create a new one
@@ -169,6 +170,27 @@ class Group {
             .child('groups/${oldGroup.groupId}/users/$userId')
             .remove();
       }
+
+      // delete all user data in old group
+      // orders, fulfilled and history
+      await Database.userReference.remove();
+
+      // check whether other users have fulfilled for current user
+      var futures = <Future>[];
+      Shop.fulfilled.forEach((fulfillerId, fulfilledOrders) {
+        fulfilledOrders.forEach((shopId, shopOrders) {
+          shopOrders.forEach((fulfilledForId, order) {
+            if (fulfilledForId == userId) {
+              futures.add(
+                Database.groupReference
+                    .child('$fulfillerId/fulfilled/$shopId/$fulfilledForId')
+                    .remove(),
+              );
+            }
+          });
+        });
+      });
+      await Future.wait(futures);
     }
 
     return await joinGroup(newGroupName, newGroupId, userId, userName);

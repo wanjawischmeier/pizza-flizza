@@ -148,7 +148,7 @@
 
 
    "shop": {
-      "no_open_orders": "Keine offenen Bestellungen",
+      "no_open_orders": "Keine Bestellungen",
       "slide_to_shop": "Zum Einkaufen schieben"
    },
 
@@ -160,8 +160,8 @@
       "unknown_user": "Unbekannter Benutzer",
       "bought_for": "Gekauft für {}",
       "bought_by": "Gekauft von {}",
-      "date_location": "{} am {} um {}",
-      "date_location_newline": "{} am {} um {}",
+      "date": "{} am {}",
+      "date_location": "@:transaction.date bei {}",
       "no_transactions": "Keine Transaktionen",
       "clear_history": "Verlauf löschen"
    },

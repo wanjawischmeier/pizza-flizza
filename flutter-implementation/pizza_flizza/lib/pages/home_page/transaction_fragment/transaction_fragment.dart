@@ -82,9 +82,10 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       secondaryColor: Themes.grayLight,
       accentColor: Themes.grayMid,
       id: timestamp,
-      header: 'transaction.date_location_newline'.tr(
-        args: [order.timeFormatted, order.dateFormatted, order.shopName],
+      header: 'transaction.date'.tr(
+        args: [order.timeFormatted, order.dateFormatted],
       ),
+      subHeader: order.shopName,
       content: order.itemsFormatted,
       trailing: Helper.formatPrice(order.price),
       dismissable: false,
