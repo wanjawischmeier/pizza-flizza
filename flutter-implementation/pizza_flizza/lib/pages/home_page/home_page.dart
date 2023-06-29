@@ -36,17 +36,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   static final Map<String, Tuple3<IconData, AppBarType, Widget>>
       _widgetOptions = {
     'home.options.order'.tr(): const Tuple3(
-      Icons.online_prediction_rounded,
+      Icons.add_shopping_cart_rounded,
       AppBarType.location,
       OrderFragment(),
     ),
     'home.options.shop'.tr(): const Tuple3(
-      Icons.shop_2,
+      Icons.shopping_basket_outlined,
       AppBarType.location,
       ShopFragment(),
     ),
     'home.options.transactions'.tr(): const Tuple3(
-      Icons.transcribe_sharp,
+      Icons.list_alt_rounded,
       AppBarType.name,
       TransactionFragment(),
     ),
