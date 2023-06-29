@@ -69,6 +69,8 @@ class _ShopFragmentState extends State<ShopFragment>
       });
     });
 
+    var oldForeground = _foregroundItem;
+
     if (_ordersShop.isNotEmpty) {
       if (_foregroundItem == null) {
         _foregroundItem = _ordersShop.values.first;
@@ -95,6 +97,7 @@ class _ShopFragmentState extends State<ShopFragment>
 
     setState(() {
       var oldState = _state;
+      var foregroundCount = _foregroundItem?.count ?? 0;
 
       if (_ordersShop.isEmpty) {
         _foregroundItem = null;
@@ -102,15 +105,19 @@ class _ShopFragmentState extends State<ShopFragment>
         _state = ShopState.noOrders;
       } else if (lock || _state == ShopState.noOrders) {
         _state = ShopState.locked;
+      } else if (_foregroundItem.identityMatches(oldForeground)) {
+        _count = min(_count, foregroundCount);
+        _gradient = _count / foregroundCount;
+      } else {
+        _count = foregroundCount;
       }
+
+      _swipedCount = 0;
 
       // animate if state changed
       if (_state != oldState) {
         _controller.forward();
       }
-
-      _count = _foregroundItem?.count ?? 0;
-      _swipedCount = 0;
     });
   }
 

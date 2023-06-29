@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/widgets/circular_avatar_icon.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
 typedef OnGroupSelected = void Function(String groupName, int? groupId);
@@ -20,20 +20,11 @@ class _GroupSelectionSlideState extends State<GroupSelectionSlide> {
     return Column(
       children: [
         const Spacer(),
-        Container(
-          width: 150,
-          padding: const EdgeInsets.only(bottom: 16),
-          child: ClipOval(
-            child: Container(
-              padding: const EdgeInsets.all(30),
-              color: Themes.grayMid,
-              child: const FittedBox(
-                child: Icon(
-                  Icons.group_add_outlined,
-                  color: Themes.cream,
-                ),
-              ),
-            ),
+        const Padding(
+          padding: EdgeInsets.all(8),
+          child: CircularAvatarIcon(
+            padding: EdgeInsets.all(30),
+            iconData: Icons.group_add_outlined,
           ),
         ),
         Text(

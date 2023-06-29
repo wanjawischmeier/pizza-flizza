@@ -35,45 +35,48 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             ),
           ),
         ),
-        onPressed: () async {
-          setState(() {
-            _isSigningIn = true;
-          });
+        onPressed: _isSigningIn
+            ? null
+            : () async {
+                setState(() {
+                  _isSigningIn = true;
+                });
 
-          // trigger the authentication flow
-          final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+                // trigger the authentication flow
+                final GoogleSignInAccount? googleUser =
+                    await GoogleSignIn().signIn();
 
-          // sign in process was aborted by user
-          if (googleUser == null) {
-            _isSigningIn = false;
-            return;
-          }
+                // sign in process was aborted by user
+                if (googleUser == null) {
+                  _isSigningIn = false;
+                  return;
+                }
 
-          // obtain the auth details from the request
-          final GoogleSignInAuthentication googleAuth =
-              await googleUser.authentication;
+                // obtain the auth details from the request
+                final GoogleSignInAuthentication googleAuth =
+                    await googleUser.authentication;
 
-          // create a new credential
-          final authCredential = GoogleAuthProvider.credential(
-            accessToken: googleAuth.accessToken,
-            idToken: googleAuth.idToken,
-          );
+                // create a new credential
+                final authCredential = GoogleAuthProvider.credential(
+                  accessToken: googleAuth.accessToken,
+                  idToken: googleAuth.idToken,
+                );
 
-          // once signed in, get the UserCredential
-          var credential =
-              await FirebaseAuth.instance.signInWithCredential(authCredential);
+                // once signed in, get the UserCredential
+                var credential = await FirebaseAuth.instance
+                    .signInWithCredential(authCredential);
 
-          User? user = credential.user;
-          if (user == null) {
-            await FirebaseAuth.instance.signOut();
-          } else {
-            await widget.onGoogleSignInComplete?.call(user);
-          }
+                User? user = credential.user;
+                if (user == null) {
+                  await FirebaseAuth.instance.signOut();
+                } else {
+                  await widget.onGoogleSignInComplete?.call(user);
+                }
 
-          setState(() {
-            _isSigningIn = false;
-          });
-        },
+                setState(() {
+                  _isSigningIn = false;
+                });
+              },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
           child: AnimatedSize(

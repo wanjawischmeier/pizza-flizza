@@ -11,6 +11,7 @@ import 'package:pizza_flizza/other/custom_icons.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/login_page/widgets/google_signin_button.dart';
+import 'package:pizza_flizza/widgets/circular_avatar_icon.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 
 typedef OnLoginComplete = void Function(
@@ -63,32 +64,13 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      Row(
+                      const Row(
                         children: [
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.only(bottom: 32),
-                              child: Container(
-                                height: 150,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Themes.grayMid,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      spreadRadius: 2,
-                                      blurRadius: 4,
-                                      offset: const Offset(2, 2),
-                                    )
-                                  ],
-                                ),
-                                child: const FittedBox(
-                                  child: Icon(
-                                    PizzaIcons.logo,
-                                    color: Themes.cream,
-                                  ),
-                                ),
+                              padding: EdgeInsets.only(bottom: 32),
+                              child: CircularAvatarIcon(
+                                iconData: PizzaIcons.logo,
                               ),
                             ),
                           ),

@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:pizza_flizza/other/theme.dart';
+import 'package:pizza_flizza/widgets/circular_avatar_icon.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef OnContinue = void Function();
@@ -99,20 +99,11 @@ class _PrivacyPolicySlideState extends State<PrivacyPolicySlide> {
     return Column(
       children: [
         const Spacer(),
-        Container(
-          width: 150,
-          padding: const EdgeInsets.only(bottom: 16),
-          child: ClipOval(
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              color: Themes.grayMid,
-              child: const FittedBox(
-                child: Icon(
-                  Icons.privacy_tip_outlined,
-                  color: Themes.cream,
-                ),
-              ),
-            ),
+        const Padding(
+          padding: EdgeInsets.all(8),
+          child: CircularAvatarIcon(
+            padding: EdgeInsets.all(20),
+            iconData: Icons.privacy_tip_outlined,
           ),
         ),
         const Text(

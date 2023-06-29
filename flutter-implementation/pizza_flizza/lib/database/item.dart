@@ -93,6 +93,12 @@ extension ItemFilter on Iterable<OrderItem> {
   }
 }
 
+extension ItemMatch on OrderItem? {
+  bool identityMatches(OrderItem? item) {
+    return this?.itemId == item?.itemId && this?.shopId == item?.shopId;
+  }
+}
+
 class HistoryItem {
   String itemName;
   int count;
