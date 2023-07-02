@@ -91,6 +91,16 @@ extension ItemFilter on Iterable<OrderItem> {
           orderItem.userId == item.userId && orderItem.shopId == item.shopId,
     ).firstOrNull;
   }
+
+  int get totalItemCount {
+    int count = 0;
+
+    for (var item in this) {
+      count += item.count;
+    }
+
+    return count;
+  }
 }
 
 extension ItemMatch on OrderItem? {

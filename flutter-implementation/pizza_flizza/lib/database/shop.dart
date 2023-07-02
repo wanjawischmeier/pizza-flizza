@@ -83,6 +83,21 @@ class Shop {
     return result.substring(0, max(0, result.length - 1));
   }
 
+  static double _currentTotal = 0;
+  static final StreamController<double> _currentTotalController =
+      StreamController.broadcast();
+  static StreamSubscription<double> subscribeToCurrentTotal(
+      void Function(double total) onUpdate) {
+    onUpdate(_currentTotal);
+    return _currentTotalController.stream.listen(onUpdate);
+  }
+
+  static void clearCurrentOrder() {
+    _currentOrder.clear();
+    _currentTotal = 0;
+    _currentTotalController.add(_currentTotal);
+  }
+
   static final OrderMap _orders = {};
   static OrderMap get orders => _orders;
   static final FulfilledMap _fulfilled = {};
@@ -118,15 +133,6 @@ class Shop {
       void Function(HistoryMap orders) onUpdate) {
     onUpdate(_history);
     return _historyUpdatedController.stream.listen(onUpdate);
-  }
-
-  static double _currentTotal = 0;
-  static final StreamController<double> _currentTotalController =
-      StreamController.broadcast();
-  static StreamSubscription<double> subscribeToCurrentTotal(
-      void Function(double total) onUpdate) {
-    onUpdate(_currentTotal);
-    return _currentTotalController.stream.listen(onUpdate);
   }
 
   static StreamSubscription<DatabaseEvent>? _groupDataAddedSubscription,
@@ -635,31 +641,20 @@ class Shop {
     }
     var fulfilledFuture = order.databaseReference.remove();
 
+    HistoryOrder? existingOrder;
+    _history[order.userId]?[order.shopId]?.forEach((timestamp, historyOrder) {
+      // find recent existing order
+      if ((timestamp - order.timestamp).abs() < Duration.millisecondsPerHour) {
+        order.timestamp = timestamp;
+        existingOrder = historyOrder;
+      }
+    });
+
     // add to history
     var historyOrder = HistoryOrder.fromFulfilledOrder(order);
-    /*
-    var historyUser = _history[order.userId];
-    if (historyUser == null) {
-      historyUser = {
-        order.shopId: {order.timestamp: historyOrder}
-      };
-    } else {
-      var historyShop = historyUser[order.shopId];
-
-      if (historyShop == null) {
-        historyShop = {order.timestamp: historyOrder};
-      } else {
-        var oldOrder = historyShop[order.timestamp];
-
-        if (oldOrder != null) {
-          historyOrder += oldOrder;
-        }
-
-        historyShop[order.timestamp] = historyOrder;
-      }
+    if (existingOrder != null) {
+      historyOrder.items.addAll(existingOrder!.items);
     }
-    */
-
     var historyFuture = Database.realtime
         .child(
             'users/${Database.groupId}/${order.userId}/history/${order.shopId}/${order.timestamp}')

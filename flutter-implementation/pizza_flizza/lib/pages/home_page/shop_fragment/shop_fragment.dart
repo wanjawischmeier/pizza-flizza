@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_firestorage/lib.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pizza_flizza/database/database.dart';
 
 import 'package:slide_to_act/slide_to_act.dart';
@@ -28,11 +29,11 @@ class ShopFragment extends StatefulWidget {
 
 class _ShopFragmentState extends State<ShopFragment>
     with TickerProviderStateMixin {
-  OrderItem? _foregroundItem, _backgroundItem;
+  // OrderItem? _foregroundItem, _backgroundItem;
+  int _count = 0;
   double _gradient = 1;
-  double _swipedCount = 0;
   ShopState _state = ShopState.locked;
-  late int _count;
+
   late AnimationController _controller;
   static const Duration _animationDurationIn = Duration(milliseconds: 300);
   static const Duration _animationDurationOut = Duration(milliseconds: 150);
@@ -52,8 +53,80 @@ class _ShopFragmentState extends State<ShopFragment>
 
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<OrderMap> _ordersSubscription;
-  final _ordersShop = <int, OrderItem>{};
+  final _ordersShop = <OrderItem>[];
   final _fulfilled = <String>[];
+
+  List<OrderItem>? _foregroundItems = [];
+  List<OrderItem>? _backgroundItems = [];
+
+  List<OrderItem>? _gatherNextItems() {
+    if (_ordersShop.isEmpty) {
+      return null;
+    }
+
+    var first = _ordersShop[0];
+    _ordersShop.removeAt(0);
+    var items = <OrderItem>[first];
+
+    for (var item in _ordersShop) {
+      if (item.identityMatches(first)) {
+        items.add(item);
+      }
+    }
+
+    for (var item in items) {
+      _ordersShop.remove(item);
+    }
+
+    return items;
+  }
+
+  void _fulfillForegroundItems() {
+    var items = _foregroundItems;
+    if (items == null || items.isEmpty) {
+      return;
+    }
+
+    _fulfilled.add(items.first.itemId);
+
+    if (items.totalItemCount <= _count) {
+      // every order can be fulfilled
+      for (var item in items) {
+        Shop.fulfillItem(item, item.count);
+      }
+
+      return;
+    } else {
+      // Distribute items fairly
+      int remainingItems = _count;
+
+      for (var item in items) {
+        double distributionRatio = item.count / items.totalItemCount;
+        int distributedQuantity = (distributionRatio * _count).round();
+
+        if (distributedQuantity > item.count) {
+          distributedQuantity = item.count;
+        }
+
+        if (distributedQuantity > remainingItems) {
+          distributedQuantity = remainingItems;
+        }
+
+        if (distributedQuantity == 0) {
+          break;
+        }
+
+        remainingItems -= distributedQuantity;
+        Shop.fulfillItem(item, distributedQuantity);
+      }
+
+      if (remainingItems > 0) {
+        Fluttertoast.showToast(
+          msg: 'Item distribution failed: $remainingItems items remaining.',
+        );
+      }
+    }
+  }
 
   void filterOrders(OrderMap orders, {bool lock = false}) {
     _ordersShop.clear();
@@ -63,56 +136,34 @@ class _ShopFragmentState extends State<ShopFragment>
       // select currentShop
       userOrders[Shop.currentShopId]?.items.forEach((itemId, item) {
         if (!_fulfilled.contains(itemId)) {
-          // use hash to account for possible duplicate itemId's across shops
-          _ordersShop[item.hashCode] = OrderItem.copy(item);
+          _ordersShop.add(OrderItem.copy(item));
         }
       });
     });
 
-    var oldForeground = _foregroundItem;
+    var oldForegroundItems = _foregroundItems;
 
-    if (_ordersShop.isNotEmpty) {
-      if (_foregroundItem == null) {
-        _foregroundItem = _ordersShop.values.first;
-      } else {
-        var newForegroundItem =
-            _ordersShop.values.getMatchingItem(_foregroundItem!);
-        if (newForegroundItem != null) {
-          _foregroundItem = newForegroundItem;
-        }
-      }
-
-      if (_ordersShop.length > 1) {
-        if (_backgroundItem == null) {
-          _backgroundItem = _ordersShop.values.elementAt(1);
-        } else {
-          var newBackgroundItem =
-              _ordersShop.values.getMatchingItem(_backgroundItem!);
-          if (newBackgroundItem != null) {
-            _backgroundItem = newBackgroundItem;
-          }
-        }
-      }
-    }
+    _foregroundItems = _gatherNextItems();
+    _backgroundItems = _gatherNextItems();
 
     setState(() {
       var oldState = _state;
-      var foregroundCount = _foregroundItem?.count ?? 0;
+      var foregroundCount = _foregroundItems?.totalItemCount ?? 0;
 
-      if (_ordersShop.isEmpty) {
-        _foregroundItem = null;
-        _backgroundItem = null;
+      if (_foregroundItems == null) {
         _state = ShopState.noOrders;
-      } else if (lock || _state == ShopState.noOrders) {
+      } else if (lock) {
         _state = ShopState.locked;
-      } else if (_foregroundItem.identityMatches(oldForeground)) {
+      }
+
+      var foregroundItem = _foregroundItems?.firstOrNull;
+      if (_count != oldForegroundItems?.totalItemCount &&
+          foregroundItem.identityMatches(oldForegroundItems?.firstOrNull)) {
         _count = min(_count, foregroundCount);
         _gradient = _count / foregroundCount;
       } else {
         _count = foregroundCount;
       }
-
-      _swipedCount = 0;
 
       // animate if state changed
       if (_state != oldState) {
@@ -134,7 +185,6 @@ class _ShopFragmentState extends State<ShopFragment>
     _ordersSubscription = Shop.subscribeToOrdersUpdated(filterOrders);
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
-      _fulfilled.clear();
       filterOrders(Shop.orders, lock: true);
     });
   }
@@ -161,8 +211,11 @@ class _ShopFragmentState extends State<ShopFragment>
                   backgroundColor: Themes.grayMid,
                   progressColor: Themes.cream,
                   borderRadius: BorderRadius.circular(99),
-                  maxValue: _swipedCount + _ordersShop.length,
-                  currentValue: _swipedCount,
+                  maxValue: _fulfilled.length +
+                      _ordersShop.length +
+                      (_foregroundItems == null ? 0 : 1) +
+                      (_backgroundItems == null ? 0 : 1),
+                  currentValue: _fulfilled.length.toDouble(),
                 ),
               ),
               Expanded(
@@ -175,9 +228,9 @@ class _ShopFragmentState extends State<ShopFragment>
                         threshold: 100,
                         duration: const Duration(milliseconds: 150),
                         absoluteAngle: true,
-                        isDisabled: _foregroundItem == null,
+                        isDisabled: _foregroundItems == null,
                         foregroundCardBuilder: (context) {
-                          var item = _foregroundItem;
+                          var item = _foregroundItems?.firstOrNull;
                           if (item == null) {
                             return null;
                           }
@@ -189,7 +242,7 @@ class _ShopFragmentState extends State<ShopFragment>
                           );
                         },
                         backgroundCardBuilder: (context) {
-                          var item = _backgroundItem;
+                          var item = _backgroundItems?.firstOrNull;
                           if (item == null) {
                             return null;
                           }
@@ -197,14 +250,15 @@ class _ShopFragmentState extends State<ShopFragment>
                           return ShopCardWidget(
                             stop: 0,
                             name: item.itemName,
-                            count: item.count,
+                            count: _backgroundItems?.totalItemCount ?? 0,
                           );
                         },
                         // only slide if the count is higher than 1
-                        onStartSlide: () => (_foregroundItem?.count ?? 0) > 1,
+                        onStartSlide: () =>
+                            (_foregroundItems?.totalItemCount ?? 0) > 1,
                         onSlide: (gradient) {
                           // snap to range
-                          int count = _foregroundItem?.count ?? 0;
+                          int count = _foregroundItems?.totalItemCount ?? 0;
                           int newCount =
                               max(1, min(count, (gradient * count).round()));
                           _gradient = newCount / count;
@@ -219,46 +273,32 @@ class _ShopFragmentState extends State<ShopFragment>
                           }
                         },
                         onSwipe: (direction) {
-                          var item = _foregroundItem;
-                          if (item != null &&
-                              direction == AppinioSwiperDirection.right) {
-                            Shop.fulfillItem(item, _count);
+                          if (direction == AppinioSwiperDirection.right) {
+                            _fulfillForegroundItems();
+                          } else {
+                            var foregroundItemId =
+                                _foregroundItems?.firstOrNull?.itemId;
+                            if (foregroundItemId != null) {
+                              setState(() {
+                                _fulfilled.add(foregroundItemId);
+                              });
+                            }
                           }
 
                           _gradient = 1;
-                          _count = _backgroundItem?.count ?? 0;
+                          _count = _backgroundItems?.totalItemCount ?? 0;
 
-                          var firstOrderEntry = _ordersShop.entries.first;
-                          int orderHash = firstOrderEntry.key;
-                          var orderItem = firstOrderEntry.value;
-                          _ordersShop.remove(orderHash);
-                          _fulfilled.add(orderItem.itemId);
+                          if (_backgroundItems == null) {
+                            _fulfilled.clear();
+                            _foregroundItems = null;
 
-                          _foregroundItem = _backgroundItem;
-                          if (_ordersShop.length > 1) {
-                            _backgroundItem = _ordersShop.values.elementAt(1);
-                          } else {
-                            _backgroundItem = null;
-                          }
-
-                          if (_ordersShop.isEmpty) {
-                            if (_fulfilled.isEmpty) {
-                              setState(() {
-                                _swipedCount = 0;
-                                _state = ShopState.noOrders;
-                              });
-                              _controller.forward();
-                            } else {
-                              _fulfilled.clear();
-                              // some unfulfilled: restore original orders
-                              filterOrders(Shop.orders, lock: true);
-                            }
+                            filterOrders(Shop.orders, lock: true);
 
                             return false;
                           } else {
-                            setState(() {
-                              _swipedCount++;
-                            });
+                            _foregroundItems = List.from(_backgroundItems!);
+                            _backgroundItems = _gatherNextItems();
+
                             return true;
                           }
                         },

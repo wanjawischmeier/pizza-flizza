@@ -119,7 +119,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
               .child('groups/${group.groupId}/users/${user.uid}')
               .get();
           if (userSnapshot.value == null) {
-            FirebaseAuth.instance.signOut();
+            FirebaseAuth.instance.currentUser?.delete();
             Fluttertoast.showToast(
               msg: 'login.errors.no_username_create'.tr(),
               toastLength: Toast.LENGTH_LONG,
@@ -215,7 +215,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
         .child('groups/${group.groupId}/users/${user.uid}')
         .get();
     if (userSnapshot.value == null) {
-      FirebaseAuth.instance.signOut();
+      FirebaseAuth.instance.currentUser?.delete();
       Fluttertoast.showToast(
         msg: 'login.errors.no_username_create'.tr(),
         toastLength: Toast.LENGTH_LONG,

@@ -421,7 +421,7 @@ class _LoginPageState extends State<LoginPage> {
       await Group.initializeGroupUpdates();
       var group = Group.findUserGroup(user.uid);
       if (group == null) {
-        FirebaseAuth.instance.signOut();
+        FirebaseAuth.instance.currentUser?.delete();
         Fluttertoast.showToast(
           msg: 'login.errors.no_group_create'.tr(),
           toastLength: Toast.LENGTH_LONG,
@@ -434,7 +434,7 @@ class _LoginPageState extends State<LoginPage> {
           .child('groups/${group.groupId}/users/${user.uid}')
           .get();
       if (userSnapshot.value == null) {
-        FirebaseAuth.instance.signOut();
+        FirebaseAuth.instance.currentUser?.delete();
         Fluttertoast.showToast(
           msg: 'login.errors.no_username_create'.tr(),
           toastLength: Toast.LENGTH_LONG,

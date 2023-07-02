@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             FadeTransition(
               opacity: _opacityAnimation,
               child: ModalBarrier(
-                color: Themes.grayDark.withOpacity(0.5),
+                color: Colors.black.withOpacity(0.5),
                 onDismiss: () {
                   removeOverlay();
                 },
@@ -153,7 +153,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       (index) {
         var entry = _widgetOptions.entries.elementAt(index);
         return BottomNavigationBarItem(
-            icon: Icon(entry.value.item1), label: entry.key);
+          icon: Icon(entry.value.item1),
+          label: entry.key,
+        );
       },
     );
   }
@@ -191,7 +193,77 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       bottomNavigationBar: BottomNavigationBar(
         items: _bottomNavigationBarItems,
         currentIndex: _selectedIndex,
-        onTap: (value) {
+        onTap: (value) async {
+          if (_selectedIndex == value) {
+            return;
+          } else if (_selectedIndex == 0) {
+            if (Shop.currentOrder.isNotEmpty) {
+              bool? approved = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) => AlertDialog(
+                  backgroundColor: Themes.grayMid,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  title: const Text('home.discard_order.title').tr(),
+                  content: const Text('home.discard_order.content').tr(),
+                  actions: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Themes.grayLight,
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text(
+                              'home.discard_order.cancel',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
+                            ).tr(),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Themes.cream,
+                              minimumSize: const Size.fromHeight(50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text(
+                              'home.discard_order.continue',
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
+                            ).tr(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+
+              if (!(approved ?? false)) {
+                return;
+              }
+
+              Shop.clearCurrentOrder();
+            }
+          }
+
           setState(() {
             _selectedIndex = value;
           });

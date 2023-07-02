@@ -134,6 +134,13 @@
          "order": "Bestellen",
          "shop": "Einkaufen",
          "transactions": "Transaktionen"
+      },
+
+      "discard_order": {
+         "title": "Bestellung verwerfen?",
+         "content": "Du hast einige Dinge noch nicht in den Einkaufskorb getan.",
+         "cancel": "Abbrechen",
+         "continue": "Verwerfen"
       }
    },
 
@@ -172,8 +179,13 @@
    "profile_overlay": {
       "header": "Dein Profil",
       "email_specifier": " (festgelegt von {})",
+      "account_management": "Konto Verwalten",
+      "report_bug": "Einen Fehler melden",
       "log_out": "Abmelden",
-      "close": "Schließen"
+      "close": "Schließen",
+
+      "report_bug_url": "https://docs.google.com/forms/d/e/1FAIpQLSdEAo1Rqb09k_c46DbcW_hAmaYCvEZV5oLX5imNAy5P9Wa18A/viewform?usp=sf_link",
+      "account_management_url": "https://wanjawischmeier.github.io/pizza-flizza/pages/account-management"
    },
 
 

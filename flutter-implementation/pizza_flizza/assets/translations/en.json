@@ -134,6 +134,13 @@
          "order": "Order",
          "shop": "Shop",
          "transactions": "Transactions"
+      },
+
+      "discard_order": {
+         "title": "Discard order?",
+         "content": "You haven't put some things in the shopping cart yet.",
+         "cancel": "Cancel",
+         "continue": "Discard"
       }
    },
 
@@ -172,8 +179,13 @@
    "profile_overlay": {
       "header": "Your Profile",
       "email_specifier": " (specified by {})",
+      "account_management": "Account management",
+      "report_bug": "Report a bug",
       "log_out": "Log out",
-      "close": "Close"
+      "close": "Close",
+
+      "report_bug_url": "https://docs.google.com/forms/d/e/1FAIpQLSdEAo1Rqb09k_c46DbcW_hAmaYCvEZV5oLX5imNAy5P9Wa18A/viewform?usp=sf_link",
+      "account_management_url": "https://wanjawischmeier.github.io/pizza-flizza/pages/account-management"
    },
 
 
