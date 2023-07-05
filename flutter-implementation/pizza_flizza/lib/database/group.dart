@@ -159,46 +159,57 @@ class Group {
   static Future<Group> switchGroup(String newGroupName, int? newGroupId,
       String userId, String userName) async {
     Group? oldGroup = findUserGroup(userId);
-    if (oldGroup != null) {
-      if (oldGroup.groupId == newGroupId) {
-        return oldGroup;
-      }
-
-      if (oldGroup.users.length <= 1) {
-        // the group is empty apart from the current user, remove it
-        await Database.realtime.child('groups/${oldGroup.groupId}').remove();
-      } else {
-        // only remove the current user
-        await Database.realtime
-            .child('groups/${oldGroup.groupId}/users/$userId')
-            .remove();
-      }
-
-      // delete all user data in old group
-      // orders, fulfilled and history
-      await Database.userReference?.remove();
-
-      // check whether other users have fulfilled for current user
-      var futures = <Future>[];
-      Shop.fulfilled.forEach((fulfillerId, fulfilledOrders) {
-        fulfilledOrders.forEach((shopId, shopOrders) {
-          shopOrders.forEach((fulfilledForId, order) {
-            if (fulfilledForId == userId) {
-              var future = Database.groupReference
-                  ?.child('$fulfillerId/fulfilled/$shopId/$fulfilledForId')
-                  .remove();
-
-              if (future != null) {
-                futures.add(future);
-              }
-            }
-          });
-        });
-      });
-      await Future.wait(futures);
+    if (oldGroup == null) {
+      return await joinGroup(newGroupName, newGroupId, userId, userName);
     }
 
-    return await joinGroup(newGroupName, newGroupId, userId, userName);
+    if (oldGroup.groupId == newGroupId) {
+      return oldGroup;
+    }
+
+    var group = await joinGroup(newGroupName, newGroupId, userId, userName);
+
+    var futures = <Future>[];
+    if (oldGroup.users.length <= 1) {
+      // the group is empty apart from the current user, remove it
+      futures.add(
+        Database.realtime.child('groups/${oldGroup.groupId}').remove(),
+      );
+    } else {
+      // only remove the current user
+      futures.add(
+        Database.realtime
+            .child('groups/${oldGroup.groupId}/users/$userId')
+            .remove(),
+      );
+    }
+
+    // delete all user data in old group
+    // orders, fulfilled and history
+    var future = Database.userReference?.remove();
+    if (future != null) {
+      futures.add(future);
+    }
+
+    // check whether other users have fulfilled for current user
+    Shop.fulfilled.forEach((fulfillerId, fulfilledOrders) {
+      fulfilledOrders.forEach((shopId, shopOrders) {
+        shopOrders.forEach((fulfilledForId, order) {
+          if (fulfilledForId == userId) {
+            var future = Database.groupReference
+                ?.child('$fulfillerId/fulfilled/$shopId/$fulfilledForId')
+                .remove();
+
+            if (future != null) {
+              futures.add(future);
+            }
+          }
+        });
+      });
+    });
+
+    await Future.wait(futures);
+    return group;
   }
 
   static Group? findUserGroup(String userId) {
