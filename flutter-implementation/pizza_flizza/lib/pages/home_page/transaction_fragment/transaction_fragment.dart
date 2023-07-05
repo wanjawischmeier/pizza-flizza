@@ -32,19 +32,26 @@ class _TransactionFragmentState extends State<TransactionFragment> {
     String messageTemplate, credit;
     IconData? iconData;
 
-    if (order.fulfillerId == Database.userId) {
+    var user = Database.currentUser;
+    if (user == null) {
+      throw Exception('User undefined');
+    }
+
+    if (order.fulfillerId == user.userId) {
       // order fulfilled by user
       dismissable = true;
       color = Themes.cream;
       messageTemplate = 'transaction.bought_for';
-      credit = order.userName;
+      credit = Database.getUserName(order.userId) ??
+          'database.unknown_username'.tr();
       iconData = Icons.check;
     } else {
       // order placed by user
       color = Themes.grayLight;
       dismissable = false;
       messageTemplate = 'transaction.bought_by';
-      credit = order.fulfillerName;
+      credit = Database.getUserName(order.fulfillerId) ??
+          'database.unknown_username'.tr();
     }
 
     return TransactionCardWidget(
@@ -96,6 +103,11 @@ class _TransactionFragmentState extends State<TransactionFragment> {
   void initState() {
     super.initState();
 
+    var user = Database.currentUser;
+    if (user == null) {
+      return;
+    }
+
     _fulfilledSubscription = Shop.subscribeToFulfilledUpdated((orders) async {
       // already gathering info on state, discard update
       if (_futures.isNotEmpty) {
@@ -108,7 +120,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
         ordersFulfiller.forEach((shopId, ordersShop) {
           ordersShop.forEach((userId, order) {
             // order is relevant if fulfilled or ordered by user
-            if (fulfillerId == Database.userId || userId == Database.userId) {
+            if (fulfillerId == user.userId || userId == user.userId) {
               _fulfilledRelevant[order.hashCode] = order;
             }
           });
@@ -127,7 +139,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
     _historySubscription = Shop.subscribeToHistoryUpdated((orders) {
       _historyUser.clear();
 
-      orders[Database.userId]?.forEach((shopId, ordersShop) {
+      orders[user.userId]?.forEach((shopId, ordersShop) {
         ordersShop.forEach((timestamp, order) {
           _historyUser[timestamp] = order;
         });

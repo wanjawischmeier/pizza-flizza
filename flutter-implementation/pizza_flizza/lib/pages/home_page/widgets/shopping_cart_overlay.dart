@@ -31,11 +31,17 @@ class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
   @override
   void initState() {
     super.initState();
+
+    var user = Database.currentUser;
+    if (user == null) {
+      return;
+    }
+
     _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
       _ordersUser.clear();
       _totalPrice = 0;
 
-      var ordersUserRaw = orders[Database.userId];
+      var ordersUserRaw = orders[user.userId];
       if (ordersUserRaw == null) {
         widget.onRemoveOverlay();
       } else {

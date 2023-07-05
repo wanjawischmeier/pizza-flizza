@@ -30,32 +30,35 @@ class Group {
   }
 
   static final _groups = <int, Group>{};
+  static Map<int, Group> get groups => _groups;
 
   static void _parseAndAddGroup(String? key, Map? group) {
-    if (key != null && group != null) {
-      int id = int.parse(key);
-      var rawUsers = group['users'] as Map?;
-      var users = <String, String>{};
-
-      if (rawUsers != null) {
-        rawUsers.forEach((userId, userName) {
-          if (userId != null) {
-            users[userId] = userName;
-          }
-        });
-      }
-
-      _groups[id] = Group(
-        id,
-        group['name'],
-        users,
-      );
-
-      _groupsUpdatedController.add(_groups);
+    if (key == null || group == null) {
+      return;
     }
+
+    int id = int.parse(key);
+    var rawUsers = group['users'] as Map?;
+    var users = <String, String>{};
+
+    if (rawUsers != null) {
+      rawUsers.forEach((userId, userName) {
+        if (userId != null) {
+          users[userId] = userName;
+        }
+      });
+    }
+
+    _groups[id] = Group(
+      id,
+      group['name'],
+      users,
+    );
+
+    _groupsUpdatedController.add(_groups);
   }
 
-  static Future<void> initializeGroupUpdates() async {
+  static Future<void> initializeListeners() async {
     onGroupUpdated(DatabaseEvent event) {
       _parseAndAddGroup(
         event.snapshot.key,
@@ -87,7 +90,7 @@ class Group {
     });
   }
 
-  static Future<void> cancelGroupUpdates() async {
+  static Future<void> cancelGroupListeners() async {
     await _groupsDataAddedSubscription?.cancel();
     await _groupsDataChangedSubscription?.cancel();
     await _groupsDataRemovedSubscription?.cancel();
@@ -173,7 +176,7 @@ class Group {
 
       // delete all user data in old group
       // orders, fulfilled and history
-      await Database.userReference.remove();
+      await Database.userReference?.remove();
 
       // check whether other users have fulfilled for current user
       var futures = <Future>[];
@@ -181,11 +184,13 @@ class Group {
         fulfilledOrders.forEach((shopId, shopOrders) {
           shopOrders.forEach((fulfilledForId, order) {
             if (fulfilledForId == userId) {
-              futures.add(
-                Database.groupReference
-                    .child('$fulfillerId/fulfilled/$shopId/$fulfilledForId')
-                    .remove(),
-              );
+              var future = Database.groupReference
+                  ?.child('$fulfillerId/fulfilled/$shopId/$fulfilledForId')
+                  .remove();
+
+              if (future != null) {
+                futures.add(future);
+              }
             }
           });
         });

@@ -49,17 +49,14 @@ class Order {
 }
 
 class FulfilledOrder extends Order {
-  String fulfillerId, userId, fulfillerName, userName;
-  String timeFormatted, dateFormatted;
+  String userId, fulfillerId, timeFormatted, dateFormatted;
   int timestamp;
 
   FulfilledOrder(
-    this.fulfillerId,
     this.userId,
+    this.fulfillerId,
     super.shopId,
     super.shopName,
-    this.fulfillerName,
-    this.userName,
     this.timeFormatted,
     this.dateFormatted,
     this.timestamp,
@@ -71,14 +68,10 @@ class FulfilledOrder extends Order {
     String newUserId,
     String newShopId,
     String newShopName,
-    String newFulfillerName,
-    String newUserName,
     DateTime date,
     Map<String, OrderItem> items,
   )   : fulfillerId = newFulfillerId,
         userId = newUserId,
-        fulfillerName = newFulfillerName,
-        userName = newUserName,
         timeFormatted = DateFormat.Hm().format(date),
         dateFormatted = DateFormat('dd.MM.yy').format(date),
         timestamp = date.millisecondsSinceEpoch,
@@ -91,12 +84,9 @@ class FulfilledOrder extends Order {
   FulfilledOrder.fromUserItem(
     OrderItem item,
     String newUserId,
-    String newUserName,
     DateTime date,
   )   : fulfillerId = newUserId,
         userId = newUserId,
-        fulfillerName = newUserName,
-        userName = newUserName,
         timeFormatted = DateFormat.Hm().format(date),
         dateFormatted = DateFormat('dd.MM.yy').format(date),
         timestamp = date.millisecondsSinceEpoch,
@@ -106,8 +96,8 @@ class FulfilledOrder extends Order {
           {item.itemId: item},
         );
 
-  DatabaseReference get databaseReference =>
-      Database.userReference.child('fulfilled/$shopId/$userId');
+  DatabaseReference? get databaseReference =>
+      Database.userReference?.child('fulfilled/$shopId/$userId');
 
   /// itemId, count
   Map<String, int> get itemsParsed {

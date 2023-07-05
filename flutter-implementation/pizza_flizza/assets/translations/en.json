@@ -57,7 +57,6 @@
          "no_credentials_create": "@:login.errors.toast_header Failed to get account credentials",
          "no_email_create": "@:login.errors.toast_header Account email not specified",
          "no_username_create": "@:login.errors.toast_header Username not specified",
-         "no_group_create": "@:login.errors.toast_header_corrupted Not associated with a group",
 
          "no_email": "Please enter an email",
          "no_username": "Please enter an username",

@@ -25,14 +25,15 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
   static const double _itemSpacer = 16;
   static const _artificialDelay = Duration(milliseconds: 500);
   final String _thirdPartyProviderHintEmail =
-      (Database.providerId == null || Database.providerId == 'password')
+      (Database.currentUser?.providerId == null ||
+              Database.currentUser?.providerId == 'password')
           ? ''
-          : 'profile_overlay.email_specifier'.tr(args: [Database.providerId!]);
-  String? _email = Database.userEmail;
-  String? _userName;
-  String? _groupName = Database.groupName;
-  int? _groupId = Database.groupId;
+          : 'profile_overlay.email_specifier'.tr(
+              args: [Database.currentUser!.providerId!],
+            );
 
+  String? _email, _userName, _groupName;
+  int? _groupId;
   bool _userNameChanging = false;
   bool _groupIdChanging = false;
 
@@ -48,7 +49,10 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
   void initState() {
     super.initState();
 
-    _userName = Database.userName;
+    _email = Database.currentUser?.userEmail;
+    _userName = Database.currentUser?.userName;
+    _groupName = Database.currentUser?.group.groupName;
+    _groupId = Database.currentUser?.group.groupId;
   }
 
   @override
@@ -124,14 +128,11 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                           _groupId = groupId;
                         },
                         onSelectionConfirmed: (groupName, groupId) async {
-                          var userId = Database.userId;
-                          var userName = Database.userName;
                           _groupName = groupName;
                           _groupId = groupId;
 
-                          if (userId == null ||
-                              userName == null ||
-                              _groupId == Database.groupId) {
+                          var user = Database.currentUser;
+                          if (user == null) {
                             return;
                           }
 
@@ -144,14 +145,18 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                           var group = await Group.switchGroup(
                             groupName,
                             groupId,
-                            userId,
-                            userName,
+                            user.userId,
+                            user.userName,
                           );
 
                           _groupId = group.groupId;
                           _groupName = group.groupName;
-                          Database.groupId = _groupId;
-                          Database.groupName = _groupName;
+                          if (_groupId != null) {
+                            user.group.groupId = _groupId!;
+                          }
+                          if (_groupName != null) {
+                            user.group.groupName = _groupName!;
+                          }
 
                           Shop.clearOrderData();
                           Shop.initializeUserGroupUpdates();
@@ -285,16 +290,18 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
   }
 
   Future<void> _onUserNameChanged(bool hasFocus) async {
+    var user = Database.currentUser;
     if (!hasFocus &&
         (_userName?.isNotEmpty ?? false) &&
-        _userName != Database.userName) {
+        user != null &&
+        _userName != user.userName) {
       setState(() {
         _userNameChanging = true;
       });
 
-      Database.userName = _userName;
+      Database.currentUser?.userName = _userName!;
       await Database.realtime
-          .child('groups/${Database.groupId}/users/${Database.userId}')
+          .child('groups/${user.group.groupId}/users/${user.userId}')
           .set(_userName);
       // clarify that an update is being applied
       await Future.delayed(_artificialDelay);

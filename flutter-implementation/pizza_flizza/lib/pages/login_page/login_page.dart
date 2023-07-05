@@ -277,7 +277,6 @@ class _LoginPageState extends State<LoginPage> {
                             }
 
                             // find group associated with user
-                            await Group.initializeGroupUpdates();
                             var group = Group.findUserGroup(user.uid);
                             if (group != null) {
                               // get username
@@ -391,6 +390,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (credential != null) {
       User? user = credential.user;
+      String? userName = user?.displayName;
       String? email = user?.email;
 
       if (user == null) {
@@ -418,29 +418,18 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       // find group associated with user
-      await Group.initializeGroupUpdates();
       var group = Group.findUserGroup(user.uid);
-      if (group == null) {
-        FirebaseAuth.instance.currentUser?.delete();
-        Fluttertoast.showToast(
-          msg: 'login.errors.no_group_create'.tr(),
-          toastLength: Toast.LENGTH_LONG,
-        );
-        return;
-      }
 
-      // get username
-      var userSnapshot = await Database.realtime
-          .child('groups/${group.groupId}/users/${user.uid}')
-          .get();
-      if (userSnapshot.value == null) {
+      // check username
+      userName ??= user.displayName;
+      if (userName == null) {
         FirebaseAuth.instance.currentUser?.delete();
         Fluttertoast.showToast(
           msg: 'login.errors.no_username_create'.tr(),
           toastLength: Toast.LENGTH_LONG,
         );
       } else {
-        widget.onLoginComplete?.call(user, userSnapshot.value as String, group);
+        widget.onLoginComplete?.call(user, userName, group);
       }
     }
 
@@ -459,6 +448,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: _email, password: _password);
+      await credential.user?.updateDisplayName(_userName);
     } catch (error) {
       String code = (error as FirebaseAuthException).code;
       String pattern = 'login.errors.firebase_auth.$code';

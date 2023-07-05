@@ -57,7 +57,6 @@
          "no_credentials_create": "@:login.errors.toast_header Kontoanmeldeinformationen konnten nicht abgerufen werden",
          "no_email_create": "@:login.errors.toast_header Konto-E-Mail nicht angegeben",
          "no_username_create": "@:login.errors.toast_header Benutzername nicht angegeben",
-         "no_group_create": "@:login.errors.toast_header_corrupted Nicht mit einer Gruppe verbunden",
 
          "no_email": "Bitte gib eine E-Mail-Adresse an",
          "no_username": "Bitte gib einen Benutzernamen an",

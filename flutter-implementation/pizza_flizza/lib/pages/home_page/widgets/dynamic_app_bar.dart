@@ -45,9 +45,13 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
 
   int countUserOrders(List<ShopItem> orders) {
     int count = 0;
+    var user = Database.currentUser;
+    if (user == null) {
+      return -1;
+    }
 
     for (var item in orders) {
-      if (item.userId == Database.userId) {
+      if (item.userId == user.userId) {
         count += item.count;
       }
     }
@@ -59,10 +63,15 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
   void initState() {
     super.initState();
 
+    var user = Database.currentUser;
+    if (user == null) {
+      return;
+    }
+
     _ordersSubscription = Shop.subscribeToOrdersUpdated((orders) {
       _orderCount = 0;
 
-      orders[Database.userId]?.forEach((shopId, order) {
+      orders[user.userId]?.forEach((shopId, order) {
         order.items.forEach((itemId, item) {
           _orderCount += item.count;
         });

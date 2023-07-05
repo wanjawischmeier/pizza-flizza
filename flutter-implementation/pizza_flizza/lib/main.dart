@@ -10,6 +10,7 @@ import 'package:logger/logger.dart';
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/database/shop.dart';
+import 'package:pizza_flizza/database/user.dart';
 import 'package:pizza_flizza/other/firebase_options.dart';
 import 'package:pizza_flizza/pages/home_page/home_page.dart';
 import 'package:pizza_flizza/pages/intro_page/intro_page.dart';
@@ -23,62 +24,47 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  bool validUser = false;
-
-  await Group.initializeGroupUpdates();
-  var user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-    await Shop.loadAll();
-
-    var group = Group.findUserGroup(user.uid);
-    if (group == null) {
-      FirebaseAuth.instance.signOut();
-    } else {
-      // get username
-      var userSnapshot = await Database.realtime
-          .child('groups/${group.groupId}/users/${user.uid}')
-          .get();
-      if (userSnapshot.value == null) {
-        FirebaseAuth.instance.signOut();
-        Fluttertoast.showToast(
-          msg: 'Profile corrupted: Username not specified',
-          toastLength: Toast.LENGTH_LONG,
-        );
-      } else {
-        validUser = true;
-      }
-    }
-  }
+  await Group.initializeListeners();
+  var route = await _PizzaFlizzaAppState.initializeUser(
+    null,
+    null,
+    null,
+    reroute: false,
+  );
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
   Logger.level = Level.debug;
+
   runApp(
     EasyLocalization(
-        supportedLocales: const [
-          Locale('en'),
-          Locale('de'),
-        ],
-        path: 'assets/translations',
-        fallbackLocale: const Locale('en'),
-        child: PizzaFlizzaApp(isValidUser: validUser)),
+      supportedLocales: const [
+        Locale('en'),
+        Locale('de'),
+      ],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: PizzaFlizzaApp(initialPage: route),
+    ),
   );
 }
 
 class PizzaFlizzaApp extends StatefulWidget {
-  final bool isValidUser;
+  final String initialPage;
 
-  const PizzaFlizzaApp({super.key, required this.isValidUser});
+  const PizzaFlizzaApp({super.key, required this.initialPage});
 
   @override
   State<StatefulWidget> createState() => _PizzaFlizzaAppState();
 }
 
 class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
-  final _navigatorKey = GlobalKey<NavigatorState>();
+  static final _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<User?> _authStateChangedSubscription;
+  late StreamSubscription<Map<int, Group>> _groupsUpdatedSubscription;
+  static String? _currentUserName;
 
   // based on: https://dev.to/snowcodes/flutter-firebase-authentication-dynamic-routing-by-authstatechanges-9k0
   void _onAuthStateChanged(User? user) async {
@@ -87,13 +73,67 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
     }
   }
 
-  void _initializeUser() {
+  static Future<String> initializeUser(
+    User? firebaseUser,
+    String? userName,
+    Group? group, {
+    bool reroute = true,
+  }) async {
+    _currentUserName ??= userName;
+
+    if (firebaseUser == null) {
+      firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) {
+        if (reroute) {
+          _navigatorKey.currentState?.pushReplacementNamed('login');
+        }
+        return 'login';
+      }
+    }
+
+    if (group == null) {
+      group = Group.findUserGroup(firebaseUser.uid);
+      if (group == null) {
+        if (reroute) {
+          _navigatorKey.currentState?.pushReplacementNamed('intro');
+        }
+        return 'intro';
+      }
+    }
+
+    if (userName == null) {
+      userName = group.users[firebaseUser.uid];
+      userName ??= firebaseUser.displayName;
+      if (userName == null) {
+        firebaseUser.delete();
+        Fluttertoast.showToast(
+          msg: 'login.errors.no_username_create'.tr(),
+          toastLength: Toast.LENGTH_LONG,
+        );
+        if (reroute) {
+          _navigatorKey.currentState?.pushReplacementNamed('login');
+        }
+        return 'login';
+      }
+    }
+
+    Database.groupUsers = await UserData.loadUsersInGroup(group);
+    Database.currentUser = UserData.fromFirebaseUser(
+      firebaseUser,
+      userName,
+      group,
+    );
     Shop.initializeUserGroupUpdates();
-    _navigatorKey.currentState?.pushReplacementNamed('home');
+    await Shop.loadAll();
+
+    if (reroute) {
+      _navigatorKey.currentState?.pushReplacementNamed('home');
+    }
+    return 'home';
   }
 
   void _deinitializeUser() {
-    Database.userId = null;
+    // Database.currentUser = null;
 
     // listeners already canceled before signing out
     _navigatorKey.currentState?.pushReplacementNamed('login');
@@ -106,29 +146,15 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
     _authStateChangedSubscription =
         FirebaseAuth.instance.authStateChanges().listen(_onAuthStateChanged);
 
-    Group.initializeGroupUpdates().then((_) async {
-      var user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        var group = Group.findUserGroup(user.uid);
-        if (group == null) {
-          FirebaseAuth.instance.signOut();
-          _navigatorKey.currentState?.pushReplacementNamed('login');
-        } else {
-          // get username
-          var userSnapshot = await Database.realtime
-              .child('groups/${group.groupId}/users/${user.uid}')
-              .get();
-          if (userSnapshot.value == null) {
-            FirebaseAuth.instance.currentUser?.delete();
-            Fluttertoast.showToast(
-              msg: 'login.errors.no_username_create'.tr(),
-              toastLength: Toast.LENGTH_LONG,
-            );
-            _navigatorKey.currentState?.pushReplacementNamed('login');
-          } else {
-            _loadUserData(user, userSnapshot.value as String, group);
-          }
-        }
+    // trigger intro if the user is no longer associated with a group
+    _groupsUpdatedSubscription = Group.subscribeToGroupsUpdated((groups) {
+      var firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) {
+        return;
+      }
+
+      if (Group.findUserGroup(firebaseUser.uid) == null) {
+        _navigatorKey.currentState?.pushReplacementNamed('intro');
       }
     });
   }
@@ -136,7 +162,8 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
   @override
   void dispose() {
     _authStateChangedSubscription.cancel();
-    Group.cancelGroupUpdates();
+    _groupsUpdatedSubscription.cancel();
+    Group.cancelGroupListeners();
     super.dispose();
   }
 
@@ -150,14 +177,14 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       navigatorKey: _navigatorKey,
-      initialRoute: widget.isValidUser ? 'home' : 'login',
+      initialRoute: widget.initialPage,
       onGenerateRoute: (settings) {
         Widget widget;
 
         switch (settings.name) {
           case 'login':
-            widget = LoginPage(
-              onLoginComplete: _loadUserData,
+            widget = const LoginPage(
+              onLoginComplete: initializeUser,
             );
             break;
           case 'intro':
@@ -166,9 +193,19 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
                 _navigatorKey.currentState?.pushReplacementNamed('login');
               },
               onIntroComplete: (groupName, groupId) async {
-                var user = FirebaseAuth.instance.currentUser;
-                var userName = Database.userName;
-                if (user == null || userName == null) {
+                var firebaseUser = FirebaseAuth.instance.currentUser;
+                if (firebaseUser == null) {
+                  _navigatorKey.currentState?.pushReplacementNamed('login');
+                  return;
+                }
+
+                _currentUserName ??= firebaseUser.displayName;
+                if (_currentUserName == null) {
+                  firebaseUser.delete();
+                  Fluttertoast.showToast(
+                    msg: 'login.errors.no_username_create'.tr(),
+                    toastLength: Toast.LENGTH_LONG,
+                  );
                   _navigatorKey.currentState?.pushReplacementNamed('login');
                   return;
                 }
@@ -176,11 +213,15 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
                 var group = await Group.joinGroup(
                   groupName,
                   groupId,
-                  user.uid,
-                  userName,
+                  firebaseUser.uid,
+                  _currentUserName!,
                 );
 
-                _loadUserData(user, userName, group);
+                initializeUser(
+                  firebaseUser,
+                  _currentUserName!,
+                  group,
+                );
               },
             );
             break;
@@ -195,36 +236,5 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
         );
       },
     );
-  }
-
-  Future<void> _loadUserData(User user, String userName, Group? group) async {
-    Database.userId = user.uid;
-    Database.userName = userName;
-    Database.userEmail = user.email;
-    Database.providerId = user.providerData.firstOrNull?.providerId;
-
-    if (group == null) {
-      _navigatorKey.currentState?.pushReplacementNamed('intro');
-      return;
-    }
-
-    Database.groupId = group.groupId;
-    Database.groupName = group.groupName;
-
-    var userSnapshot = await Database.realtime
-        .child('groups/${group.groupId}/users/${user.uid}')
-        .get();
-    if (userSnapshot.value == null) {
-      FirebaseAuth.instance.currentUser?.delete();
-      Fluttertoast.showToast(
-        msg: 'login.errors.no_username_create'.tr(),
-        toastLength: Toast.LENGTH_LONG,
-      );
-    } else {
-      Database.userName = userSnapshot.value as String;
-      Shop.initializeUserGroupUpdates();
-      await Shop.loadAll();
-      _initializeUser();
-    }
   }
 }
