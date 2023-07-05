@@ -143,11 +143,6 @@ class Shop {
 
   static Future<void> parseOpenUserOrders(
       String userId, Map? userOrders) async {
-    var user = Database.groupUsers[userId];
-    if (user == null) {
-      return;
-    }
-
     // clear map in case of empty orders
     if (userOrders == null) {
       if (_orders.containsKey(userId)) {
@@ -189,7 +184,7 @@ class Shop {
         var orderItem = OrderItem(
           itemId,
           shopId,
-          user,
+          userId,
           timestamp,
           itemName,
           shopName,
@@ -257,10 +252,6 @@ class Shop {
 
       for (var userEntry in fulfilledShop.entries) {
         String userId = userEntry.key;
-        var userName = Database.groupUsers[userId];
-        if (userName == null) {
-          continue;
-        }
         Map fulfilledItems = userEntry.value;
         var items = <String, OrderItem>{};
 
@@ -279,7 +270,7 @@ class Shop {
           var orderItem = OrderItem(
             itemId,
             shopId,
-            userName,
+            userId,
             timestamp,
             itemName,
             shopName,
@@ -306,7 +297,7 @@ class Shop {
 
         _fulfilled[fulfillerId]?[shopId]?[userId] = FulfilledOrder.fromDate(
           fulfillerName,
-          userName,
+          userId,
           shopId,
           shopName,
           DateTime.fromMillisecondsSinceEpoch(latestChange),

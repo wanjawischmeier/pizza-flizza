@@ -66,7 +66,7 @@ class OrderItem extends ShopItem with EquatableMixin {
   OrderItem(
     super.itemId,
     super.shopId,
-    super.user,
+    super.userId,
     this.timestamp,
     super.itemName,
     super.shopName,
