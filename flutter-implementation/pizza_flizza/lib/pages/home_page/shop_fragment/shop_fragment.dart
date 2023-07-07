@@ -15,7 +15,6 @@ import 'package:appinio_swiper/appinio_swiper.dart';
 import 'package:appinio_swiper/appinio_slide_swiper.dart';
 
 import 'package:pizza_flizza/database/item.dart';
-import 'package:pizza_flizza/database/orders/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/home_page/shop_fragment/widgets/shop_card.dart';

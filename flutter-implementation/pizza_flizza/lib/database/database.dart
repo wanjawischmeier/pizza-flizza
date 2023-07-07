@@ -12,7 +12,6 @@ class Database {
 
   static const String imageResolution = '256px';
   static Map<String, String> groupUsers = {};
-  static UserStats? currentStats;
   static UserData? currentUser;
 
   static String? getUserName(String userId) {

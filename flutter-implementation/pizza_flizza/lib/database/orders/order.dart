@@ -1,17 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database/database.dart';
-
-import '../item.dart';
-
-/// userId, shopId
-typedef OrderMap = Map<String, Map<String, Order>>;
-
-/// fulfillerId, shopId, userId
-typedef FulfilledMap = Map<String, Map<String, Map<String, FulfilledOrder>>>;
-
-/// userId, shopId, timestamp
-typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder>>>;
+import 'package:pizza_flizza/database/item.dart';
 
 class Order {
   String shopId, shopName;

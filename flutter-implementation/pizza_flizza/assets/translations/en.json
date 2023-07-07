@@ -179,6 +179,8 @@
       "header": "Your Profile",
       "email_specifier": " (specified by {})",
       "account_management": "Account management",
+      "clear_stats": "Clear statistic",
+      "clear_stats_success": "Statistic has been cleared",
       "report_bug": "Report a bug",
       "log_out": "Log out",
       "close": "Close",

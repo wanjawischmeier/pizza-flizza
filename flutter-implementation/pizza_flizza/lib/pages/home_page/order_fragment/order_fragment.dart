@@ -18,12 +18,15 @@ class OrderFragment extends StatefulWidget {
 
 class _OrderFragmentState extends State<OrderFragment> {
   late StreamSubscription<String> _shopChangedSubscription;
+  Map _items = {};
 
   @override
   void initState() {
     super.initState();
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
-      setState(() {});
+      setState(() {
+        _items = Shop.items;
+      });
     });
   }
 
@@ -40,8 +43,8 @@ class _OrderFragmentState extends State<OrderFragment> {
         // item list
         Expanded(
           child: CustomScrollView(
-            slivers: List.generate(Shop.items.length, (index) {
-              var category = Shop.items.entries.elementAt(index);
+            slivers: List.generate(_items.length, (index) {
+              var category = _items.entries.elementAt(index);
               var categoryName = category.value['0_name'];
               var categoryItems = Map.from(category.value);
               categoryItems.remove('0_name');

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
-import 'package:pizza_flizza/database/orders/order.dart';
 import 'package:pizza_flizza/database/orders/orders.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';

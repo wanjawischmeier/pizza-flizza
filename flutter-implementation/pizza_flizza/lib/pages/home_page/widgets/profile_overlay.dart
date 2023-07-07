@@ -7,6 +7,8 @@ import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/group.dart';
 import 'package:pizza_flizza/database/orders/order_manager.dart';
 import 'package:pizza_flizza/database/orders/order_parser.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
+import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -201,19 +203,46 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                           ),
                         ).tr(),
                       ),
-                      TextButton(
-                        onPressed: () => launchUrl(
-                          Uri.parse(
-                            'profile_overlay.account_management_url'.tr(),
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () => launchUrl(
+                              Uri.parse(
+                                'profile_overlay.account_management_url'.tr(),
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                            child: const Text(
+                              'profile_overlay.account_management',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ).tr(),
                           ),
-                          mode: LaunchMode.externalApplication,
-                        ),
-                        child: const Text(
-                          'profile_overlay.account_management',
-                          style: TextStyle(
-                            color: Colors.white,
+                          TextButton(
+                            onPressed: () async {
+                              Orders.userStats?.clear();
+                              await Database.userReference
+                                  ?.child('stats')
+                                  .remove();
+
+                              Shop.sortShopItems(Shop.currentShopId);
+                              Shop.shopChangedController
+                                  .add(Shop.currentShopId);
+
+                              Fluttertoast.showToast(
+                                msg: 'profile_overlay.clear_stats_success'.tr(),
+                                toastLength: Toast.LENGTH_LONG,
+                              );
+                            },
+                            child: const Text(
+                              'profile_overlay.clear_stats',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ).tr(),
                           ),
-                        ).tr(),
+                        ],
                       ),
                       TextButton(
                         onPressed: () => launchUrl(

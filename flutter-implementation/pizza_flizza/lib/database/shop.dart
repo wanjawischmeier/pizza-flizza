@@ -26,7 +26,7 @@ class Shop {
     _currentOrder.clear();
     _currentTotal = 0;
 
-    _shopChangedController.add(_currentShopId);
+    shopChangedController.add(_currentShopId);
   }
 
   static String get currentShopName => getShopName(_currentShopId);
@@ -41,7 +41,7 @@ class Shop {
   }
 
   static Map getItemInfo(String shopId, String itemId) {
-    for (var categoryEntry in shops[shopId]['items'].entries) {
+    for (var categoryEntry in shops[shopId]?['items']?.entries ?? {}) {
       String categoryId = categoryEntry.key;
       var category = categoryEntry.value;
 
@@ -61,12 +61,12 @@ class Shop {
     };
   }
 
-  static final StreamController<String> _shopChangedController =
+  static final StreamController<String> shopChangedController =
       StreamController.broadcast();
   static StreamSubscription<String> subscribeToShopChanged(
       void Function(String shopId) onUpdate) {
     onUpdate(_currentShopId);
-    return _shopChangedController.stream.listen(onUpdate);
+    return shopChangedController.stream.listen(onUpdate);
   }
 
   // shopId, itemId -> count
@@ -84,18 +84,18 @@ class Shop {
   }
 
   static double _currentTotal = 0;
-  static final StreamController<double> _currentTotalController =
+  static final StreamController<double> currentTotalController =
       StreamController.broadcast();
   static StreamSubscription<double> subscribeToCurrentTotal(
       void Function(double total) onUpdate) {
     onUpdate(_currentTotal);
-    return _currentTotalController.stream.listen(onUpdate);
+    return currentTotalController.stream.listen(onUpdate);
   }
 
   static void clearCurrentOrder() {
     _currentOrder.clear();
     _currentTotal = 0;
-    _currentTotalController.add(_currentTotal);
+    currentTotalController.add(_currentTotal);
   }
 
   static final Map<String, List<Reference>> _itemReferences = {};
@@ -114,33 +114,50 @@ class Shop {
           .listAll();
       _itemReferences[currentShopId] = imagesSnapshot.items;
 
-      for (var categoryEntry in shops[currentShopId]['items'].entries) {
-        var sorted =
-            Helper.sortByComparator(categoryEntry.value, (item0, item1) {
-          int bought0, bought1;
+      sortShopItems(currentShopId);
+    }
+  }
 
-          if (item0.key == '0_name') {
-            bought0 = 0;
-          } else {
-            bought0 = (item0.value as Map)['bought'];
-          }
+  static bool sortShopItems(String shopId) {
+    bool modified = false;
 
-          if (item1.key == '0_name') {
-            bought1 = 0;
-          } else {
-            bought1 = (item1.value as Map)['bought'];
-          }
+    var shopStats = Orders.userStats?[currentShopId];
+    for (var categoryEntry in shops[currentShopId]['items'].entries) {
+      var sorted = Helper.sortByComparator(categoryEntry.value, (item0, item1) {
+        int bought0, bought1;
+        int stat0 = (shopStats?[item0.key] ?? 0) * 10000;
+        int stat1 = (shopStats?[item1.key] ?? 0) * 10000;
 
-          if (bought0 == bought1) {
-            return 0;
-          } else {
-            return bought0 < bought1 ? 1 : -1;
-          }
-        });
+        if (item0.key == '0_name') {
+          bought0 = 0;
+        } else if (stat0 != 0) {
+          bought0 = stat0;
+        } else {
+          bought0 = (item0.value as Map)['bought'];
+        }
 
+        if (item1.key == '0_name') {
+          bought1 = 0;
+        } else if (stat1 != 0) {
+          bought1 = stat1;
+        } else {
+          bought1 = (item1.value as Map)['bought'];
+        }
+
+        if (bought0 == bought1) {
+          return 0;
+        } else {
+          return bought0 < bought1 ? 1 : -1;
+        }
+      });
+
+      if (sorted != categoryEntry.value) {
         shops[currentShopId]['items'][categoryEntry.key] = sorted;
+        modified = true;
       }
     }
+
+    return modified;
   }
 
   static bool containsReference(String referencePath) {
@@ -165,7 +182,7 @@ class Shop {
     double rawTotal = _currentTotal + (count - oldCount) * price;
     // limit result
     _currentTotal = (rawTotal.abs() * 100).roundToDouble() / 100;
-    _currentTotalController.add(_currentTotal);
+    currentTotalController.add(_currentTotal);
   }
 
   static Future<void>? pushCurrentOrder() {
@@ -174,6 +191,7 @@ class Shop {
       return null;
     }
 
+    var futures = <Future>[];
     var orderData = <String, Map<String, int>>{};
     var items = <String, OrderItem>{};
     var ordersUser = Orders.orders[user.userId];
@@ -230,6 +248,15 @@ class Shop {
         newCount,
         price,
       );
+
+      // update stats
+      int oldStat = Orders.stats[user.userId]?[_currentShopId]?[itemId] ?? 0;
+      var future = Database.userReference
+          ?.child('stats/$_currentShopId/$itemId')
+          .set(oldStat + count);
+      if (future != null) {
+        futures.add(future);
+      }
     });
 
     var future =
@@ -237,7 +264,7 @@ class Shop {
 
     _currentTotal = 0;
     _currentOrder.clear();
-    _currentTotalController.add(_currentTotal);
+    currentTotalController.add(_currentTotal);
     Orders.ordersPushedController.add(null);
     Orders.ordersUpdatedController.add(Orders.orders);
 

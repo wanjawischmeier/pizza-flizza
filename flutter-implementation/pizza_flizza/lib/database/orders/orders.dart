@@ -1,13 +1,32 @@
 import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:pizza_flizza/database/database.dart';
 
 import 'order.dart';
+
+/// userId, shopId -> order
+typedef OrderMap = Map<String, Map<String, Order>>;
+
+/// fulfillerId, shopId, userId -> order
+typedef FulfilledMap = Map<String, Map<String, Map<String, FulfilledOrder>>>;
+
+/// userId, shopId, timestamp -> order
+typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder>>>;
+
+/// userId, shopId, itemId -> count
+typedef StatMap = Map<String, Map<String, Map<String, int>>>;
 
 class Orders {
   static final OrderMap orders = {};
   static final FulfilledMap fulfilled = {};
   static final HistoryMap history = {};
+  static final StatMap stats = {};
+
+  static Map<String, Map<String, int>>? get userStats {
+    var userId = Database.currentUser?.userId;
+    return userId == null ? null : stats[userId];
+  }
 
   static final StreamController<void> ordersPushedController =
       StreamController.broadcast();
@@ -38,6 +57,14 @@ class Orders {
       void Function(HistoryMap orders) onUpdate) {
     onUpdate(history);
     return historyUpdatedController.stream.listen(onUpdate);
+  }
+
+  static final StreamController<StatMap> statsUpdatedController =
+      StreamController.broadcast();
+  static StreamSubscription<StatMap> subscribeToStatsUpdated(
+      void Function(StatMap stats) onUpdate) {
+    onUpdate(stats);
+    return statsUpdatedController.stream.listen(onUpdate);
   }
 
   static StreamSubscription<DatabaseEvent>? groupDataAddedSubscription,

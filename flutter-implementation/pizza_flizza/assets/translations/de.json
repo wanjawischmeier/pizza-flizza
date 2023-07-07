@@ -179,6 +179,8 @@
       "header": "Dein Profil",
       "email_specifier": " (festgelegt von {})",
       "account_management": "Konto Verwalten",
+      "clear_stats": "Statistik zurücksetzen",
+      "clear_stats_success": "Statistik wurde zurückgesetzt",
       "report_bug": "Einen Fehler melden",
       "log_out": "Abmelden",
       "close": "Schließen",

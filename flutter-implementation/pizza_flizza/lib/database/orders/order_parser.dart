@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:intl/intl.dart';
+import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/item.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 
-import '../database.dart';
-import '../item.dart';
 import 'order.dart';
 import 'orders.dart';
 
@@ -28,6 +28,7 @@ class OrderParser extends Orders {
       parseOpenUserOrders(updatedUserId, data['orders']);
       parseUserFulfilledOrders(updatedUserId, data['fulfilled']);
       parseHistoryUserOrders(updatedUserId, data['history']);
+      parseUserStats(updatedUserId, data['stats']);
     }
 
     onChildRemoved(event) {
@@ -62,6 +63,11 @@ class OrderParser extends Orders {
       if (updatedUserId == user.userId && data.containsKey('history')) {
         Orders.history.clear();
         Orders.historyUpdatedController.add(Orders.history);
+      }
+
+      if (data.containsKey('stats')) {
+        Orders.stats.remove(updatedUserId);
+        Orders.statsUpdatedController.add(Orders.stats);
       }
     }
 
@@ -330,6 +336,60 @@ class OrderParser extends Orders {
     // if orders changed: notify listeners
     if (modified) {
       Orders.historyUpdatedController.add(Orders.history);
+    }
+  }
+
+  static void parseUserStats(String userId, Map? stats) {
+    // clear map in case of empty orders
+    if (stats == null) {
+      if (Orders.stats.containsKey(userId)) {
+        Orders.stats.remove(userId);
+        Orders.statsUpdatedController.add(Orders.stats);
+      }
+
+      return;
+    }
+
+    bool modified = false;
+
+    if (Orders.stats.containsKey(userId)) {
+      Orders.stats[userId]!.clear();
+    } else {
+      Orders.stats[userId] = {};
+    }
+
+    // iterate over all shops containing stats
+    for (var shopEntry in stats.entries) {
+      String shopId = shopEntry.key;
+      Map shop = shopEntry.value;
+      bool shopModified = false;
+
+      if (!(Orders.stats[userId]?.containsKey(shopId) ?? false)) {
+        Orders.stats[userId]?[shopId] = {};
+      }
+
+      for (var itemEntry in shop.entries) {
+        String itemId = itemEntry.key;
+        int count = itemEntry.value;
+
+        // compare to previous item
+        var previousCount = Orders.stats[userId]?[shopId]?[itemId];
+        if (count != previousCount) {
+          modified = true;
+          shopModified = true;
+        }
+
+        Orders.stats[userId]?[shopId]?[itemId] = count;
+      }
+
+      if (shopModified) {
+        Shop.sortShopItems(shopId);
+      }
+    }
+
+    // if orders changed: notify listeners
+    if (modified) {
+      Orders.statsUpdatedController.add(Orders.stats);
     }
   }
 }
