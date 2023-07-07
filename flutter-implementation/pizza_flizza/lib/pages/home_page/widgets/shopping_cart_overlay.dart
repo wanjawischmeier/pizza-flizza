@@ -167,22 +167,52 @@ class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Themes.cream,
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Themes.grayLight,
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await OrderManager.removeUserOrders();
+                          widget.onRemoveOverlay.call();
+                        },
+                        child: const Text(
+                          'shopping_cart.clear_all',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                        ).tr(),
+                      ),
                     ),
-                  ),
-                  onPressed: widget.onRemoveOverlay,
-                  child: const Text(
-                    'shopping_cart.close',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Themes.cream,
+                          minimumSize: const Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: widget.onRemoveOverlay,
+                        child: const Text(
+                          'shopping_cart.close',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                        ).tr(),
+                      ),
                     ),
-                  ).tr(),
+                  ],
                 ),
               ),
             ],

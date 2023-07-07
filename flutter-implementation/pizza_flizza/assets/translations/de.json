@@ -194,6 +194,7 @@
 
    "shopping_cart": {
       "header": "Deine Bestellung",
+      "clear_all": "Alle löschen",
       "close": "Schließen"
    }
 }

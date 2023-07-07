@@ -21,6 +21,17 @@ class OrderManager extends Orders {
     return item.databaseReference?.remove();
   }
 
+  static Future<void>? removeUserOrders() {
+    var userId = Database.currentUser?.userId;
+    if (userId == null) {
+      return null;
+    }
+
+    Orders.orders.remove(userId);
+    Orders.ordersUpdatedController.add(Orders.orders);
+    return Database.userReference?.child('orders').remove();
+  }
+
   static Future<void>? archiveFulfilledOrder(FulfilledOrder order) {
     var user = Database.currentUser;
     if (user == null) {

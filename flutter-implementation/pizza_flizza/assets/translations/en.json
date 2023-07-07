@@ -194,6 +194,7 @@
 
    "shopping_cart": {
       "header": "Your Order",
+      "clear_all": "Clear all",
       "close": "Close"
    }
 }
