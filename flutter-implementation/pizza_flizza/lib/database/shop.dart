@@ -47,7 +47,7 @@ class Shop {
 
       for (var itemEntry in category.entries) {
         if (itemEntry.key == itemId) {
-          itemEntry.value['category'] = categoryId;
+          itemEntry.value['categoryId'] = categoryId;
           return itemEntry.value;
         }
       }
@@ -121,12 +121,14 @@ class Shop {
   static bool sortShopItems(String shopId) {
     bool modified = false;
 
-    var shopStats = Orders.userStats?[currentShopId];
     for (var categoryEntry in shops[currentShopId]['items'].entries) {
+      String categoryId = categoryEntry.key;
+      var categoryStats = Orders.userStats?[currentShopId]?[categoryId];
+
       var sorted = Helper.sortByComparator(categoryEntry.value, (item0, item1) {
         int bought0, bought1;
-        int stat0 = (shopStats?[item0.key] ?? 0) * 10000;
-        int stat1 = (shopStats?[item1.key] ?? 0) * 10000;
+        int stat0 = (categoryStats?[item0.key] ?? 0) * 10000;
+        int stat1 = (categoryStats?[item1.key] ?? 0) * 10000;
 
         if (item0.key == '0_name') {
           bought0 = 0;
@@ -225,34 +227,29 @@ class Shop {
 
     // loop through current
     _currentOrder.forEach((itemId, count) {
-      // get item info
-      var itemInfo = getItemInfo(_currentShopId, itemId);
-      String itemName = itemInfo['name'];
-      String shopName = getShopName(_currentShopId);
       int timestamp = DateTime.now().millisecondsSinceEpoch;
       int newCount = count + (orderData[itemId]?['count'] ?? 0);
-      double price = newCount * (itemInfo['price'] as double);
 
       orderData[itemId] = <String, int>{
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'count': newCount,
       };
 
-      items[itemId] = OrderItem(
-        itemId,
-        _currentShopId,
+      var item = OrderItem.loadShopItem(
         user.userId,
+        _currentShopId,
+        itemId,
         timestamp,
-        itemName,
-        shopName,
         newCount,
-        price,
       );
+      items[itemId] = item;
 
       // update stats
-      int oldStat = Orders.stats[user.userId]?[_currentShopId]?[itemId] ?? 0;
+      int oldStat = Orders.stats[user.userId]?[_currentShopId]?[item.categoryId]
+              ?[itemId] ??
+          0;
       var future = Database.userReference
-          ?.child('stats/$_currentShopId/$itemId')
+          ?.child('stats/$_currentShopId/${item.categoryId}/$itemId')
           .set(oldStat + count);
       if (future != null) {
         futures.add(future);

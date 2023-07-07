@@ -19,7 +19,7 @@ class ShopItemInfo {
 }
 
 class ShopItem {
-  String itemId, shopId, userId, itemName, shopName;
+  String itemId, shopId, categoryId, userId, itemName, shopName;
   int count;
   double price;
   ShopItemInfo shopInfo;
@@ -27,6 +27,7 @@ class ShopItem {
   ShopItem(
     this.itemId,
     this.shopId,
+    this.categoryId,
     this.userId,
     this.itemName,
     this.shopName,
@@ -66,6 +67,7 @@ class OrderItem extends ShopItem with EquatableMixin {
   OrderItem(
     super.itemId,
     super.shopId,
+    super.categoryId,
     super.userId,
     this.timestamp,
     super.itemName,
@@ -79,12 +81,41 @@ class OrderItem extends ShopItem with EquatableMixin {
         super(
           order.itemId,
           order.shopId,
+          order.categoryId,
           order.userId,
           order.itemName,
           order.shopName,
           order.count,
           order.price,
         );
+
+  static OrderItem loadShopItem(
+    String userId,
+    String shopId,
+    String itemId,
+    int timestamp,
+    int count,
+  ) {
+    // get item info
+    var itemInfo = Shop.getItemInfo(shopId, itemId);
+    String shopName = Shop.getShopName(shopId);
+    String itemName = itemInfo['name'];
+    String categoryId = itemInfo['categoryId'];
+    double price = count * (itemInfo['price'] as double);
+
+    // create instance
+    return OrderItem(
+      itemId,
+      shopId,
+      categoryId,
+      userId,
+      timestamp,
+      itemName,
+      shopName,
+      count,
+      price,
+    );
+  }
 }
 
 extension ItemFilter on Iterable<OrderItem> {

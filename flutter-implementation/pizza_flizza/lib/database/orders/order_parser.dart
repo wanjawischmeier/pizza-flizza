@@ -122,23 +122,13 @@ class OrderParser extends Orders {
         String itemId = itemEntry.key;
         Map item = itemEntry.value;
 
-        // get item info
-        var itemInfo = Shop.getItemInfo(shopId, itemId);
-        String itemName = itemInfo['name'];
-        int timestamp = item['timestamp'];
-        int count = item['count'];
-        double price = count * (itemInfo['price'] as double);
-
         // create instance
-        var orderItem = OrderItem(
-          itemId,
-          shopId,
+        var orderItem = OrderItem.loadShopItem(
           userId,
-          timestamp,
-          itemName,
-          shopName,
-          count,
-          price,
+          shopId,
+          itemId,
+          item['timestamp'],
+          item['count'],
         );
 
         // compare to previous item
@@ -211,6 +201,7 @@ class OrderParser extends Orders {
           // get item info
           var itemInfo = Shop.getItemInfo(shopId, itemId);
           String itemName = itemInfo['name'];
+          String categoryId = itemInfo['categoryId'];
           int timestamp = item['timestamp'];
           int count = item['count'];
           double price = count * (itemInfo['price'] as double);
@@ -219,6 +210,7 @@ class OrderParser extends Orders {
           var orderItem = OrderItem(
             itemId,
             shopId,
+            categoryId,
             userId,
             timestamp,
             itemName,
@@ -352,10 +344,12 @@ class OrderParser extends Orders {
 
     bool modified = false;
 
-    if (Orders.stats.containsKey(userId)) {
-      Orders.stats[userId]!.clear();
-    } else {
+    var userStats = Orders.stats[userId];
+    if (userStats == null) {
       Orders.stats[userId] = {};
+      userStats = Orders.stats[userId];
+    } else {
+      userStats.clear();
     }
 
     // iterate over all shops containing stats
@@ -364,22 +358,36 @@ class OrderParser extends Orders {
       Map shop = shopEntry.value;
       bool shopModified = false;
 
-      if (!(Orders.stats[userId]?.containsKey(shopId) ?? false)) {
-        Orders.stats[userId]?[shopId] = {};
+      var shopStats = userStats![shopId];
+      if (shopStats == null) {
+        userStats[shopId] = {};
+        shopStats = userStats[shopId];
       }
 
-      for (var itemEntry in shop.entries) {
-        String itemId = itemEntry.key;
-        int count = itemEntry.value;
+      for (var categoryEntry in shop.entries) {
+        String categoryId = categoryEntry.key;
+        var category = categoryEntry.value;
 
-        // compare to previous item
-        var previousCount = Orders.stats[userId]?[shopId]?[itemId];
-        if (count != previousCount) {
-          modified = true;
-          shopModified = true;
+        var categoryStats = shopStats![categoryId];
+        if (categoryStats == null) {
+          shopStats[categoryId] = {};
+          categoryStats = shopStats[categoryId];
         }
 
-        Orders.stats[userId]?[shopId]?[itemId] = count;
+        for (var itemEntry in category.entries) {
+          String itemId = itemEntry.key;
+          int count = itemEntry.value;
+
+          // compare to previous item
+          var previousCount =
+              Orders.stats[userId]?[shopId]?[categoryId]?[itemId];
+          if (count != previousCount) {
+            modified = true;
+            shopModified = true;
+          }
+
+          categoryStats![itemId] = count;
+        }
       }
 
       if (shopModified) {
