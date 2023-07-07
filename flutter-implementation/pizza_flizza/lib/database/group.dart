@@ -4,8 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:pizza_flizza/database/database.dart';
-
-import 'shop.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
 
 class Group {
   int groupId;
@@ -192,7 +191,7 @@ class Group {
     }
 
     // check whether other users have fulfilled for current user
-    Shop.fulfilled.forEach((fulfillerId, fulfilledOrders) {
+    Orders.fulfilled.forEach((fulfillerId, fulfilledOrders) {
       fulfilledOrders.forEach((shopId, shopOrders) {
         shopOrders.forEach((fulfilledForId, order) {
           if (fulfilledForId == userId) {

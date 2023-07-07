@@ -5,7 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/group.dart';
-import 'package:pizza_flizza/database/shop.dart';
+import 'package:pizza_flizza/database/orders/order_manager.dart';
+import 'package:pizza_flizza/database/orders/order_parser.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/widgets/group_selection_field.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -140,7 +141,7 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             _groupIdChanging = true;
                           });
 
-                          await Shop.cancelUserGroupUpdates();
+                          await OrderParser.cancelUserGroupUpdates();
 
                           var group = await Group.switchGroup(
                             groupName,
@@ -158,8 +159,8 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                             user.group.groupName = _groupName!;
                           }
 
-                          Shop.clearOrderData();
-                          Shop.initializeUserGroupUpdates();
+                          OrderManager.clearOrderData();
+                          OrderParser.initializeUserGroupUpdates();
 
                           // clarify that an update is being applied
                           await Future.delayed(_artificialDelay);
@@ -246,7 +247,7 @@ class _ProfileOverlayState extends State<ProfileOverlay> {
                           ),
                         ),
                         onPressed: () async {
-                          await Shop.cancelUserGroupUpdates();
+                          await OrderParser.cancelUserGroupUpdates();
                           await FirebaseAuth.instance.signOut();
                           widget.onRemoveOverlay();
                         },

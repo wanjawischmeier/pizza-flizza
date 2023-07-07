@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
-import 'package:pizza_flizza/database/order.dart';
-import 'package:pizza_flizza/database/shop.dart';
+import 'package:pizza_flizza/database/orders/order.dart';
+import 'package:pizza_flizza/database/orders/order_manager.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
 import 'package:pizza_flizza/other/helper.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/home_page/transaction_fragment/widgets/transaction_card.dart';
@@ -37,7 +38,7 @@ class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
       return;
     }
 
-    _ordersSubscription2 = Shop.subscribeToOrdersUpdated((orders) {
+    _ordersSubscription2 = Orders.subscribeToOrdersUpdated((orders) {
       _ordersUser.clear();
       _totalPrice = 0;
 
@@ -158,7 +159,7 @@ class _ShoppingCartOverlayState extends State<ShoppingCartOverlay> {
                             _totalPrice = max(0, _totalPrice - item.price);
                           });
 
-                          Shop.removeOrderItem(item);
+                          OrderManager.removeOrderItem(item);
                         },
                       );
                     },

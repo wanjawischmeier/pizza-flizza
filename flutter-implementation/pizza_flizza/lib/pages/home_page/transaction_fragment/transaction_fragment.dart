@@ -4,8 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/database.dart';
-import 'package:pizza_flizza/database/order.dart';
-import 'package:pizza_flizza/database/shop.dart';
+import 'package:pizza_flizza/database/orders/order.dart';
+import 'package:pizza_flizza/database/orders/order_manager.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
 import 'package:pizza_flizza/other/helper.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/home_page/transaction_fragment/widgets/transaction_card.dart';
@@ -74,7 +75,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
             _fulfilledRelevant.remove(orderId);
           });
 
-          Shop.archiveFulfilledOrder(order);
+          OrderManager.archiveFulfilledOrder(order);
         }
       },
     );
@@ -108,7 +109,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       return;
     }
 
-    _fulfilledSubscription = Shop.subscribeToFulfilledUpdated((orders) async {
+    _fulfilledSubscription = Orders.subscribeToFulfilledUpdated((orders) async {
       // already gathering info on state, discard update
       if (_futures.isNotEmpty) {
         return;
@@ -136,7 +137,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
       });
     });
 
-    _historySubscription = Shop.subscribeToHistoryUpdated((orders) {
+    _historySubscription = Orders.subscribeToHistoryUpdated((orders) {
       _historyUser.clear();
 
       orders[user.userId]?.forEach((shopId, ordersShop) {
@@ -195,7 +196,7 @@ class _TransactionFragmentState extends State<TransactionFragment> {
             ),
             onPressed: () {
               _historyUser.clear();
-              Shop.clearUserHistory();
+              OrderManager.clearUserHistory();
             },
             child: Padding(
               padding: const EdgeInsets.all(16),

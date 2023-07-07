@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:cached_firestorage/lib.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/orders/order_manager.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
 
 import 'package:slide_to_act/slide_to_act.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
@@ -13,7 +15,7 @@ import 'package:appinio_swiper/appinio_swiper.dart';
 import 'package:appinio_swiper/appinio_slide_swiper.dart';
 
 import 'package:pizza_flizza/database/item.dart';
-import 'package:pizza_flizza/database/order.dart';
+import 'package:pizza_flizza/database/orders/order.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/home_page/shop_fragment/widgets/shop_card.dart';
@@ -92,7 +94,7 @@ class _ShopFragmentState extends State<ShopFragment>
     if (items.totalItemCount <= _count) {
       // every order can be fulfilled
       for (var item in items) {
-        Shop.fulfillItem(item, item.count);
+        OrderManager.fulfillItem(item, item.count);
       }
 
       return;
@@ -117,7 +119,7 @@ class _ShopFragmentState extends State<ShopFragment>
         }
 
         remainingItems -= distributedQuantity;
-        Shop.fulfillItem(item, distributedQuantity);
+        OrderManager.fulfillItem(item, distributedQuantity);
       }
 
       if (remainingItems > 0) {
@@ -182,10 +184,10 @@ class _ShopFragmentState extends State<ShopFragment>
       value: 1,
     );
 
-    _ordersSubscription = Shop.subscribeToOrdersUpdated(filterOrders);
+    _ordersSubscription = Orders.subscribeToOrdersUpdated(filterOrders);
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
-      filterOrders(Shop.orders, lock: true);
+      filterOrders(Orders.orders, lock: true);
     });
   }
 
@@ -292,7 +294,7 @@ class _ShopFragmentState extends State<ShopFragment>
                             _fulfilled.clear();
                             _foregroundItems = null;
 
-                            filterOrders(Shop.orders, lock: true);
+                            filterOrders(Orders.orders, lock: true);
 
                             return false;
                           } else {

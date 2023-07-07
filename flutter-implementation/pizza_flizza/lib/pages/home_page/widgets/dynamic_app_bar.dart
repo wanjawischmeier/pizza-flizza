@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
-import 'package:pizza_flizza/database/order.dart';
+import 'package:pizza_flizza/database/orders/order.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
 
@@ -68,7 +69,7 @@ class _DynamicAppBarState extends State<DynamicAppBar> {
       return;
     }
 
-    _ordersSubscription = Shop.subscribeToOrdersUpdated((orders) {
+    _ordersSubscription = Orders.subscribeToOrdersUpdated((orders) {
       _orderCount = 0;
 
       orders[user.userId]?.forEach((shopId, order) {

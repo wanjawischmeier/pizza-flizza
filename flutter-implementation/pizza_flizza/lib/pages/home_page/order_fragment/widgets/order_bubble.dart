@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
 
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/theme.dart';
@@ -49,7 +50,7 @@ class _OrderBubbleWidgetState extends State<OrderBubbleWidget> {
         _itemCount = 0;
       });
     });
-    _orderPushedSubscription = Shop.subscribeToOrdersPushed((_) {
+    _orderPushedSubscription = Orders.subscribeToOrdersPushed((_) {
       setState(() {
         _itemCount = 0;
       });

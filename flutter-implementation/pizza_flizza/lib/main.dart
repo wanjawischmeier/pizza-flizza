@@ -9,6 +9,7 @@ import 'package:logger/logger.dart';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/group.dart';
+import 'package:pizza_flizza/database/orders/order_parser.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/database/user.dart';
 import 'package:pizza_flizza/other/firebase_options.dart';
@@ -123,7 +124,7 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       userName,
       group,
     );
-    Shop.initializeUserGroupUpdates();
+    OrderParser.initializeUserGroupUpdates();
     await Shop.loadAll();
 
     if (reroute) {
