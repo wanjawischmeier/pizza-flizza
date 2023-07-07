@@ -37,14 +37,12 @@ class _OrderBottomBarState extends State<OrderBottomBar>
     });
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       setState(() {
-        // a bit hacky but oh well
-        _currentTotal = -1;
+        _currentTotal = 0;
         _visible = false;
       });
     });
     _currentTotalSubscription = Shop.subscribeToCurrentTotal((total) {
-      if (_currentTotal == -1) {
-        _currentTotal = 0;
+      if (_currentTotal == total) {
         return;
       }
 
