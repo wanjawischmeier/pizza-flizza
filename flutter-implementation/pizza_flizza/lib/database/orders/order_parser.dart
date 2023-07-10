@@ -297,9 +297,8 @@ class OrderParser extends Orders {
           int count = itemEntry.value;
 
           // get item info
-          var itemInfo = Shop.getItemInfo(shopId, itemId);
-          String itemName = itemInfo['name'];
-          double price = count * (itemInfo['price'] as double);
+          var itemInfo = ShopItemInfo(shopId, itemId);
+          double price = count * itemInfo.price;
 
           // compare to previous item
           var previousCount =
@@ -309,7 +308,7 @@ class OrderParser extends Orders {
           }
 
           items[itemId] = HistoryItem(
-            itemName,
+            itemInfo.itemName,
             count,
             price,
           );

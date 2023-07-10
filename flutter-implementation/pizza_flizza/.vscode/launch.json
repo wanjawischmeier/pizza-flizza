@@ -28,7 +28,7 @@
 			"deviceId": "11111JEC206254"
         },
         {
-            "name": "Pixel 6 Emulator",
+            "name": "Pixel 3a Emulator",
 			"request": "launch",
 			"type": "dart",
 			"deviceId": "emulator-5554"
@@ -52,12 +52,12 @@
 			"configurations": ["Pixel 4a", "Chrome"],
 		},
 		{
-			"name": "Pixel 4a & Pixel 6 Emulator",
-			"configurations": ["Pixel 4a", "Pixel 6 Emulator"],
+			"name": "Pixel 4a & Pixel 3a Emulator",
+			"configurations": ["Pixel 4a", "Pixel 3a Emulator"],
 		},
 		{
 			"name": "Pixel 4a & 2x Pixel 6 Emulator",
-			"configurations": ["Pixel 4a", "Pixel 6 Emulator", "Pixel 6 Emulator 2"],
+			"configurations": ["Pixel 4a", "Pixel 3a Emulator", "Pixel 6 Emulator 2"],
 		}
 	]
 }

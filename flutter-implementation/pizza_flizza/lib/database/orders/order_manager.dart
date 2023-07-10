@@ -86,7 +86,11 @@ class OrderManager extends Orders {
     return Future.wait(futures);
   }
 
-  static Future<void>? fulfillItem(OrderItem item, int count) {
+  static Future<void>? fulfillItem(
+    OrderItem item,
+    int count, [
+    OrderItem? itemToReplace,
+  ]) {
     var fulfiller = Database.currentUser;
     if (fulfiller == null) {
       return null;
@@ -151,13 +155,17 @@ class OrderManager extends Orders {
               .items[item.itemId] ??
           OrderItem.from(item);
       fulfilledItem.count = fulfilledCount + count;
-      // update price!
+      // TODO: update price!
       fulfilledItem.price = -1;
 
       Map map = {
         'count': fulfilledCount + count,
         'timestamp': date.millisecondsSinceEpoch,
       };
+
+      if (itemToReplace != null) {
+        map[itemToReplace.itemId] = count;
+      }
 
       var reference = Database.userReference
           ?.child('fulfilled/${item.shopId}/${item.userId}/${item.itemId}');

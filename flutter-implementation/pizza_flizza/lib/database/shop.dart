@@ -56,8 +56,8 @@ class Shop {
     return {
       'name': 'database.unknown_item_name'.tr(),
       'category': 'unknown_category_id',
-      'price': '0',
-      'bought': '0',
+      'price': 0.0,
+      'bought': 0.0,
     };
   }
 
@@ -100,21 +100,21 @@ class Shop {
 
   static final Map<String, List<Reference>> _itemReferences = {};
 
-  static Future<void> loadAll() async {
+  static Future<void> initializeShops() async {
     var snapshot = await Database.realtime.child('shops').get();
     shops = snapshot.value as Map;
     _currentShopId = shops.keys.first;
 
-    for (String currentShopId in shops.keys) {
+    for (String shopId in shops.keys) {
       // list product images for the shop
       var imagesSnapshot = await Database.storage
           .child(
-            'images/${Database.imageResolution}/shops/$currentShopId/items',
+            'images/${Database.imageResolution}/shops/$shopId/items',
           )
           .listAll();
-      _itemReferences[currentShopId] = imagesSnapshot.items;
+      _itemReferences[shopId] = imagesSnapshot.items;
 
-      sortShopItems(currentShopId);
+      sortShopItems(shopId);
     }
   }
 

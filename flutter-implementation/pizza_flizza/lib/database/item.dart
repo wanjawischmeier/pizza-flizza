@@ -6,17 +6,20 @@ import 'package:pizza_flizza/database/shop.dart';
 import 'database.dart';
 
 class ShopItemInfo {
+  final String _shopId;
   final Map _info;
 
   int get bought => _info['bought'];
   double get price => _info['price'];
   String get itemName => _info['name'];
+  String get shopName => Shop.getShopName(_shopId);
   String get categoryId => _info['categoryId'];
 
   set bought(int value) => _info['bought'] = value;
 
   ShopItemInfo(String shopId, String itemId)
-      : _info = Shop.getItemInfo(shopId, itemId);
+      : _shopId = shopId,
+        _info = Shop.getItemInfo(shopId, itemId);
 }
 
 class ShopItem {
@@ -39,6 +42,7 @@ class ShopItem {
 
 class OrderItem extends ShopItem with EquatableMixin {
   int timestamp;
+  Map<String, int> replacing;
 
   DatabaseReference? get databaseReference {
     var user = Database.currentUser;
@@ -47,7 +51,7 @@ class OrderItem extends ShopItem with EquatableMixin {
     }
 
     return Database.realtime.child(
-      'users/${user.group.groupId}/${user.userId}/orders/$shopId/$itemId',
+      'users/${user.group.groupId}/$userId/orders/$shopId/$itemId',
     );
   }
 
@@ -74,11 +78,13 @@ class OrderItem extends ShopItem with EquatableMixin {
     super.itemName,
     super.shopName,
     super.count,
-    super.price,
-  );
+    super.price, {
+    this.replacing = const {},
+  });
 
   OrderItem.from(OrderItem order)
       : timestamp = order.timestamp,
+        replacing = order.replacing,
         super(
           order.itemId,
           order.shopId,
@@ -98,21 +104,18 @@ class OrderItem extends ShopItem with EquatableMixin {
     int count,
   ) {
     // get item info
-    var itemInfo = Shop.getItemInfo(shopId, itemId);
-    String shopName = Shop.getShopName(shopId);
-    String itemName = itemInfo['name'];
-    String categoryId = itemInfo['categoryId'];
-    double price = count * (itemInfo['price'] as double);
+    var itemInfo = ShopItemInfo(shopId, itemId);
+    double price = count * itemInfo.price;
 
     // create instance
     return OrderItem(
       itemId,
       shopId,
-      categoryId,
+      itemInfo.categoryId,
       userId,
       timestamp,
-      itemName,
-      shopName,
+      itemInfo.itemName,
+      itemInfo.shopName,
       count,
       price,
     );
@@ -155,6 +158,10 @@ extension IterableItemFilter on Iterable<OrderItem> {
       (orderItem) =>
           orderItem.userId == item.userId && orderItem.shopId == item.shopId,
     ).firstOrNull;
+  }
+
+  Iterable<OrderItem> getMatchingId(String itemId) {
+    return where((element) => element.itemId == itemId);
   }
 
   int get totalItemCount {

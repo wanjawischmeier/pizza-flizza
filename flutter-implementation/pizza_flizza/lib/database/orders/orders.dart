@@ -18,9 +18,6 @@ typedef HistoryMap = Map<String, Map<String, Map<int, HistoryOrder>>>;
 typedef StatMap = Map<String, Map<String, Map<String, Map<String, int>>>>;
 
 class Orders {
-  static const debounceDuration = Duration(milliseconds: 100);
-  static Timer? ordersUpdatedTimer;
-
   static final OrderMap orders = {};
   static final FulfilledMap fulfilled = {};
   static final HistoryMap history = {};
@@ -43,13 +40,7 @@ class Orders {
   static StreamSubscription<OrderMap> subscribeToOrdersUpdated(
       void Function(OrderMap orders) onUpdate) {
     onUpdate(orders);
-    return ordersUpdatedController.stream.listen((value) {
-      // debounce the event to prevent double triggers
-      // eventual consistency in the database causes
-      // firebase to trigger for both old and new value
-      ordersUpdatedTimer?.cancel();
-      ordersUpdatedTimer = Timer(debounceDuration, () => onUpdate(value));
-    });
+    return ordersUpdatedController.stream.listen(onUpdate);
   }
 
   static final StreamController<FulfilledMap> fulfilledUpdatedController =

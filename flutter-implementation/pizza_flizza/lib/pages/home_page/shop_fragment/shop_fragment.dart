@@ -90,7 +90,7 @@ class _ShopFragmentState extends State<ShopFragment>
     return items;
   }
 
-  void _fulfillForegroundItems(bool isReplacement) {
+  void _fulfillForegroundItems() {
     var items = _foregroundItems;
     if (items == null || items.isEmpty) {
       return;
@@ -130,11 +130,6 @@ class _ShopFragmentState extends State<ShopFragment>
         remainingItems -= distributedQuantity;
         OrderManager.fulfillItem(item, distributedQuantity);
 
-        // don't futher replace replacements
-        if (isReplacement) {
-          continue;
-        }
-
         // find replacement item
         var replacement = item.replacement;
         if (replacement == null) {
@@ -149,6 +144,7 @@ class _ShopFragmentState extends State<ShopFragment>
           msg: 'Item distribution failed: $remainingItems items remaining.',
         );
       }
+
       /*
       // push in replacement if available
       if (_replacementItems.isNotEmpty) {
@@ -181,7 +177,6 @@ class _ShopFragmentState extends State<ShopFragment>
 
     setState(() {
       var oldState = _state;
-      var foregroundCount = _foregroundItems?.totalItemCount ?? 0;
 
       if (_foregroundItems == null && _replacementItems == null) {
         _state = ShopState.noOrders;
@@ -189,13 +184,17 @@ class _ShopFragmentState extends State<ShopFragment>
         _state = ShopState.locked;
       }
 
-      var foregroundItem = _foregroundItems?.firstOrNull;
+      var items = _foregroundItems;
+      items ??= _replacementItems;
+      var item = items?.firstOrNull;
+      var count = items?.totalItemCount ?? 0;
+
       if (_count != _previousItems?.totalItemCount &&
-          foregroundItem.identityMatches(_previousItems?.firstOrNull)) {
-        _count = min(_count, foregroundCount);
-        _gradient = _count / foregroundCount;
+          item.identityMatches(_previousItems?.firstOrNull)) {
+        _count = min(_count, count);
+        _gradient = _count / count;
       } else {
-        _count = foregroundCount;
+        _count = count;
       }
 
       // animate if state changed
@@ -228,6 +227,7 @@ class _ShopFragmentState extends State<ShopFragment>
   void dispose() {
     _shopChangedSubscription.cancel();
     _ordersSubscription.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -268,11 +268,13 @@ class _ShopFragmentState extends State<ShopFragment>
                         foregroundCardBuilder: (context) {
                           var replacement = _replacementItems?.firstOrNull;
                           if (replacement != null) {
+                            var previous = _previousItems?.firstOrNull;
+                            var name = previous?.itemName ?? 'Unknown';
                             // previous item has replacements
                             return ShopCardWidget(
                               stop: 1 - _gradient,
-                              name: replacement.itemName,
-                              count: replacement.count,
+                              name: '${replacement.itemName}\nstatt $name',
+                              count: _count,
                             );
                           }
 
@@ -311,11 +313,13 @@ class _ShopFragmentState extends State<ShopFragment>
                           );
                         },
                         // only slide if the count is higher than 1
-                        onStartSlide: () =>
-                            (_foregroundItems?.totalItemCount ?? 0) > 1,
+                        onStartSlide: () => _count >= 1,
                         onSlide: (gradient) {
+                          var items = _foregroundItems;
+                          items ??= _replacementItems;
+
                           // snap to range
-                          int count = _foregroundItems?.totalItemCount ?? 0;
+                          int count = items?.totalItemCount ?? 0;
                           int newCount =
                               max(1, min(count, (gradient * count).round()));
                           _gradient = newCount / count;
@@ -335,7 +339,22 @@ class _ShopFragmentState extends State<ShopFragment>
                           item ??= _foregroundItems?.firstOrNull;
 
                           if (direction == AppinioSwiperDirection.right) {
-                            _fulfillForegroundItems(isReplacement);
+                            if (isReplacement) {
+                              if (item != null) {
+                                var replacing = _previousItems
+                                    ?.getMatchingId(item.itemId)
+                                    .firstOrNull;
+
+                                OrderManager.fulfillItem(
+                                  item,
+                                  _count,
+                                  replacing,
+                                );
+                                _replacementItems?.remove(item);
+                              }
+                            } else {
+                              _fulfillForegroundItems();
+                            }
                           }
 
                           if (isReplacement && item != null) {

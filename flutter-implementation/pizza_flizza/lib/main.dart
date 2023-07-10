@@ -126,8 +126,8 @@ class _PizzaFlizzaAppState extends State<PizzaFlizzaApp> {
       userName,
       group,
     );
+    await Shop.initializeShops();
     OrderParser.initializeUserGroupUpdates();
-    await Shop.loadAll();
 
     if (reroute) {
       _navigatorKey.currentState?.pushReplacementNamed('home');
