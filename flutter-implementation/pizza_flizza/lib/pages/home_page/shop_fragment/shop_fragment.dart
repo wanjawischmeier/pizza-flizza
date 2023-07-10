@@ -30,7 +30,6 @@ class ShopFragment extends StatefulWidget {
 
 class _ShopFragmentState extends State<ShopFragment>
     with TickerProviderStateMixin {
-  // OrderItem? _foregroundItem, _backgroundItem;
   int _count = 0;
   double _gradient = 1;
   ShopState _state = ShopState.locked;
@@ -55,19 +54,32 @@ class _ShopFragmentState extends State<ShopFragment>
   late StreamSubscription<String> _shopChangedSubscription;
   late StreamSubscription<OrderMap> _ordersSubscription;
   final _ordersShop = <OrderItem>[];
-  final _fulfilled = <String>[];
+  final _used = <String>[];
 
-  List<OrderItem>? _foregroundItems = [];
-  List<OrderItem>? _backgroundItems = [];
+  List<OrderItem>? _foregroundItems,
+      _backgroundItems,
+      _previousItems,
+      _replacementItems;
 
   List<OrderItem>? _gatherNextItems() {
     if (_ordersShop.isEmpty) {
       return null;
     }
 
-    var first = _ordersShop[0];
-    _ordersShop.removeAt(0);
-    var items = <OrderItem>[first];
+    OrderItem? first;
+    for (var item in _ordersShop) {
+      if (!_used.contains(item.itemId)) {
+        first = item;
+        break;
+      }
+    }
+
+    if (first == null) {
+      return null;
+    }
+
+    _used.add(first.itemId);
+    var items = <OrderItem>[];
 
     for (var item in _ordersShop) {
       if (item.identityMatches(first)) {
@@ -75,23 +87,19 @@ class _ShopFragmentState extends State<ShopFragment>
       }
     }
 
-    for (var item in items) {
-      _ordersShop.remove(item);
-    }
-
     return items;
   }
 
-  void _fulfillForegroundItems() {
+  void _fulfillForegroundItems(bool isReplacement) {
     var items = _foregroundItems;
     if (items == null || items.isEmpty) {
       return;
     }
 
-    _fulfilled.add(items.first.itemId);
-
     if (items.totalItemCount <= _count) {
       // every order can be fulfilled
+      _replacementItems = null;
+
       for (var item in items) {
         OrderManager.fulfillItem(item, item.count);
       }
@@ -100,6 +108,8 @@ class _ShopFragmentState extends State<ShopFragment>
     } else {
       // Distribute items fairly
       int remainingItems = _count;
+      _replacementItems = [];
+      _replacementItems!.clear();
 
       for (var item in items) {
         double distributionRatio = item.count / items.totalItemCount;
@@ -119,6 +129,19 @@ class _ShopFragmentState extends State<ShopFragment>
 
         remainingItems -= distributedQuantity;
         OrderManager.fulfillItem(item, distributedQuantity);
+
+        // don't futher replace replacements
+        if (isReplacement) {
+          continue;
+        }
+
+        // find replacement item
+        var replacement = item.replacement;
+        if (replacement == null) {
+          continue;
+        }
+
+        _replacementItems!.add(replacement);
       }
 
       if (remainingItems > 0) {
@@ -126,6 +149,16 @@ class _ShopFragmentState extends State<ShopFragment>
           msg: 'Item distribution failed: $remainingItems items remaining.',
         );
       }
+      /*
+      // push in replacement if available
+      if (_replacementItems.isNotEmpty) {
+        if (_backgroundItems != null) {
+          _ordersShop.addAll(_backgroundItems!);
+        }
+
+        _backgroundItems = _replacementItems;
+      }
+      */
     }
   }
 
@@ -136,30 +169,29 @@ class _ShopFragmentState extends State<ShopFragment>
     orders.forEach((userId, userOrders) {
       // select currentShop
       userOrders[Shop.currentShopId]?.items.forEach((itemId, item) {
-        if (!_fulfilled.contains(itemId)) {
-          _ordersShop.add(OrderItem.copy(item));
-        }
+        _ordersShop.add(OrderItem.from(item));
       });
     });
 
-    var oldForegroundItems = _foregroundItems;
+    // only assign new items if previously null
+    _foregroundItems ??= _gatherNextItems();
+    _backgroundItems ??= _gatherNextItems();
 
-    _foregroundItems = _gatherNextItems();
-    _backgroundItems = _gatherNextItems();
+    // _previousItems = List.from(_foregroundItems!);
 
     setState(() {
       var oldState = _state;
       var foregroundCount = _foregroundItems?.totalItemCount ?? 0;
 
-      if (_foregroundItems == null) {
+      if (_foregroundItems == null && _replacementItems == null) {
         _state = ShopState.noOrders;
       } else if (lock) {
         _state = ShopState.locked;
       }
 
       var foregroundItem = _foregroundItems?.firstOrNull;
-      if (_count != oldForegroundItems?.totalItemCount &&
-          foregroundItem.identityMatches(oldForegroundItems?.firstOrNull)) {
+      if (_count != _previousItems?.totalItemCount &&
+          foregroundItem.identityMatches(_previousItems?.firstOrNull)) {
         _count = min(_count, foregroundCount);
         _gradient = _count / foregroundCount;
       } else {
@@ -183,7 +215,9 @@ class _ShopFragmentState extends State<ShopFragment>
       value: 1,
     );
 
-    _ordersSubscription = Orders.subscribeToOrdersUpdated(filterOrders);
+    _ordersSubscription = Orders.subscribeToOrdersUpdated((orders) {
+      filterOrders(orders);
+    });
 
     _shopChangedSubscription = Shop.subscribeToShopChanged((shopId) {
       filterOrders(Orders.orders, lock: true);
@@ -212,11 +246,11 @@ class _ShopFragmentState extends State<ShopFragment>
                   backgroundColor: Themes.grayMid,
                   progressColor: Themes.cream,
                   borderRadius: BorderRadius.circular(99),
-                  maxValue: _fulfilled.length +
+                  maxValue: _used.length +
                       _ordersShop.length +
                       (_foregroundItems == null ? 0 : 1) +
                       (_backgroundItems == null ? 0 : 1),
-                  currentValue: _fulfilled.length.toDouble(),
+                  currentValue: _used.length.toDouble(),
                 ),
               ),
               Expanded(
@@ -229,8 +263,19 @@ class _ShopFragmentState extends State<ShopFragment>
                         threshold: 100,
                         duration: const Duration(milliseconds: 150),
                         absoluteAngle: true,
-                        isDisabled: _foregroundItems == null,
+                        isDisabled: _foregroundItems == null &&
+                            _replacementItems == null,
                         foregroundCardBuilder: (context) {
+                          var replacement = _replacementItems?.firstOrNull;
+                          if (replacement != null) {
+                            // previous item has replacements
+                            return ShopCardWidget(
+                              stop: 1 - _gradient,
+                              name: replacement.itemName,
+                              count: replacement.count,
+                            );
+                          }
+
                           var item = _foregroundItems?.firstOrNull;
                           if (item == null) {
                             return null;
@@ -243,6 +288,17 @@ class _ShopFragmentState extends State<ShopFragment>
                           );
                         },
                         backgroundCardBuilder: (context) {
+                          var replacement =
+                              _replacementItems?.elementAtOrNull(1);
+                          if (replacement != null) {
+                            // previous item has replacements
+                            return ShopCardWidget(
+                              stop: 1 - _gradient,
+                              name: replacement.itemName,
+                              count: replacement.count,
+                            );
+                          }
+
                           var item = _backgroundItems?.firstOrNull;
                           if (item == null) {
                             return null;
@@ -274,34 +330,59 @@ class _ShopFragmentState extends State<ShopFragment>
                           }
                         },
                         onSwipe: (direction) {
+                          var item = _replacementItems?.firstOrNull;
+                          bool isReplacement = item != null;
+                          item ??= _foregroundItems?.firstOrNull;
+
                           if (direction == AppinioSwiperDirection.right) {
-                            _fulfillForegroundItems();
-                          } else {
-                            var foregroundItemId =
-                                _foregroundItems?.firstOrNull?.itemId;
-                            if (foregroundItemId != null) {
-                              setState(() {
-                                _fulfilled.add(foregroundItemId);
-                              });
+                            _fulfillForegroundItems(isReplacement);
+                          }
+
+                          if (isReplacement && item != null) {
+                            _replacementItems?.remove(item);
+
+                            if (_replacementItems?.isEmpty ?? false) {
+                              _replacementItems = null;
                             }
                           }
 
-                          _gradient = 1;
-                          _count = _backgroundItems?.totalItemCount ?? 0;
+                          if (_backgroundItems == null &&
+                              _replacementItems == null) {
+                            setState(() {
+                              _previousItems = null;
+                              _state = ShopState.locked;
 
-                          if (_backgroundItems == null) {
-                            _fulfilled.clear();
-                            _foregroundItems = null;
-
-                            filterOrders(Orders.orders, lock: true);
-
+                              // wait for animation to finish
+                              _controller.forward().then((value) {
+                                setState(() {
+                                  _used.clear();
+                                  _foregroundItems = _gatherNextItems();
+                                  _backgroundItems = _gatherNextItems();
+                                  _gradient = 1;
+                                  _count =
+                                      _foregroundItems?.totalItemCount ?? 0;
+                                });
+                              });
+                            });
                             return false;
+                          }
+
+                          if (_foregroundItems == null) {
+                            _previousItems = null;
+                          } else {
+                            _previousItems = List.from(_foregroundItems!);
+                          }
+                          if (_backgroundItems == null) {
+                            _foregroundItems = null;
                           } else {
                             _foregroundItems = List.from(_backgroundItems!);
-                            _backgroundItems = _gatherNextItems();
-
-                            return true;
                           }
+                          _backgroundItems = _gatherNextItems();
+
+                          _gradient = 1;
+                          _count = _foregroundItems?.totalItemCount ?? 0;
+
+                          return true;
                         },
                       ),
                     ),

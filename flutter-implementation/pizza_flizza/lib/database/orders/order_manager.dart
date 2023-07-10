@@ -66,9 +66,15 @@ class OrderManager extends Orders {
 
     // add to history
     var historyOrder = HistoryOrder.fromFulfilledOrder(order);
-    if (existingOrder != null) {
-      historyOrder.items.addAll(existingOrder!.items);
-    }
+    existingOrder?.items.forEach((existingItemId, existingItem) {
+      var item = historyOrder.items[existingItemId];
+      if (item == null) {
+        historyOrder.items[existingItemId] = existingItem;
+      } else {
+        historyOrder.items[existingItemId]!.count += existingItem.count;
+      }
+    });
+
     var historyFuture = Database.realtime
         .child(
             'users/${user.group.groupId}/${order.userId}/history/${order.shopId}/${order.timestamp}')
@@ -76,7 +82,7 @@ class OrderManager extends Orders {
     futures.add(historyFuture);
 
     Orders.fulfilledUpdatedController.add(Orders.fulfilled);
-    // Orders.historyUpdatedController.add(Orders.history);
+    Orders.historyUpdatedController.add(Orders.history);
     return Future.wait(futures);
   }
 
@@ -91,7 +97,7 @@ class OrderManager extends Orders {
 
     // update fulfilled, skip fulfilling own order
     if (item.userId == fulfiller.userId) {
-      var newItem = OrderItem.copy(item);
+      var newItem = OrderItem.from(item);
       newItem.count = count;
 
       archiveFulfilledOrder(
@@ -114,7 +120,7 @@ class OrderManager extends Orders {
         item.shopId,
         item.shopName,
         date,
-        {item.itemId: OrderItem.copy(item)},
+        {item.itemId: OrderItem.from(item)},
       );
 
       if (Orders.fulfilled.containsKey(fulfiller.userId)) {
@@ -122,7 +128,7 @@ class OrderManager extends Orders {
           if (Orders.fulfilled[fulfiller.userId]![item.shopId]!
               .containsKey(item.userId)) {
             Orders.fulfilled[fulfiller.userId]![item.shopId]![item.userId]!
-                .items[item.itemId] = OrderItem.copy(item);
+                .items[item.itemId] = OrderItem.from(item);
           } else {
             Orders.fulfilled[fulfiller.userId]![item.shopId]![item.userId] =
                 fulfilledOrder;
@@ -143,7 +149,7 @@ class OrderManager extends Orders {
       var fulfilledItem = Orders
               .fulfilled[fulfiller.userId]![item.shopId]![item.userId]!
               .items[item.itemId] ??
-          OrderItem.copy(item);
+          OrderItem.from(item);
       fulfilledItem.count = fulfilledCount + count;
       // update price!
       fulfilledItem.price = -1;

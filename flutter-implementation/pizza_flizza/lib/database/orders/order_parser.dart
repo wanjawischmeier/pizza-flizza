@@ -105,6 +105,7 @@ class OrderParser extends Orders {
     bool modified = false;
 
     // initialize user orders entry
+    var previousOrders = Orders.orders.deepClone;
     if (Orders.orders.containsKey(userId)) {
       Orders.orders[userId]!.clear();
     } else {
@@ -132,7 +133,7 @@ class OrderParser extends Orders {
         );
 
         // compare to previous item
-        var previousItem = Orders.orders[userId]?[shopId]?.items[itemId];
+        var previousItem = previousOrders[userId]?[shopId]?.items[itemId];
         if (orderItem != previousItem) {
           modified = true;
         }
@@ -388,6 +389,12 @@ class OrderParser extends Orders {
 
           categoryStats![itemId] = count;
         }
+
+        var sorted = categoryStats!.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+        shopStats[categoryId] = {
+          for (var entry in sorted) entry.key: entry.value
+        };
       }
 
       if (shopModified) {

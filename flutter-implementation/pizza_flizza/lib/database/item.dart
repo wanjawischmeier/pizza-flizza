@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:pizza_flizza/database/orders/orders.dart';
 import 'package:pizza_flizza/database/shop.dart';
 
 import 'database.dart';
@@ -10,7 +11,7 @@ class ShopItemInfo {
   int get bought => _info['bought'];
   double get price => _info['price'];
   String get itemName => _info['name'];
-  String get categoryId => _info['category'];
+  String get categoryId => _info['categoryId'];
 
   set bought(int value) => _info['bought'] = value;
 
@@ -76,7 +77,7 @@ class OrderItem extends ShopItem with EquatableMixin {
     super.price,
   );
 
-  OrderItem.copy(OrderItem order)
+  OrderItem.from(OrderItem order)
       : timestamp = order.timestamp,
         super(
           order.itemId,
@@ -118,7 +119,35 @@ class OrderItem extends ShopItem with EquatableMixin {
   }
 }
 
-extension ItemFilter on Iterable<OrderItem> {
+extension ItemFilter on OrderItem {
+  OrderItem? get replacement {
+    var itemIds = Orders.stats[userId]?[shopId]?[categoryId]?.keys;
+    var replacementId = itemIds?.firstOrNull;
+    if (replacementId == itemId) {
+      replacementId = itemIds?.elementAtOrNull(1);
+    }
+    if (replacementId == null) {
+      return null;
+    }
+
+    var replacement = OrderItem.loadShopItem(
+      userId,
+      shopId,
+      replacementId,
+      timestamp,
+      count,
+    );
+    return replacement;
+  }
+}
+
+extension NullableItemFilter on OrderItem? {
+  bool identityMatches(OrderItem? item) {
+    return this?.itemId == item?.itemId && this?.shopId == item?.shopId;
+  }
+}
+
+extension IterableItemFilter on Iterable<OrderItem> {
   /// get all matching items.
   /// NOT considering item counts.
   OrderItem? getMatchingItem(OrderItem item) {
@@ -136,12 +165,6 @@ extension ItemFilter on Iterable<OrderItem> {
     }
 
     return count;
-  }
-}
-
-extension ItemMatch on OrderItem? {
-  bool identityMatches(OrderItem? item) {
-    return this?.itemId == item?.itemId && this?.shopId == item?.shopId;
   }
 }
 
