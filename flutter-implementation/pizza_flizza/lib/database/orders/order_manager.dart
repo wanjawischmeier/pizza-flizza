@@ -122,7 +122,6 @@ class OrderManager extends Orders {
         fulfiller.userId,
         item.userId,
         item.shopId,
-        item.shopName,
         date,
         {item.itemId: OrderItem.from(item)},
       );

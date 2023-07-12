@@ -2,11 +2,48 @@ import 'dart:async';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:pizza_flizza/database/database.dart';
+import 'package:pizza_flizza/database/item.dart';
 
 import 'order.dart';
 
 /// userId, shopId -> order
 typedef OrderMap = Map<String, Map<String, Order>>;
+
+extension OrderAccessExtension on OrderMap {
+  Order? getOrder(String userId, String shopId) {
+    var userOrders = this[userId];
+    return userOrders?[shopId];
+  }
+
+  void setOrder(String userId, String shopId, Order order) {
+    var userOrders = this[userId];
+    userOrders ??= {};
+
+    userOrders[shopId] = order;
+  }
+
+  void setItem(String userId, String shopId, OrderItem item) {
+    var userOrders = this[userId];
+    userOrders ??= {};
+    var shopOrder = userOrders[shopId];
+    if (shopOrder == null) {
+      userOrders[shopId] = Order(shopId, {item.itemId: item});
+    } else {
+      shopOrder.items.addAll({item.itemId: item});
+    }
+  }
+
+  bool removeOrder(String userId, String shopId) {
+    var userOrders = this[userId];
+
+    if (!(userOrders?.containsKey(shopId) ?? false)) {
+      return false;
+    }
+
+    userOrders!.remove(shopId);
+    return true;
+  }
+}
 
 /// fulfillerId, shopId, userId -> order
 typedef FulfilledMap = Map<String, Map<String, Map<String, FulfilledOrder>>>;

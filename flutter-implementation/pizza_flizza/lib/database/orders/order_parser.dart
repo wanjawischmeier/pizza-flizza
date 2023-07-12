@@ -106,16 +106,11 @@ class OrderParser extends Orders {
 
     // initialize user orders entry
     var previousOrders = Orders.orders.deepClone;
-    if (Orders.orders.containsKey(userId)) {
-      Orders.orders[userId]!.clear();
-    } else {
-      Orders.orders[userId] = {};
-    }
+    Orders.orders[userId]?.clear();
 
     // iterate over all shops containing orders
     for (var shopEntry in userOrders.entries) {
       String shopId = shopEntry.key;
-      String shopName = Shop.getShopName(shopId);
       Map shop = shopEntry.value;
       var items = <String, OrderItem>{};
 
@@ -141,10 +136,13 @@ class OrderParser extends Orders {
         items[itemId] = orderItem;
       }
 
-      Orders.orders[userId]?[shopId] = Order(
+      Orders.orders.setOrder(
+        userId,
         shopId,
-        shopName,
-        items,
+        Order(
+          shopId,
+          items,
+        ),
       );
       log.logOrderItems(items, userId, shopId, null);
     }
@@ -183,7 +181,6 @@ class OrderParser extends Orders {
     // iterate over all shops containing orders
     for (var shopEntry in fulfilledOrders.entries) {
       String shopId = shopEntry.key;
-      String shopName = Shop.getShopName(shopId);
       Map fulfilledShop = shopEntry.value;
 
       if (!(Orders.fulfilled[fulfillerId]?.containsKey(shopId) ?? false)) {
@@ -215,7 +212,6 @@ class OrderParser extends Orders {
             userId,
             timestamp,
             itemName,
-            shopName,
             count,
             price,
           );
@@ -242,7 +238,6 @@ class OrderParser extends Orders {
           fulfillerId,
           userId,
           shopId,
-          shopName,
           DateTime.fromMillisecondsSinceEpoch(latestChange),
           items,
         );

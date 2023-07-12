@@ -223,27 +223,29 @@ class Shop {
     }
 
     var futures = <Future>[];
-    var orderData = <String, Map<String, int>>{};
-    var items = <String, OrderItem>{};
+    /*
     var ordersUser = Orders.orders[user.userId];
     if (ordersUser == null) {
       ordersUser = {
         _currentShopId: Order(
           _currentShopId,
-          currentShopName,
           items,
         ),
       };
     } else {
       var ordersShop = ordersUser[_currentShopId];
       if (ordersShop == null) {
-        ordersShop = Order(_currentShopId, currentShopName, items);
+        ordersShop = Order(_currentShopId, items);
       } else {
         items = ordersShop.items;
       }
     }
+    */
 
     // initialize with existing
+    var items = Orders.orders.getOrder(user.userId, _currentShopId)?.items;
+    items ??= {};
+    var orderData = <String, Map<String, int>>{};
     for (var itemEntry in items.entries) {
       var itemId = itemEntry.key;
       var item = itemEntry.value;
@@ -271,7 +273,7 @@ class Shop {
         timestamp,
         newCount,
       );
-      items[itemId] = item;
+      items![itemId] = item;
 
       // update stats
       int oldStat = Orders.stats[user.userId]?[_currentShopId]?[item.categoryId]

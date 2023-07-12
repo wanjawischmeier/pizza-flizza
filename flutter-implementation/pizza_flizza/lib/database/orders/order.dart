@@ -2,6 +2,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
+import 'package:pizza_flizza/database/shop.dart';
 
 class Order {
   String shopId, shopName;
@@ -20,9 +21,8 @@ class Order {
 
   Order(
     this.shopId,
-    this.shopName,
     this.items,
-  );
+  ) : shopName = Shop.getShopName(shopId);
 
   String get itemsFormatted {
     String result = '';
@@ -46,7 +46,6 @@ class FulfilledOrder extends Order {
     this.userId,
     this.fulfillerId,
     super.shopId,
-    super.shopName,
     this.timeFormatted,
     this.dateFormatted,
     this.timestamp,
@@ -57,7 +56,6 @@ class FulfilledOrder extends Order {
     String newFulfillerId,
     String newUserId,
     String newShopId,
-    String newShopName,
     DateTime date,
     Map<String, OrderItem> items,
   )   : fulfillerId = newFulfillerId,
@@ -67,7 +65,6 @@ class FulfilledOrder extends Order {
         timestamp = date.millisecondsSinceEpoch,
         super(
           newShopId,
-          newShopName,
           items,
         );
 
@@ -82,7 +79,6 @@ class FulfilledOrder extends Order {
         timestamp = date.millisecondsSinceEpoch,
         super(
           item.shopId,
-          item.shopName,
           {item.itemId: item},
         );
 

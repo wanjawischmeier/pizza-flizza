@@ -34,10 +34,10 @@ class ShopItem {
     this.categoryId,
     this.userId,
     this.itemName,
-    this.shopName,
     this.count,
     this.price,
-  ) : shopInfo = ShopItemInfo(shopId, itemId);
+  )   : shopName = Shop.getShopName(shopId),
+        shopInfo = ShopItemInfo(shopId, itemId);
 }
 
 class OrderItem extends ShopItem with EquatableMixin {
@@ -76,7 +76,6 @@ class OrderItem extends ShopItem with EquatableMixin {
     super.userId,
     this.timestamp,
     super.itemName,
-    super.shopName,
     super.count,
     super.price, {
     this.replacing = const {},
@@ -91,7 +90,6 @@ class OrderItem extends ShopItem with EquatableMixin {
           order.categoryId,
           order.userId,
           order.itemName,
-          order.shopName,
           order.count,
           order.price,
         );
@@ -115,7 +113,6 @@ class OrderItem extends ShopItem with EquatableMixin {
       userId,
       timestamp,
       itemInfo.itemName,
-      itemInfo.shopName,
       count,
       price,
     );
