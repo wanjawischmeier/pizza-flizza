@@ -12,6 +12,11 @@ class Helper {
         map.entries.toList()..sort((e1, e2) => e2.key.compareTo(e1.key)));
   }
 
+  static Map<T, int> sortByHighestValue<T>(Map<T, int> map) {
+    return Map.fromEntries(
+        map.entries.toList()..sort((e1, e2) => e2.value.compareTo(e1.value)));
+  }
+
   static Map<K, V> sortByComparator<K, V>(
     Map<K, V> map,
     int Function(MapEntry<K, V>, MapEntry<K, V>) comparator,

@@ -239,7 +239,7 @@ class OrderParser extends Orders {
 
         Orders.fulfilled[fulfillerId]?[shopId]?[userId] =
             FulfilledOrder.fromDate(
-          fulfillerName,
+          fulfillerId,
           userId,
           shopId,
           shopName,

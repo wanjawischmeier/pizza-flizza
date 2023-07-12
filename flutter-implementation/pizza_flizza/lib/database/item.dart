@@ -124,11 +124,24 @@ class OrderItem extends ShopItem with EquatableMixin {
 
 extension ItemFilter on OrderItem {
   OrderItem? get replacement {
-    var itemIds = Orders.stats[userId]?[shopId]?[categoryId]?.keys;
-    var replacementId = itemIds?.firstOrNull;
+    // get favourite, if possible from user
+    var userFavourites = Orders.stats[userId]?[shopId]?[categoryId]?.keys;
+    var globalFavourites = Shop.stats[categoryId]?.keys;
+    var replacementId = userFavourites?.firstOrNull;
+    replacementId ??= globalFavourites?.firstOrNull;
+
     if (replacementId == itemId) {
-      replacementId = itemIds?.elementAtOrNull(1);
+      replacementId = userFavourites?.elementAtOrNull(1);
+
+      if (replacementId == null) {
+        replacementId = globalFavourites?.firstOrNull;
+
+        if (replacementId == itemId) {
+          replacementId = globalFavourites?.elementAtOrNull(0);
+        }
+      }
     }
+
     if (replacementId == null) {
       return null;
     }

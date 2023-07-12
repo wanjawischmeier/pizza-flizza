@@ -56,10 +56,9 @@ class _ShopFragmentState extends State<ShopFragment>
   final _ordersShop = <OrderItem>[];
   final _used = <String>[];
 
-  List<OrderItem>? _foregroundItems,
-      _backgroundItems,
-      _previousItems,
-      _replacementItems;
+  List<OrderItem>? _foregroundItems, _backgroundItems, _previousItems;
+  // item, replacement
+  List<MapEntry<OrderItem, OrderItem>>? _replacementItems;
 
   List<OrderItem>? _gatherNextItems() {
     if (_ordersShop.isEmpty) {
@@ -136,7 +135,7 @@ class _ShopFragmentState extends State<ShopFragment>
           continue;
         }
 
-        _replacementItems!.add(replacement);
+        _replacementItems!.add(MapEntry(item, replacement));
       }
 
       if (remainingItems > 0) {
@@ -144,17 +143,6 @@ class _ShopFragmentState extends State<ShopFragment>
           msg: 'Item distribution failed: $remainingItems items remaining.',
         );
       }
-
-      /*
-      // push in replacement if available
-      if (_replacementItems.isNotEmpty) {
-        if (_backgroundItems != null) {
-          _ordersShop.addAll(_backgroundItems!);
-        }
-
-        _backgroundItems = _replacementItems;
-      }
-      */
     }
   }
 
@@ -185,7 +173,7 @@ class _ShopFragmentState extends State<ShopFragment>
       }
 
       var items = _foregroundItems;
-      items ??= _replacementItems;
+      items ??= _replacementItems?.map((entry) => entry.value).toList();
       var item = items?.firstOrNull;
       var count = items?.totalItemCount ?? 0;
 
@@ -266,14 +254,16 @@ class _ShopFragmentState extends State<ShopFragment>
                         isDisabled: _foregroundItems == null &&
                             _replacementItems == null,
                         foregroundCardBuilder: (context) {
-                          var replacement = _replacementItems?.firstOrNull;
-                          if (replacement != null) {
-                            var previous = _previousItems?.firstOrNull;
-                            var name = previous?.itemName ?? 'Unknown';
+                          var itemPair = _replacementItems?.firstOrNull;
+                          if (itemPair != null) {
                             // previous item has replacements
+                            var item = itemPair.key;
+                            var replacement = itemPair.value;
+
                             return ShopCardWidget(
                               stop: 1 - _gradient,
-                              name: '${replacement.itemName}\nstatt $name',
+                              name:
+                                  '${replacement.itemName}\nstatt ${item.itemName}',
                               count: _count,
                             );
                           }
@@ -290,13 +280,16 @@ class _ShopFragmentState extends State<ShopFragment>
                           );
                         },
                         backgroundCardBuilder: (context) {
-                          var replacement =
-                              _replacementItems?.elementAtOrNull(1);
-                          if (replacement != null) {
+                          var itemPair = _replacementItems?.elementAtOrNull(1);
+                          if (itemPair != null) {
                             // previous item has replacements
+                            var item = itemPair.key;
+                            var replacement = itemPair.value;
+
                             return ShopCardWidget(
                               stop: 1 - _gradient,
-                              name: replacement.itemName,
+                              name:
+                                  '${replacement.itemName}\nstatt ${item.itemName}',
                               count: replacement.count,
                             );
                           }
@@ -316,7 +309,9 @@ class _ShopFragmentState extends State<ShopFragment>
                         onStartSlide: () => _count >= 1,
                         onSlide: (gradient) {
                           var items = _foregroundItems;
-                          items ??= _replacementItems;
+                          items ??= _replacementItems
+                              ?.map((entry) => entry.value)
+                              .toList();
 
                           // snap to range
                           int count = items?.totalItemCount ?? 0;
@@ -334,31 +329,33 @@ class _ShopFragmentState extends State<ShopFragment>
                           }
                         },
                         onSwipe: (direction) {
-                          var item = _replacementItems?.firstOrNull;
-                          bool isReplacement = item != null;
+                          var itemPair = _replacementItems?.firstOrNull;
+                          bool isReplacement = itemPair != null;
+                          var item = itemPair?.key;
                           item ??= _foregroundItems?.firstOrNull;
 
                           if (direction == AppinioSwiperDirection.right) {
                             if (isReplacement) {
                               if (item != null) {
-                                var replacing = _previousItems
-                                    ?.getMatchingId(item.itemId)
-                                    .firstOrNull;
+                                var replacement = itemPair.value;
 
                                 OrderManager.fulfillItem(
-                                  item,
+                                  replacement,
                                   _count,
-                                  replacing,
+                                  originalItem: item,
                                 );
-                                _replacementItems?.remove(item);
+
+                                _replacementItems?.removeAt(0);
                               }
                             } else {
                               _fulfillForegroundItems();
                             }
                           }
 
-                          if (isReplacement && item != null) {
-                            _replacementItems?.remove(item);
+                          if (isReplacement &&
+                              item != null &&
+                              (_replacementItems?.isNotEmpty ?? false)) {
+                            _replacementItems?.removeAt(0);
 
                             if (_replacementItems?.isEmpty ?? false) {
                               _replacementItems = null;

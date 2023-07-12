@@ -88,9 +88,9 @@ class OrderManager extends Orders {
 
   static Future<void>? fulfillItem(
     OrderItem item,
-    int count, [
-    OrderItem? itemToReplace,
-  ]) {
+    int count, {
+    OrderItem? originalItem,
+  }) {
     var fulfiller = Database.currentUser;
     if (fulfiller == null) {
       return null;
@@ -163,8 +163,8 @@ class OrderManager extends Orders {
         'timestamp': date.millisecondsSinceEpoch,
       };
 
-      if (itemToReplace != null) {
-        map[itemToReplace.itemId] = count;
+      if (originalItem != null) {
+        map[originalItem.itemId] = count;
       }
 
       var reference = Database.userReference
@@ -174,6 +174,19 @@ class OrderManager extends Orders {
       }
     }
 
+    Orders.fulfilledUpdatedController.add(Orders.fulfilled);
+
+    // update shop stats
+    item.shopInfo.bought += count;
+    futures.add(
+      item.shopReference.child('bought').set(item.shopInfo.bought),
+    );
+
+    if (originalItem != null) {
+      // this item is replacing another one & therefore shouldn't be present in the order database
+      return Future.wait(futures);
+    }
+
     // update orders
     if (item.count <= count) {
       Orders.orders[item.userId]?[item.shopId]?.items.remove(item.itemId);
@@ -181,7 +194,7 @@ class OrderManager extends Orders {
       if (future != null) {
         futures.add(future);
       }
-    } else {
+    } else if (originalItem == null) {
       item.count -= count;
       Orders.orders[item.userId]?[item.shopId]?.items[item.itemId]?.count =
           item.count;
@@ -191,14 +204,7 @@ class OrderManager extends Orders {
       }
     }
 
-    // update shop stats
-    item.shopInfo.bought += count;
-    futures.add(
-      item.shopReference.child('bought').set(item.shopInfo.bought),
-    );
-
     Orders.ordersUpdatedController.add(Orders.orders);
-    Orders.fulfilledUpdatedController.add(Orders.fulfilled);
     return Future.wait(futures);
   }
 

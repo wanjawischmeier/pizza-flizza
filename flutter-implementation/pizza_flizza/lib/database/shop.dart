@@ -31,7 +31,9 @@ class Shop {
 
   static String get currentShopName => getShopName(_currentShopId);
 
+  // TODO: properly parse items
   static Map<dynamic, dynamic> shops = {};
+  static Map<String, Map<String, int>> stats = {};
   static Map<dynamic, dynamic> get items {
     return shops[_currentShopId]['items'];
   }
@@ -57,7 +59,7 @@ class Shop {
       'name': 'database.unknown_item_name'.tr(),
       'category': 'unknown_category_id',
       'price': 0.0,
-      'bought': 0.0,
+      'bought': 0,
     };
   }
 
@@ -105,7 +107,10 @@ class Shop {
     shops = snapshot.value as Map;
     _currentShopId = shops.keys.first;
 
-    for (String shopId in shops.keys) {
+    for (var shopEntry in shops.entries) {
+      String shopId = shopEntry.key;
+      var shop = shopEntry.value;
+
       // list product images for the shop
       var imagesSnapshot = await Database.storage
           .child(
@@ -113,6 +118,30 @@ class Shop {
           )
           .listAll();
       _itemReferences[shopId] = imagesSnapshot.items;
+
+      // parse global item stats
+      for (var categoryEntry in shop['items'].entries) {
+        String categoryId = categoryEntry.key;
+        var category = categoryEntry.value;
+
+        if (!stats.containsKey(categoryId)) {
+          stats[categoryId] = {};
+        }
+
+        for (var itemEntry in category.entries) {
+          String itemId = itemEntry.key;
+          if (itemId == '0_name') {
+            continue;
+          }
+
+          int? bought = itemEntry.value['bought'];
+          if (bought != null) {
+            stats[categoryId]![itemId] = bought;
+          }
+        }
+
+        stats[categoryId] = Helper.sortByHighestValue(stats[categoryId]!);
+      }
 
       sortShopItems(shopId);
     }
