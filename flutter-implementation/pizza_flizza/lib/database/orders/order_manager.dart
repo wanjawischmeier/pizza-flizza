@@ -59,7 +59,7 @@ class OrderManager extends Orders {
         ?.forEach((timestamp, historyOrder) {
       // find recent existing order
       if ((timestamp - order.timestamp).abs() < Duration.millisecondsPerHour) {
-        order.timestamp = timestamp;
+        order.date = DateTime.fromMillisecondsSinceEpoch(timestamp);
         existingOrder = historyOrder;
       }
     });
@@ -78,7 +78,7 @@ class OrderManager extends Orders {
     var historyFuture = Database.realtime
         .child(
             'users/${user.group.groupId}/${order.userId}/history/${order.shopId}/${order.timestamp}')
-        .set(historyOrder.itemsParsed);
+        .set(historyOrder.json);
     futures.add(historyFuture);
 
     Orders.fulfilledUpdatedController.add(Orders.fulfilled);
@@ -106,9 +106,9 @@ class OrderManager extends Orders {
 
       archiveFulfilledOrder(
         FulfilledOrder.fromUserItem(
-          newItem,
           fulfiller.userId,
           date,
+          newItem,
         ),
       );
     } else {
@@ -118,7 +118,7 @@ class OrderManager extends Orders {
               ?.count ??
           0;
 
-      var fulfilledOrder = FulfilledOrder.fromDate(
+      var fulfilledOrder = FulfilledOrder(
         fulfiller.userId,
         item.userId,
         item.shopId,

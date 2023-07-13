@@ -24,6 +24,11 @@ class Order {
     this.items,
   ) : shopName = Shop.getShopName(shopId);
 
+  Order.from(Order order)
+      : shopId = order.shopId,
+        shopName = order.shopName,
+        items = Map.from(order.items);
+
   String get itemsFormatted {
     String result = '';
     if (items.isEmpty) {
@@ -39,44 +44,22 @@ class Order {
 }
 
 class FulfilledOrder extends Order {
-  String userId, fulfillerId, timeFormatted, dateFormatted;
-  int timestamp;
+  String userId, fulfillerId;
+  DateTime date;
 
   FulfilledOrder(
-    this.userId,
     this.fulfillerId,
+    this.userId,
     super.shopId,
-    this.timeFormatted,
-    this.dateFormatted,
-    this.timestamp,
+    this.date,
     super.items,
   );
 
-  FulfilledOrder.fromDate(
-    String newFulfillerId,
-    String newUserId,
-    String newShopId,
-    DateTime date,
-    Map<String, OrderItem> items,
-  )   : fulfillerId = newFulfillerId,
-        userId = newUserId,
-        timeFormatted = DateFormat.Hm().format(date),
-        dateFormatted = DateFormat('dd.MM.yy').format(date),
-        timestamp = date.millisecondsSinceEpoch,
-        super(
-          newShopId,
-          items,
-        );
-
   FulfilledOrder.fromUserItem(
+    this.userId,
+    this.date,
     OrderItem item,
-    String newUserId,
-    DateTime date,
-  )   : fulfillerId = newUserId,
-        userId = newUserId,
-        timeFormatted = DateFormat.Hm().format(date),
-        dateFormatted = DateFormat('dd.MM.yy').format(date),
-        timestamp = date.millisecondsSinceEpoch,
+  )   : fulfillerId = userId,
         super(
           item.shopId,
           {item.itemId: item},
@@ -85,7 +68,7 @@ class FulfilledOrder extends Order {
   DatabaseReference? get databaseReference =>
       Database.userReference?.child('fulfilled/$shopId/$userId');
 
-  /// itemId, count
+  /// itemId -> count
   Map<String, int> get itemsParsed {
     var parsed = <String, int>{};
 
@@ -95,35 +78,41 @@ class FulfilledOrder extends Order {
 
     return parsed;
   }
+
+  int get timestamp => date.millisecondsSinceEpoch;
+
+  String get timeFormatted => DateFormat.Hm().format(date);
+
+  String get dateFormatted => DateFormat('dd.MM.yy').format(date);
 }
 
 class HistoryOrder {
-  String shopId, shopName, timeFormatted, dateFormatted;
+  String shopId, shopName;
+  DateTime date;
 
   /// itemId
   Map<String, HistoryItem> items;
 
   HistoryOrder(
     this.shopId,
-    this.shopName,
-    this.timeFormatted,
-    this.dateFormatted,
+    this.date,
     this.items,
-  );
+  ) : shopName = Shop.getShopName(shopId);
 
   HistoryOrder.fromFulfilledOrder(FulfilledOrder order)
       : shopId = order.shopId,
         shopName = order.shopName,
-        timeFormatted = order.timeFormatted,
-        dateFormatted = order.dateFormatted,
+        date = order.date,
         items = order.items.map(
           (itemId, item) => MapEntry(
-              itemId,
-              HistoryItem(
-                item.itemName,
-                item.count,
-                item.price,
-              )),
+            itemId,
+            HistoryItem(
+              item.itemId,
+              item.itemName,
+              item.count,
+              item.price,
+            ),
+          ),
         );
 
   HistoryOrder operator +(HistoryOrder other) {
@@ -135,6 +124,7 @@ class HistoryOrder {
         newItems[key] = value;
       } else {
         newItems[key] = HistoryItem(
+          existing.itemId,
           existing.itemName,
           existing.count + value.count,
           existing.price + value.price,
@@ -144,12 +134,16 @@ class HistoryOrder {
 
     return HistoryOrder(
       other.shopId,
-      other.shopName,
-      other.timeFormatted,
-      other.dateFormatted,
+      other.date,
       newItems,
     );
   }
+
+  int get timestamp => date.millisecondsSinceEpoch;
+
+  String get timeFormatted => DateFormat.Hm().format(date);
+
+  String get dateFormatted => DateFormat('dd.MM.yy').format(date);
 
   // TODO: remove this mess in favor of inheritance
   double get price {
@@ -176,7 +170,7 @@ class HistoryOrder {
   }
 
   /// itemId, count
-  Map<String, int> get itemsParsed {
+  Map<String, int> get json {
     var parsed = <String, int>{};
 
     items.forEach((itemId, item) {

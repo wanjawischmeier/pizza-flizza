@@ -9,7 +9,6 @@ import 'package:pizza_flizza/other/logger.util.dart';
 
 import 'database.dart';
 import 'item.dart';
-import 'orders/order.dart';
 
 class Shop {
   static final log = AppLogger();

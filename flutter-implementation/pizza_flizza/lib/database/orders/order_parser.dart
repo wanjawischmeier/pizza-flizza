@@ -1,12 +1,10 @@
 import 'dart:async';
 
-import 'package:intl/intl.dart';
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 
-import 'order.dart';
 import 'orders.dart';
 
 class OrderParser extends Orders {
@@ -128,7 +126,7 @@ class OrderParser extends Orders {
         );
 
         // compare to previous item
-        var previousItem = previousOrders[userId]?[shopId]?.items[itemId];
+        var previousItem = previousOrders.getItem(userId, shopId, itemId);
         if (orderItem != previousItem) {
           modified = true;
         }
@@ -136,15 +134,8 @@ class OrderParser extends Orders {
         items[itemId] = orderItem;
       }
 
-      Orders.orders.setOrder(
-        userId,
-        shopId,
-        Order(
-          shopId,
-          items,
-        ),
-      );
-      log.logOrderItems(items, userId, shopId, null);
+      Orders.orders.setItems(userId, shopId, items);
+      Orders.orders.logOrder(userId, shopId);
     }
 
     // if orders changed: notify listeners
@@ -171,21 +162,12 @@ class OrderParser extends Orders {
     }
 
     bool modified = false;
-
-    if (Orders.fulfilled.containsKey(fulfillerId)) {
-      Orders.fulfilled[fulfillerId]?.clear();
-    } else {
-      Orders.fulfilled[fulfillerId] = {};
-    }
+    Orders.fulfilled[fulfillerId]?.clear();
 
     // iterate over all shops containing orders
     for (var shopEntry in fulfilledOrders.entries) {
       String shopId = shopEntry.key;
       Map fulfilledShop = shopEntry.value;
-
-      if (!(Orders.fulfilled[fulfillerId]?.containsKey(shopId) ?? false)) {
-        Orders.fulfilled[fulfillerId]?[shopId] = {};
-      }
 
       for (var userEntry in fulfilledShop.entries) {
         String userId = userEntry.key;
@@ -217,8 +199,12 @@ class OrderParser extends Orders {
           );
 
           // compare to previous item
-          var previousItem =
-              Orders.fulfilled[fulfillerId]?[shopId]?[userId]?.items[itemId];
+          var previousItem = Orders.fulfilled.getItem(
+            fulfillerId,
+            shopId,
+            userId,
+            itemId,
+          );
           if (orderItem != previousItem) {
             modified = true;
           }
@@ -226,23 +212,8 @@ class OrderParser extends Orders {
           items[itemId] = orderItem;
         }
 
-        var latestChange = 0;
-        items.forEach((itemId, item) {
-          if (item.timestamp > latestChange) {
-            latestChange = item.timestamp;
-          }
-        });
-
-        Orders.fulfilled[fulfillerId]?[shopId]?[userId] =
-            FulfilledOrder.fromDate(
-          fulfillerId,
-          userId,
-          shopId,
-          DateTime.fromMillisecondsSinceEpoch(latestChange),
-          items,
-        );
-
-        log.logOrderItems(items, userId, shopId, fulfillerId);
+        Orders.fulfilled.setItems(fulfillerId, shopId, userId, items);
+        Orders.fulfilled.logOrder(fulfillerId, shopId, userId);
       }
     }
 
@@ -264,30 +235,20 @@ class OrderParser extends Orders {
     }
 
     bool modified = false;
-
-    if (Orders.history.containsKey(userId)) {
-      Orders.history[userId]!.clear();
-    } else {
-      Orders.history[userId] = {};
-    }
+    Orders.history[userId]?.clear();
 
     // iterate over all shops containing a history
     for (var shopEntry in historyOrders.entries) {
       String shopId = shopEntry.key;
-      String shopName = Shop.getShopName(shopId);
       Map shop = shopEntry.value;
 
-      if (!(Orders.history[userId]?.containsKey(shopId) ?? false)) {
-        Orders.history[userId]?[shopId] = {};
-      }
-
-      for (var ordersShop in shop.entries) {
-        int timestamp = int.parse(ordersShop.key);
+      for (var ordersEntry in shop.entries) {
+        int timestamp = int.parse(ordersEntry.key);
         DateTime date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-        Map order = ordersShop.value;
+        Map shopOrder = ordersEntry.value;
         var items = <String, HistoryItem>{};
 
-        for (var itemEntry in order.entries) {
+        for (var itemEntry in shopOrder.entries) {
           String itemId = itemEntry.key;
           int count = itemEntry.value;
 
@@ -296,27 +257,26 @@ class OrderParser extends Orders {
           double price = count * itemInfo.price;
 
           // compare to previous item
-          var previousCount =
-              Orders.history[userId]?[shopId]?[timestamp]?.items[itemId]?.count;
-          if (count != previousCount) {
+          var previousItem = Orders.history.getItem(
+            userId,
+            shopId,
+            timestamp,
+            itemId,
+          );
+          if (count != previousItem?.count) {
             modified = true;
           }
 
           items[itemId] = HistoryItem(
+            itemId,
             itemInfo.itemName,
             count,
             price,
           );
         }
 
-        Orders.history[userId]?[shopId]?[timestamp] = HistoryOrder(
-          shopId,
-          shopName,
-          DateFormat.Hm().format(date),
-          DateFormat('dd.MM.yy').format(date),
-          items,
-        );
-        log.logHistoryOrderItems(items, userId, shopId);
+        Orders.history.setItems(userId, shopId, date, items);
+        Orders.history.logOrder(userId, shopId, timestamp);
       }
     }
 
@@ -374,8 +334,13 @@ class OrderParser extends Orders {
           int count = itemEntry.value;
 
           // compare to previous item
-          var previousCount =
-              Orders.stats[userId]?[shopId]?[categoryId]?[itemId];
+          var previousCount = Orders.stats.getStat(
+            userId,
+            shopId,
+            categoryId,
+            itemId,
+          );
+
           if (count != previousCount) {
             modified = true;
             shopModified = true;

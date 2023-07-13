@@ -186,11 +186,12 @@ extension IterableItemFilter on Iterable<OrderItem> {
 }
 
 class HistoryItem {
-  String itemName;
+  String itemId, itemName;
   int count;
   double price;
 
   HistoryItem(
+    this.itemId,
     this.itemName,
     this.count,
     this.price,
