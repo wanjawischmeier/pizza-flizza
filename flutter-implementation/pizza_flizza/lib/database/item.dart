@@ -23,21 +23,27 @@ class ShopItemInfo {
 }
 
 class ShopItem {
-  String itemId, shopId, categoryId, userId, itemName, shopName;
+  String itemId, shopId, userId, shopName;
   int count;
-  double price;
-  ShopItemInfo shopInfo;
+
+  final ShopItemInfo _shopInfo;
+
+  String get categoryId => _shopInfo.categoryId;
+
+  String get itemName => _shopInfo.itemName;
+
+  double get price => count * _shopInfo.price;
+
+  int get bought => _shopInfo.bought;
+  set bought(value) => _shopInfo.bought = value;
 
   ShopItem(
     this.itemId,
     this.shopId,
-    this.categoryId,
     this.userId,
-    this.itemName,
     this.count,
-    this.price,
   )   : shopName = Shop.getShopName(shopId),
-        shopInfo = ShopItemInfo(shopId, itemId);
+        _shopInfo = ShopItemInfo(shopId, itemId);
 }
 
 class OrderItem extends ShopItem with EquatableMixin {
@@ -56,7 +62,7 @@ class OrderItem extends ShopItem with EquatableMixin {
   }
 
   DatabaseReference get shopReference => Database.realtime
-      .child('shops/$shopId/items/${shopInfo.categoryId}/$itemId');
+      .child('shops/$shopId/items/${_shopInfo.categoryId}/$itemId');
 
   @override
   List<Object?> get props => [
@@ -72,51 +78,21 @@ class OrderItem extends ShopItem with EquatableMixin {
   OrderItem(
     super.itemId,
     super.shopId,
-    super.categoryId,
     super.userId,
     this.timestamp,
-    super.itemName,
-    super.count,
-    super.price, {
+    super.count, {
     this.replacing = const {},
   });
 
-  OrderItem.from(OrderItem order)
-      : timestamp = order.timestamp,
-        replacing = order.replacing,
+  OrderItem.from(OrderItem item)
+      : timestamp = item.timestamp,
+        replacing = item.replacing,
         super(
-          order.itemId,
-          order.shopId,
-          order.categoryId,
-          order.userId,
-          order.itemName,
-          order.count,
-          order.price,
+          item.itemId,
+          item.shopId,
+          item.userId,
+          item.count,
         );
-
-  static OrderItem loadShopItem(
-    String userId,
-    String shopId,
-    String itemId,
-    int timestamp,
-    int count,
-  ) {
-    // get item info
-    var itemInfo = ShopItemInfo(shopId, itemId);
-    double price = count * itemInfo.price;
-
-    // create instance
-    return OrderItem(
-      itemId,
-      shopId,
-      itemInfo.categoryId,
-      userId,
-      timestamp,
-      itemInfo.itemName,
-      count,
-      price,
-    );
-  }
 }
 
 extension ItemFilter on OrderItem {
@@ -143,10 +119,10 @@ extension ItemFilter on OrderItem {
       return null;
     }
 
-    var replacement = OrderItem.loadShopItem(
-      userId,
-      shopId,
+    var replacement = OrderItem(
       replacementId,
+      shopId,
+      userId,
       timestamp,
       count,
     );

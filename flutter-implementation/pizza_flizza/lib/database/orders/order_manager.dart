@@ -1,5 +1,6 @@
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
+import 'package:pizza_flizza/database/orders/order_access.dart';
 import 'package:pizza_flizza/database/orders/orders.dart';
 
 import 'order.dart';
@@ -40,24 +41,16 @@ class OrderManager extends Orders {
     var futures = <Future>[];
 
     // remove from fulfilled
-    Orders.fulfilled[order.fulfillerId]?[order.shopId]?.remove(order.userId);
-    // clean map propagating up the tree
-    if (Orders.fulfilled[order.fulfillerId]?[order.shopId]?.isEmpty ?? false) {
-      Orders.fulfilled[order.fulfillerId]?.remove(order.shopId);
-
-      if (Orders.fulfilled[order.fulfillerId]?.isEmpty ?? false) {
-        Orders.fulfilled.clear();
-      }
-    }
+    Orders.fulfilled.removeOrder(order);
     var fulfilledFuture = order.databaseReference?.remove();
     if (fulfilledFuture != null) {
       futures.add(fulfilledFuture);
     }
 
+    // find recent existing order
     HistoryOrder? existingOrder;
     Orders.history[order.userId]?[order.shopId]
         ?.forEach((timestamp, historyOrder) {
-      // find recent existing order
       if ((timestamp - order.timestamp).abs() < Duration.millisecondsPerHour) {
         order.date = DateTime.fromMillisecondsSinceEpoch(timestamp);
         existingOrder = historyOrder;
@@ -77,7 +70,8 @@ class OrderManager extends Orders {
 
     var historyFuture = Database.realtime
         .child(
-            'users/${user.group.groupId}/${order.userId}/history/${order.shopId}/${order.timestamp}')
+          'users/${user.group.groupId}/${order.userId}/history/${order.shopId}/${order.timestamp}',
+        )
         .set(historyOrder.json);
     futures.add(historyFuture);
 
@@ -112,53 +106,10 @@ class OrderManager extends Orders {
         ),
       );
     } else {
-      int fulfilledCount = Orders
-              .fulfilled[fulfiller.userId]?[item.shopId]?[item.userId]
-              ?.items[item.itemId]
-              ?.count ??
-          0;
-
-      var fulfilledOrder = FulfilledOrder(
-        fulfiller.userId,
-        item.userId,
-        item.shopId,
-        date,
-        {item.itemId: OrderItem.from(item)},
-      );
-
-      if (Orders.fulfilled.containsKey(fulfiller.userId)) {
-        if (Orders.fulfilled[fulfiller.userId]!.containsKey(item.shopId)) {
-          if (Orders.fulfilled[fulfiller.userId]![item.shopId]!
-              .containsKey(item.userId)) {
-            Orders.fulfilled[fulfiller.userId]![item.shopId]![item.userId]!
-                .items[item.itemId] = OrderItem.from(item);
-          } else {
-            Orders.fulfilled[fulfiller.userId]![item.shopId]![item.userId] =
-                fulfilledOrder;
-          }
-        } else {
-          Orders.fulfilled[fulfiller.userId]![item.shopId] = {
-            item.userId: fulfilledOrder,
-          };
-        }
-      } else {
-        Orders.fulfilled[fulfiller.userId] = {
-          item.shopId: {
-            item.userId: fulfilledOrder,
-          }
-        };
-      }
-
-      var fulfilledItem = Orders
-              .fulfilled[fulfiller.userId]![item.shopId]![item.userId]!
-              .items[item.itemId] ??
-          OrderItem.from(item);
-      fulfilledItem.count = fulfilledCount + count;
-      // TODO: update price!
-      fulfilledItem.price = -1;
+      item = Orders.fulfilled.addItem(fulfiller.userId, item);
 
       Map map = {
-        'count': fulfilledCount + count,
+        'count': item.count,
         'timestamp': date.millisecondsSinceEpoch,
       };
 
@@ -176,9 +127,9 @@ class OrderManager extends Orders {
     Orders.fulfilledUpdatedController.add(Orders.fulfilled);
 
     // update shop stats
-    item.shopInfo.bought += count;
+    item.bought += count;
     futures.add(
-      item.shopReference.child('bought').set(item.shopInfo.bought),
+      item.shopReference.child('bought').set(item.bought),
     );
 
     if (originalItem != null) {

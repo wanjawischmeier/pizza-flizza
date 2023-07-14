@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:pizza_flizza/database/orders/order_access.dart';
 import 'package:pizza_flizza/database/orders/orders.dart';
 import 'package:pizza_flizza/other/helper.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
@@ -222,24 +223,6 @@ class Shop {
     }
 
     var futures = <Future>[];
-    /*
-    var ordersUser = Orders.orders[user.userId];
-    if (ordersUser == null) {
-      ordersUser = {
-        _currentShopId: Order(
-          _currentShopId,
-          items,
-        ),
-      };
-    } else {
-      var ordersShop = ordersUser[_currentShopId];
-      if (ordersShop == null) {
-        ordersShop = Order(_currentShopId, items);
-      } else {
-        items = ordersShop.items;
-      }
-    }
-    */
 
     // initialize with existing
     var items = Orders.orders.getOrder(user.userId, _currentShopId)?.items;
@@ -265,10 +248,10 @@ class Shop {
         'count': newCount,
       };
 
-      var item = OrderItem.loadShopItem(
-        user.userId,
-        _currentShopId,
+      var item = OrderItem(
         itemId,
+        _currentShopId,
+        user.userId,
         timestamp,
         newCount,
       );

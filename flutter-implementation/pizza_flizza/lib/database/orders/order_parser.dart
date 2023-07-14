@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:pizza_flizza/database/database.dart';
 import 'package:pizza_flizza/database/item.dart';
+import 'package:pizza_flizza/database/orders/order_access.dart';
 import 'package:pizza_flizza/database/shop.dart';
 import 'package:pizza_flizza/other/logger.util.dart';
 
@@ -117,10 +118,10 @@ class OrderParser extends Orders {
         Map item = itemEntry.value;
 
         // create instance
-        var orderItem = OrderItem.loadShopItem(
-          userId,
-          shopId,
+        var orderItem = OrderItem(
           itemId,
+          shopId,
+          userId,
           item['timestamp'],
           item['count'],
         );
@@ -177,25 +178,16 @@ class OrderParser extends Orders {
         for (var itemEntry in fulfilledItems.entries) {
           String itemId = itemEntry.key;
           Map item = itemEntry.value;
-
-          // get item info
-          var itemInfo = Shop.getItemInfo(shopId, itemId);
-          String itemName = itemInfo['name'];
-          String categoryId = itemInfo['categoryId'];
           int timestamp = item['timestamp'];
           int count = item['count'];
-          double price = count * (itemInfo['price'] as double);
 
           // create instance
           var orderItem = OrderItem(
             itemId,
             shopId,
-            categoryId,
             userId,
             timestamp,
-            itemName,
             count,
-            price,
           );
 
           // compare to previous item
