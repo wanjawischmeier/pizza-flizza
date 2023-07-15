@@ -159,6 +159,20 @@ extension IterableItemFilter on Iterable<OrderItem> {
 
     return count;
   }
+
+  Map<String, List<OrderItem>> get groupByItemId {
+    Map<String, List<OrderItem>> groupedItems = {};
+
+    for (var item in this) {
+      if (groupedItems.containsKey(item.itemId)) {
+        groupedItems[item.itemId]!.add(item);
+      } else {
+        groupedItems[item.itemId] = [item];
+      }
+    }
+
+    return groupedItems;
+  }
 }
 
 class HistoryItem {

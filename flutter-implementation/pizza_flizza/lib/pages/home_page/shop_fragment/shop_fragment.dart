@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_firestorage/lib.dart';
@@ -20,6 +21,8 @@ import 'package:pizza_flizza/other/theme.dart';
 import 'package:pizza_flizza/pages/home_page/shop_fragment/widgets/shop_card.dart';
 
 enum ShopState { locked, unlocked, noOrders }
+
+Function equal = const ListEquality().equals;
 
 class ShopFragment extends StatefulWidget {
   const ShopFragment({super.key});
@@ -65,30 +68,20 @@ class _ShopFragmentState extends State<ShopFragment>
       return null;
     }
 
-    OrderItem? matching;
+    List<OrderItem>? matching;
     int count = 0;
-    for (var item in _ordersShop) {
-      if (!_used.contains(item.itemId)) {
+    for (var itemEntry in _ordersShop.groupByItemId.entries) {
+      var items = itemEntry.value;
+
+      if (!_used.contains(items.firstOrNull?.itemId)) {
         if (count++ == index) {
-          matching = item;
+          matching = items;
           break;
         }
       }
     }
 
-    if (matching == null) {
-      return null;
-    }
-
-    var items = <OrderItem>[];
-
-    for (var item in _ordersShop) {
-      if (item.identityMatches(matching)) {
-        items.add(item);
-      }
-    }
-
-    return items;
+    return matching;
   }
 
   void _fulfillForegroundItems() {
@@ -148,6 +141,17 @@ class _ShopFragmentState extends State<ShopFragment>
     }
   }
 
+  List<OrderItem>? _refresh(List<OrderItem>? input) {
+    var items = input;
+    items ??= _replacementItems?.map((entry) => entry.value).toList();
+    var item = items?.firstOrNull;
+    var orderItems = _ordersShop.where(
+      (element) => element.itemId == item?.itemId,
+    );
+
+    return orderItems.isEmpty ? null : orderItems.toList();
+  }
+
   void filterOrders(OrderMap orders, {bool lock = false}) {
     _ordersShop.clear();
 
@@ -159,9 +163,20 @@ class _ShopFragmentState extends State<ShopFragment>
       });
     });
 
-    // only assign new items if previously null
+    var oldCount = _foregroundItems?.totalItemCount;
+
+    _foregroundItems = _refresh(_foregroundItems);
+    _backgroundItems = _refresh(_backgroundItems);
+
     var newForeground = _gatherItemsAt(0);
     var newBackground = _gatherItemsAt(1);
+
+    if (equal(_foregroundItems, newBackground) ||
+        equal(_backgroundItems, newForeground)) {
+      var tmp = _foregroundItems;
+      _foregroundItems = _backgroundItems;
+      _backgroundItems = tmp;
+    }
 
     if (newForeground == null) {
       _foregroundItems = null;
@@ -176,25 +191,28 @@ class _ShopFragmentState extends State<ShopFragment>
     }
 
     setState(() {
+      var newCount = _foregroundItems?.totalItemCount ?? 0;
+      if (_count == 0) {
+        _count = newCount;
+      }
+
+      if (newCount != oldCount) {
+        if (_count == oldCount) {
+          _count = newCount;
+        } else {
+          _count = min(_count, newCount);
+          _gradient = _count / newCount;
+        }
+      } else {
+        _count = newCount;
+      }
+
       var oldState = _state;
 
       if (_foregroundItems == null && _replacementItems == null) {
         _state = ShopState.noOrders;
-      } else if (lock) {
+      } else if (lock || _state == ShopState.noOrders) {
         _state = ShopState.locked;
-      }
-
-      var items = _foregroundItems;
-      items ??= _replacementItems?.map((entry) => entry.value).toList();
-      var item = items?.firstOrNull;
-      var count = items?.totalItemCount ?? 0;
-
-      if (_count != _previousItems?.totalItemCount &&
-          item.identityMatches(_previousItems?.firstOrNull)) {
-        _count = min(_count, count);
-        _gradient = _count / count;
-      } else {
-        _count = count;
       }
 
       // animate if state changed

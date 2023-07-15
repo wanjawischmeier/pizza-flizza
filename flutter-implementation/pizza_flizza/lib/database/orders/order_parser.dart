@@ -30,63 +30,19 @@ class OrderParser extends Orders {
       parseUserStats(updatedUserId, data['stats']);
     }
 
-    onChildRemoved(event) {
-      String updatedUserId = event.snapshot.key;
-      Map? data = event.snapshot.value;
-      if (data == null || data.isEmpty) {
-        return;
-      }
-
-      Map? removedFulfilled = data['fulfilled'];
-      if (removedFulfilled != null) {
-        bool changed = false;
-        for (Map fulfilledShop in removedFulfilled.values) {
-          for (String userId in fulfilledShop.keys) {
-            if (userId == user.userId) {
-              Orders.fulfilled.remove(updatedUserId);
-              changed = true;
-            }
-          }
-        }
-
-        if (changed) {
-          Orders.fulfilledUpdatedController.add(Orders.fulfilled);
-        }
-      }
-
-      if (data.containsKey('orders')) {
-        Orders.orders.remove(updatedUserId);
-        Orders.ordersUpdatedController.add(Orders.orders);
-      }
-
-      if (updatedUserId == user.userId && data.containsKey('history')) {
-        Orders.history.clear();
-        Orders.historyUpdatedController.add(Orders.history);
-      }
-
-      if (data.containsKey('stats')) {
-        Orders.stats.remove(updatedUserId);
-        Orders.statsUpdatedController.add(Orders.stats);
-      }
-    }
-
     var users = Database.realtime.child('users/${user.group.groupId}');
     Orders.groupDataAddedSubscription =
         users.onChildAdded.listen(onChildUpdated);
     Orders.groupDataChangedSubscription =
         users.onChildChanged.listen(onChildUpdated);
-    Orders.groupDataRemovedSubscription =
-        users.onChildRemoved.listen(onChildRemoved);
   }
 
   static Future<void> cancelUserGroupUpdates() async {
     await Orders.groupDataAddedSubscription?.cancel();
     await Orders.groupDataChangedSubscription?.cancel();
-    await Orders.groupDataRemovedSubscription?.cancel();
 
     Orders.groupDataAddedSubscription = null;
     Orders.groupDataChangedSubscription = null;
-    Orders.groupDataRemovedSubscription = null;
   }
 
   static Future<void> parseOpenUserOrders(
@@ -101,11 +57,9 @@ class OrderParser extends Orders {
       return;
     }
 
-    bool modified = false;
-
     // initialize user orders entry
     var previousOrders = Orders.orders.deepClone;
-    Orders.orders[userId]?.clear();
+    Orders.orders.remove(userId);
 
     // iterate over all shops containing orders
     for (var shopEntry in userOrders.entries) {
@@ -126,12 +80,6 @@ class OrderParser extends Orders {
           item['count'],
         );
 
-        // compare to previous item
-        var previousItem = previousOrders.getItem(userId, shopId, itemId);
-        if (orderItem != previousItem) {
-          modified = true;
-        }
-
         items[itemId] = orderItem;
       }
 
@@ -140,7 +88,7 @@ class OrderParser extends Orders {
     }
 
     // if orders changed: notify listeners
-    if (modified) {
+    if (Orders.orders != previousOrders) {
       Orders.ordersUpdatedController.add(Orders.orders);
     }
   }
@@ -163,7 +111,7 @@ class OrderParser extends Orders {
     }
 
     bool modified = false;
-    Orders.fulfilled[fulfillerId]?.clear();
+    Orders.fulfilled.remove(fulfillerId);
 
     // iterate over all shops containing orders
     for (var shopEntry in fulfilledOrders.entries) {

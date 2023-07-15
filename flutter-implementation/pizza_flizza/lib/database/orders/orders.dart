@@ -68,6 +68,5 @@ class Orders {
   }
 
   static StreamSubscription<DatabaseEvent>? groupDataAddedSubscription,
-      groupDataChangedSubscription,
-      groupDataRemovedSubscription;
+      groupDataChangedSubscription;
 }
