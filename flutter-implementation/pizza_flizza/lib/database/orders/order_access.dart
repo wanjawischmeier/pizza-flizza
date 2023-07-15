@@ -47,19 +47,19 @@ extension OrderAccessExtension on OrderMap {
     userOrders[shopId] = order;
   }
 
-  void setItem(String userId, String shopId, OrderItem item) {
-    var userOrders = this[userId];
+  void setItem(OrderItem item) {
+    var userOrders = this[item.userId];
     userOrders ??= {};
 
-    var order = userOrders[shopId];
+    var order = userOrders[item.shopId];
     if (order == null) {
-      userOrders[shopId] = Order(shopId, {item.itemId: item});
+      userOrders[item.shopId] = Order(item.shopId, {item.itemId: item});
     } else {
       order.items.addAll({item.itemId: item});
     }
   }
 
-  bool removeOrder(String userId, String shopId) {
+  bool removeOrderAt(String userId, String shopId) {
     var userOrders = this[userId];
 
     if (!(userOrders?.containsKey(shopId) ?? false)) {
@@ -67,8 +67,18 @@ extension OrderAccessExtension on OrderMap {
     }
 
     userOrders!.remove(shopId);
+
+    // clean map
+    if (this[userId]!.isEmpty) {
+      this[userId]!.remove(shopId);
+    }
+
     return true;
   }
+
+  // TODO: map cleanup
+  bool removeItem(OrderItem item) =>
+      this[item.userId]?[item.shopId]?.items.remove(item) != null;
 
   void logOrder(String userId, String shopId) {
     var items = this[userId]?[shopId]?.items;
@@ -190,11 +200,11 @@ extension FulfilledAccessExtension on FulfilledMap {
     shopOrders!.remove(userId);
 
     // clean map propagating up the tree
-    if (Orders.fulfilled[fulfillerId]?[shopId]?.isEmpty ?? false) {
-      Orders.fulfilled[fulfillerId]?.remove(shopId);
+    if (this[fulfillerId]?[shopId]?.isEmpty ?? false) {
+      this[fulfillerId]?.remove(shopId);
 
-      if (Orders.fulfilled[fulfillerId]?.isEmpty ?? false) {
-        Orders.fulfilled.clear();
+      if (this[fulfillerId]?.isEmpty ?? false) {
+        clear();
       }
     }
 

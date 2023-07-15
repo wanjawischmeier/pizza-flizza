@@ -365,6 +365,7 @@ class _ShopFragmentState extends State<ShopFragment>
                           if (_backgroundItems == null &&
                               _replacementItems == null) {
                             setState(() {
+                              _foregroundItems = null;
                               _previousItems = null;
                               _state = ShopState.locked;
 

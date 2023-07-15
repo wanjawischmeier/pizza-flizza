@@ -139,15 +139,16 @@ class OrderManager extends Orders {
 
     // update orders
     if (item.count <= count) {
-      Orders.orders[item.userId]?[item.shopId]?.items.remove(item.itemId);
+      Orders.orders.removeItem(item);
+
       var future = item.databaseReference?.remove();
       if (future != null) {
         futures.add(future);
       }
     } else if (originalItem == null) {
       item.count -= count;
-      Orders.orders[item.userId]?[item.shopId]?.items[item.itemId]?.count =
-          item.count;
+      Orders.orders.setItem(item);
+
       var future = item.databaseReference?.child('count').set(item.count);
       if (future != null) {
         futures.add(future);
