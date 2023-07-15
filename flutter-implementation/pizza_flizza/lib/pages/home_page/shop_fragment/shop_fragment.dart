@@ -60,28 +60,30 @@ class _ShopFragmentState extends State<ShopFragment>
   // item, replacement
   List<MapEntry<OrderItem, OrderItem>>? _replacementItems;
 
-  List<OrderItem>? _gatherNextItems() {
+  List<OrderItem>? _gatherItemsAt(int index) {
     if (_ordersShop.isEmpty) {
       return null;
     }
 
-    OrderItem? first;
+    OrderItem? matching;
+    int count = 0;
     for (var item in _ordersShop) {
       if (!_used.contains(item.itemId)) {
-        first = item;
-        break;
+        if (count++ == index) {
+          matching = item;
+          break;
+        }
       }
     }
 
-    if (first == null) {
+    if (matching == null) {
       return null;
     }
 
-    _used.add(first.itemId);
     var items = <OrderItem>[];
 
     for (var item in _ordersShop) {
-      if (item.identityMatches(first)) {
+      if (item.identityMatches(matching)) {
         items.add(item);
       }
     }
@@ -158,10 +160,20 @@ class _ShopFragmentState extends State<ShopFragment>
     });
 
     // only assign new items if previously null
-    _foregroundItems ??= _gatherNextItems();
-    _backgroundItems ??= _gatherNextItems();
+    var newForeground = _gatherItemsAt(0);
+    var newBackground = _gatherItemsAt(1);
 
-    // _previousItems = List.from(_foregroundItems!);
+    if (newForeground == null) {
+      _foregroundItems = null;
+    } else {
+      _foregroundItems ??= newForeground;
+    }
+
+    if (newBackground == null) {
+      _backgroundItems = null;
+    } else {
+      _backgroundItems ??= newBackground;
+    }
 
     setState(() {
       var oldState = _state;
@@ -334,6 +346,10 @@ class _ShopFragmentState extends State<ShopFragment>
                           var item = itemPair?.key;
                           item ??= _foregroundItems?.firstOrNull;
 
+                          if (!isReplacement && item != null) {
+                            _used.add(item.itemId);
+                          }
+
                           if (direction == AppinioSwiperDirection.right) {
                             if (isReplacement) {
                               if (item != null) {
@@ -373,8 +389,8 @@ class _ShopFragmentState extends State<ShopFragment>
                               _controller.forward().then((value) {
                                 setState(() {
                                   _used.clear();
-                                  _foregroundItems = _gatherNextItems();
-                                  _backgroundItems = _gatherNextItems();
+                                  _foregroundItems = _gatherItemsAt(0);
+                                  _backgroundItems = _gatherItemsAt(1);
                                   _gradient = 1;
                                   _count =
                                       _foregroundItems?.totalItemCount ?? 0;
@@ -394,7 +410,7 @@ class _ShopFragmentState extends State<ShopFragment>
                           } else {
                             _foregroundItems = List.from(_backgroundItems!);
                           }
-                          _backgroundItems = _gatherNextItems();
+                          _backgroundItems = _gatherItemsAt(1);
 
                           _gradient = 1;
                           _count = _foregroundItems?.totalItemCount ?? 0;

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_firestorage/cached_firestorage.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,11 +22,15 @@ import 'package:pizza_flizza/other/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  initializeDateFormatting();
-  await EasyLocalization.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  await [
+    initializeDateFormatting(),
+    EasyLocalization.ensureInitialized(),
+    CachedFirestorage.init(),
+    Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    ),
+  ].wait;
 
   await Group.initializeListeners();
   var route = await _PizzaFlizzaAppState.initializeUser(
