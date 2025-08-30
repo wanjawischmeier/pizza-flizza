@@ -19,7 +19,7 @@ The long overdue collectivization of food shopping meets Tinder. A project to or
 
 # Installation
 
-You can download the latest pre-release [here](https://github.com/wanjawischmeier/pizza-flizza/releases/download/v0.4.3/pizza_v0.4.3.apk) (only for testing).
+You can download the latest pre-release for android [here](https://github.com/wanjawischmeier/pizza-flizza/releases/download/v0.4.3/pizza_v0.4.3.apk) (only for testing). An iOS version was made, but I am not rich enough to pay apples insane developer fees and am therefore unable to use/publish that.
 
 
 # Privacy
