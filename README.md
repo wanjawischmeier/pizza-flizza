@@ -1,6 +1,13 @@
+<p align="center">
+  <img width="96" height="96" alt="ma" src="https://github.com/user-attachments/assets/af1f2b49-9b65-492b-8afa-5d623a1d6e53" />
+  <br>
+  <strong>PizzaFlizza</strong>
+</p>
+<br>
+
 The long overdue collectivization of food shopping meets Tinder. A project to organize our food runs during school breaks.
 
-### You can:
+# You can:
 - Create and manage accounts
   - Register via email
   - Link a google account
@@ -16,6 +23,7 @@ The long overdue collectivization of food shopping meets Tinder. A project to or
     - Mark something as paid as soon as that person gave you the money
   - See what others bought for you (and how much you still owe them)
 
+<br>
 
 # Installation
 
